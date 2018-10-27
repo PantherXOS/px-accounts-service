@@ -1,9 +1,25 @@
+---
+category: desktop
+developer: Reza Alizadeh Majd <r.majd@pantherx.org>
+priority: 10
+packages:
+  - px_accounts
+related:
+  - px_accounts_ui
+  - px_accounts_service
+  - px_accounts_helper_imap
+  - px_accounts_helper_ftp
+  - px_accounts_helper_btc
+dependencies:
+  - lib_px_accounts
+---
+
 # Accounts
 
   - `px_accounts_ui` **Online Accounts** ui-application (frontend, only UI)
   - `px_accounts` application (add, modify, verify, delete)
   - `px_accounts_service` background-service (track account status)
-  - `lib_px_accounts` authenticate applications to retrieve account related passwords
+  - [`lib_px_accounts`](https://git.pantherx.org/development/applications/lib_px_accounts) authenticate applications to retrieve account related passwords
   - `px_accounts_helper_imap` verify IMAP credentials (1)
   - `px_accounts_helper_ftp` verify FTP credentials
   - `px_accounts_plugin_btc` Bitcoin support (2, 3)
