@@ -46,20 +46,20 @@ A>px_accounts_service]
 B>px_accounts]
 C>px_accounts_ui]
 E[/accounts]
-F[/passwords - pass]
+F>px_pass]
 G[modules]
 H>px_accounts_helper_*]
 I>px_accounts_plugin_*]
 J(Server)
 K[Crypto, VPN, Proxy, 3rd party]
 
-B --> |read / write| E
-B --> |read / write| F
+B --> |file system| E
+B -.- |RPC| F
 B --> |extent| G
 G --> H
 G --> I
-C --> |access| B
-A --> |read| E
+C -.- |RPC| B
+A --> |file system| E
 H --> |verify credentials| J
 I --> |support new account types| K
 ```
@@ -67,10 +67,10 @@ I --> |support new account types| K
 **Accounts** manages all app-related accounts such as Email, Calendar, Contacts, Matrix, IRC, Dropbox, Telegram, among others.
 
   - Configuration is stored in `~/.userdata/accounts` (file_name: `<account-name>.scm`)
-  - Credentials are stored using [pass](https://www.passwordstore.org) in `~/.userdata/accounts/passwords`
-  - Applications (ex.: `px_mail_service`) read accounts from `~/.userdata/accounts/<account-name>.scm`
+  - Credentials are stored using `px_pass`, via RPC
+  - Applications (ex.: `px_mail_service`) request account credentials via RPC `px_pass`
   - Add, modify or remove accounts trough `px_accounts`
-  - `px_accounts_ui` UI for `px_accounts`
+  - `px_accounts_ui` UI for `px_accounts` via RPC
 
 **Q: What does the `px_accounts_ui` do?**
 
@@ -82,7 +82,8 @@ I --> |support new account types| K
 
   - Read and modify accounts stored in `~/.userdata/accounts`
   - programmatic access, ex.: `px_accounts add -provider fastmail -account "info@pantherx.org" "abcdef"`
-  - Stores passwords in `pass`
+  - Stores passwords in `px_pass`
+  - provides RPC access for 3rd party applications (access accounts)
 
 When you add a account using `-provider`  
 (1) without defining protocols; ex.: `-protocol imap caldav carddav`, it's assumed that you want to activate all supported protocols.   
