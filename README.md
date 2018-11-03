@@ -58,7 +58,8 @@ B -.- |RPC| F
 B --> |extent| G
 G --> H
 G --> I
-C -.- |RPC| B
+C -.- |RPC| A
+C -.- |execution| B
 A --> |file system| E
 H --> |verify credentials| J
 I --> |support new account types| K
