@@ -34,7 +34,7 @@ graph TD
 SVC>px_accounts_service]
 CMD>px_accounts]
 GUI>px_accounts_ui]
-DB(/.userdata/accounts/*)
+DB(~/.userdata/accounts/*)
 PAS>px_pass]
 MOD[modules]
 HLP>px_accounts_helper_*]
