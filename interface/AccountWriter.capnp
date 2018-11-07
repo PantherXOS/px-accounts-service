@@ -7,5 +7,5 @@ interface AccountWriter extends(AccountReader) {
 
    add @0 (account: Account) -> (result: Bool);
    edit @1 (account: Account) -> (result: Bool);
-   delete @2 (title: Text) -> (result: Bool);
+   remove @2 (title: Text) -> (result: Bool);
 }
