@@ -11,16 +11,16 @@
 #include <iostream>
 #include <fstream>
 
-//string PXUTILS::titleToFileName(const string &title) {
-//    string result = title;
-//    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
-//        if (c == ' ') {
-//            return (int) '_';
-//        }
-//        return std::tolower(c);
-//    });
-//    return result;
-//}
+string PXUTILS::ACCOUNT::title2name(const string &title) {
+    string result = title;
+    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+        if (c == ' ') {
+            return (int) '_';
+        }
+        return std::tolower(c);
+    });
+    return result;
+}
 
 string PXUTILS::FILE::abspath(const string &path) {
     string res;

@@ -12,7 +12,10 @@ using namespace std;
 
 namespace PXUTILS {
 
-//    string titleToFileName(const string& title);
+    namespace ACCOUNT {
+        string title2name(const string &title);
+    }
+
 
     namespace FILE
     {

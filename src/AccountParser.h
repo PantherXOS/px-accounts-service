@@ -26,6 +26,13 @@ namespace PXParser {
         map<string, ParamDict> services;
     };
 
+    enum AccountStatus {
+        AC_NONE,
+        AC_ONLINE,
+        AC_OFFLINE,
+        AC_ERROR
+    };
+
     bool read(const string &acName, AccountObject *ac);
 
     bool write(const string &acName, const AccountObject &ac);
