@@ -38,7 +38,41 @@ kj::Promise<void> RPCHandler::list(AccountReader::Server::ListContext ctx) {
 }
 
 kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
-    return Server::get(ctx);
+
+    KJ_REQUIRE(ctx.getParams().hasTitle(), "'account' parameter not set");
+
+    auto title = ctx.getParams().getTitle().cStr();
+    PXParser::AccountObject actObj;
+    KJ_ASSERT(AccountManager::Instance().readAccount(title, &actObj), "Account not found");
+
+    auto account = ctx.getResults().initAccount();
+    account.setTitle(actObj.title);
+    account.setProvider(actObj.provider);
+    account.setActive(actObj.is_active);
+
+    auto accountSettings = account.initSettings(actObj.settings.size());
+    int i, j;
+    i = 0;
+    for (const auto &kv: actObj.settings) {
+        accountSettings[i].setKey(kv.first);
+        accountSettings[i].setValue(kv.second);
+        i++;
+    }
+
+    auto accountServices = account.initServices(actObj.services.size());
+    i = 0;
+    for (const auto &svc : actObj.services) {
+        accountServices[i].setName(svc.first);
+        auto params = accountServices[i].initParams(svc.second.size());
+        j = 0;
+        for (const auto &kv : svc.second) {
+            params[j].setKey(kv.first);
+            params[j].setValue(kv.second);
+            j++;
+        }
+        i++;
+    }
+    return kj::READY_NOW;
 }
 
 kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext ctx) {
