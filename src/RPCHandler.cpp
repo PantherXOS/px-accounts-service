@@ -89,7 +89,14 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
 }
 
 kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext ctx) {
-    return Server::getStatus(ctx);
+
+    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
+
+    auto title = ctx.getParams().getTitle().cStr();
+    PXParser::AccountStatus  stat = AccountManager::Instance().getStatus(title);
+    ctx.getResults().setStatus((Account::Status)stat);
+
+    return kj::READY_NOW;
 }
 
 kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
