@@ -39,7 +39,7 @@ kj::Promise<void> RPCHandler::list(AccountReader::Server::ListContext ctx) {
 
 kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'account' parameter not set");
+    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
     PXParser::AccountObject actObj;
