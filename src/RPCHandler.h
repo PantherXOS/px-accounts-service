@@ -7,6 +7,7 @@
 
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
+#include "AccountParser.h"
 
 
 class RPCHandler final: public AccountWriter::Server {
@@ -24,6 +25,9 @@ public:
     kj::Promise<void> add(AddContext ctx) override;
     kj::Promise<void> edit(EditContext ctx) override;
     kj::Promise<void> remove(RemoveContext ctx) override;
+
+protected:
+    bool parse(const Account::Reader &rpcAccount, PXParser::AccountObject *pAccount);
 };
 
 

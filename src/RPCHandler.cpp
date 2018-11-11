@@ -100,13 +100,66 @@ kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext 
 }
 
 kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
-    return Server::add(ctx);
+
+    KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
+
+    auto rpcAccount = ctx.getParams().getAccount();
+    PXParser::AccountObject account;
+    KJ_ASSERT(this->parse(rpcAccount, &account), "Error on parse received account");
+
+    KJ_ASSERT(AccountManager::Instance().createAccount(account), "Create new account failed.");
+    ctx.getResults().setResult(true);
+
+    return kj::READY_NOW;
 }
 
 kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
-    return Server::edit(ctx);
+
+    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
+    KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
+
+    auto title = ctx.getParams().getTitle().cStr();
+    auto rpcAccount = ctx.getParams().getAccount();
+    PXParser::AccountObject account;
+    KJ_ASSERT(this->parse(rpcAccount, &account), "Error on parse received account");
+
+    KJ_ASSERT(AccountManager::Instance().modifyAccount(title, account), "Modify Existing Account failed.");
+    ctx.getResults().setResult(true);
+
+    return kj::READY_NOW;
 }
 
 kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
-    return Server::remove(ctx);
+
+    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
+
+    auto title = ctx.getParams().getTitle().cStr();
+    KJ_ASSERT(AccountManager::Instance().deleteAccount(title), "Remove Account Failed");
+    ctx.getResults().setResult(true);
+
+    return  kj::READY_NOW;
+}
+
+bool RPCHandler::parse(const Account::Reader &rpcAccount, PXParser::AccountObject *pAccount) {
+
+    pAccount->title = rpcAccount.getTitle().cStr();
+    pAccount->provider = rpcAccount.getProvider().cStr();
+    pAccount->is_active = rpcAccount.getActive();
+
+    for (const auto &item : rpcAccount.getSettings()) {
+        KJ_REQUIRE(item.hasKey(), "'key' parameter is not set for setting");
+        KJ_REQUIRE(item.hasValue(), "'value' parameter is not set for setting");
+        pAccount->settings[item.getKey().cStr()] = item.getValue().cStr();
+    }
+
+    for (const auto &svc : rpcAccount.getServices()) {
+        KJ_REQUIRE(svc.hasName(), "service 'name' is not set");
+        auto name = svc.getName().cStr();
+        for (const auto &param : svc.getParams()) {
+            KJ_REQUIRE(param.hasKey(), "'key' parameter is not set for service");
+            KJ_REQUIRE(param.hasValue(), "'value' parameter is not set for service");
+            pAccount->services[name][param.getKey().cStr()] = param.getValue().cStr();
+        }
+    }
+    return true;
 }
