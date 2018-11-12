@@ -82,7 +82,7 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
     auto title = ctx.getParams().getTitle().cStr();
     auto stat = (PXParser::AccountStatus)ctx.getParams().getStat();
 
-    KJ_ASSERT(!AccountManager::Instance().setStatus(title, stat), "set account status failed");
+    KJ_ASSERT(AccountManager::Instance().setStatus(title, stat), "set account status failed");
     ctx.getResults().setResult(true);
 
     return kj::READY_NOW;

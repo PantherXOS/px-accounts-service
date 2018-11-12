@@ -210,4 +210,33 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
             REQUIRE(getRes.hasAccount());
         }
     }
+
+    SECTION("Account Status Test") {
+        auto listReq = client.listRequest();
+        auto listRes = listReq.send().wait(waitScope);
+        REQUIRE(listRes.hasAccounts());
+        if (listRes.getAccounts().size() == 0)
+            WARN("account list is empty. test omitted.");
+        else {
+            auto title = listRes.getAccounts()[0];
+            CAPTURE(title.cStr());
+
+            auto getReq = client.getStatusRequest();
+            getReq.setTitle(title);
+            auto getRes = getReq.send().wait(waitScope);
+            REQUIRE(getRes.getStatus() == Account::Status::NONE);
+
+            auto setReq = client.setStatusRequest();
+            setReq.setTitle(title);
+            setReq.setStat(Account::Status::ONLINE);
+            auto setRes = setReq.send().wait(waitScope);
+            REQUIRE(setRes.getResult());
+
+            getReq = client.getStatusRequest();
+            getReq.setTitle(title);
+            getRes = getReq.send().wait(waitScope);
+            REQUIRE(getRes.getStatus() == Account::Status::ONLINE);
+
+        }
+    }t
 }
