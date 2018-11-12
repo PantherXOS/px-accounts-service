@@ -92,7 +92,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
     }
     m_accountDict.erase(accountName);
     m_statDict.erase(accountName);
-    return false;
+    return true;
 }
 
 vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, ServiceFilters_t serviceFilter) {
