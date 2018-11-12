@@ -1,12 +1,20 @@
 #include <iostream>
+#include <unistd.h>
 
-#include "RPCHandler.h"
-#include <capnp/ez-rpc.h>
+#include "RPCServer.h"
 
 int main() {
 
-    capnp::EzRpcServer server(kj::heap<RPCHandler>(), "127.0.0.1", 4444);
-    auto& waitScope = server.getWaitScope();
-    kj::NEVER_DONE.wait(waitScope);
+    RPCServer srv("127.0.0.1:4444");
+    srv.start();
+    std::cout << "Server started" << std::endl;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+    while (true) {
+        sleep(1);
+    }
+#pragma clang diagnostic pop
+
+    return 0;
 }
