@@ -24,3 +24,11 @@ add_executable(px_accounts_service ${accountSources} ${accountHeaders}
         src/AccountManager.cpp
         src/AccountUtils.cpp
         src/AccountParser.cpp)
+
+
+add_executable(test_account_manager ${accountSources}
+        tests/test_account_manager.cpp
+        src/AccountManager.cpp
+        src/AccountParser.cpp
+        src/AccountUtils.cpp)
+target_include_directories(test_account_manager PRIVATE src Catch2/single_include)
