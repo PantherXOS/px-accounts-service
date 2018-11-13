@@ -238,5 +238,5 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
             REQUIRE(getRes.getStatus() == Account::Status::ONLINE);
 
         }
-    }t
+    }
 }
