@@ -10,9 +10,22 @@
 
 using namespace std;
 
+#define RPC_PATH          "~/.userdata/rpc"
+#define RPC_SOCKET_PATH   RPC_PATH "/accounts"
+#define RPC_MKDIR_CMD     "mkdir -p " RPC_PATH
+
 
 RPCServer::RPCServer(const std::string &addr) {
     this->address = addr;
+    if (addr.empty()) {
+
+        system(RPC_MKDIR_CMD);
+        string rpcPath =  PXUTILS::FILE::abspath(RPC_SOCKET_PATH);
+        if (PXUTILS::FILE::exists(rpcPath)) {
+            PXUTILS::FILE::remove(rpcPath);
+        }
+        this->address = string("unix:") + rpcPath;
+    }
 }
 
 void RPCServer::start() {

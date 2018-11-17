@@ -5,7 +5,7 @@
 
 int main() {
 
-    RPCServer srv("127.0.0.1:4444");
+    RPCServer srv;
     srv.start();
     std::cout << "Server started" << std::endl;
 

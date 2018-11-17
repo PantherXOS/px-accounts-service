@@ -10,7 +10,7 @@
 class RPCServer {
 
 public:
-    explicit RPCServer(const std::string &addr);
+    explicit RPCServer(const std::string &addr = std::string());
 
 public:
     void start();
