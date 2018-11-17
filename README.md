@@ -240,3 +240,26 @@ interface AccountWriter extends(AccountReader) {
 }
 
 ```
+
+
+## Build Instructions:
+1. install following libraries:
+   * yaml-cpp
+   * capnproto
+
+2. get latest version from repository using following command: 
+```sh
+git clone https://git.pantherx.org/development/applications/px_accounts_service.git
+```
+
+3. init submodules using following command:
+```sh
+git submodule update --init --recursive
+```
+
+4. perform following commands:
+```sh
+mkdir build && cd build
+cmake ..
+make 
+```
