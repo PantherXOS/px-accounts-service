@@ -136,4 +136,107 @@ The current state of an account is determined two-ways:
 
 - once services come online, and syncs successfully, report _online_
 - should sync fail, report _error_
-- should connection fail, report _offline_
+- should connection fail, report _offline_ 
+
+
+## `px_accounts_service` Internal Architecture:
+
+`px_accounts_service` is responsible for following tasks:
+- provide RPC interface for other applications to access online accounts.
+- Add, Verify, Edit and Delete online account details using 3rd party helpers and plugins.
+- hold account status details.
+
+```mermaid
+graph TD;
+APP>3rd party apps.]
+CMD>px_accounts]
+PAS>px_pass]
+PLG>px_accounts_plugin_...]
+HLP>px_accounts_helper_...]
+RPC[RPC Server]
+ACT[Account Manager]
+MOD[Modules]
+FS(File System)
+  
+subgraph px_accounts_service
+ACT --- FS
+RPC --- ACT
+ACT --- MOD
+end
+
+APP -.- |rpc| RPC
+CMD -.- |rpc| RPC
+MOD --- PLG
+MOD --- HLP
+ACT -.- |rpc| PAS
+```
+
+### `px_accounts_service` tasks:
+Following tasks should be done by `px_accounts_service`:
+1. get list of online accounts
+2. get account details
+3. add new account
+4. edit account details
+5. delete account
+6. set account status
+7. get account status
+
+### `px_accounts_service` communication interface:
+We will provide 3 types of interfaces that are available for interacting with `px_accounts_service`.
+- Account Structure that holds the details of each online account.
+- Public Communication Interface that is available for all modules to communicate with `px_accounts_service` using RPC.
+- Protected Communication Interface that is only available for internal Account module communications. initial design for these interfaces is as following structure:
+
+#### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/Account.capnp)
+ 
+```
+struct Account {
+   title @0 : Text;
+   provider @1 : Text;
+   active @2 : Bool;
+   settings @3 : List(Param);
+   services @4 : List(Service);
+   
+   struct Service {
+      name @0 : Text;
+      params @1 : List(Param);
+   }
+   struct Param{
+      key @0 : Text;
+      value @1 : Text;
+   }
+   enum Status {
+      none @0;
+      online @1;
+      offline @2;
+      error @3;
+   }
+}
+```
+
+#### 2. Public Communication Interface. [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/AccountReader.capnp)
+```
+using Account = import "Account.capnp".Account;
+
+interface AccountReader {
+    list    @0 (providerFilter: List(Text), serviceFilter: List(Text)) -> (accounts: List(Text));
+    get     @1 (title: Text) -> (account: Account);
+
+    setStatus @2 (title: Text, stat: Account.Status) -> (result: Bool);
+    getStatus @3 (title: Text) -> (status: Account.Status);
+}
+```
+
+#### 3. Internal Communication Interface. [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/AccountWriter.capnp)
+```
+using Account = import "Account.capnp".Account;
+using AccountReader = import "AccountReader.capnp".AccountReader;
+
+interface AccountWriter extends(AccountReader) {
+
+   add @0 (account: Account) -> (result: Bool);
+   edit @1 (account: Account) -> (result: Bool);
+   remove @2 (title: Text) -> (result: Bool);
+}
+
+```
