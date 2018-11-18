@@ -32,7 +32,8 @@ bool PXParser::read(const string &acName, PXParser::AccountObject *ac) {
             for (const auto &it : cfg[ACCOUNT_KEY][ACCOUNT_SERVICE_KEY]) {
                 for (const auto &service : it) {
                     auto serviceName = service.first.as<string>();
-                    for (const auto &param : service.second.as<YAML::Node>()) {
+                    const YAML::Node& params = service.second;
+                    for (const auto& param: params[serviceName]) {
                         ac->services[serviceName][param.first.as<string>()] = param.second.as<string>();
                     }
                 }
