@@ -4,12 +4,15 @@
 
 #include "AccountUtils.h"
 
+#include <stdio.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <wordexp.h>
 #include <dirent.h>
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 string PXUTILS::ACCOUNT::title2name(const string &title) {
     string result = title;
