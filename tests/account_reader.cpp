@@ -3,12 +3,13 @@
 //
 
 #include <iostream>
+#include <unistd.h>
 #include <RPCServer.h>
 #include <capnp/ez-rpc.h>
 #include <AccountParser.h>
 #include <interface/AccountReader.capnp.h>
 
-#define SERVER_ADDRESS "127.0.0.1:4321"
+#define SERVER_ADDRESS "~/.userdata/rpc/accounts"
 
 using namespace std;
 
@@ -32,10 +33,13 @@ bool rpc2ac(const Account::Reader &rpc, PXParser::AccountObject &act)
 
 int main() {
 
-    RPCServer srv(SERVER_ADDRESS);
+    RPCServer srv;
     srv.start();
 
-    capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
+    usleep(10000);
+
+    string addr = string("unix:") + PXUTILS::FILE::abspath(SERVER_ADDRESS);
+    capnp::EzRpcClient rpcClient(addr);
     auto &waitScope = rpcClient.getWaitScope();
     AccountReader::Client client = rpcClient.getMain<AccountReader>();
 
