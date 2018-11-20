@@ -88,13 +88,13 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     act.settings["first key"] = "first value";
     act.settings["second key"] = "second value";
 
-    act.services["svc1"]["param1"] = "val1";
-    act.services["svc1"]["param2"] = "val2";
-    act.services["svc1"]["param3"] = "val3";
+    act.services["svc1"]["param11"] = "val11";
+    act.services["svc1"]["param12"] = "val12";
+    act.services["svc1"]["param13"] = "val13";
 
-    act.services["svc2"]["param1"] = "val1";
-    act.services["svc2"]["param2"] = "val2";
-    act.services["svc2"]["param3"] = "val3";
+    act.services["svc2"]["param21"] = "val21";
+    act.services["svc2"]["param22"] = "val22";
+    act.services["svc2"]["param23"] = "val23";
 
 
     capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
@@ -126,11 +126,19 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
         PXParser::AccountObject savedAct;
         rpc2ac(getRes.getAccount(), savedAct);
+
         REQUIRE(savedAct.title == act.title);
         REQUIRE(savedAct.provider == act.provider);
         REQUIRE(savedAct.is_active == act.is_active);
         REQUIRE(savedAct.settings.size() == act.settings.size());
         REQUIRE(savedAct.services.size() == act.services.size());
+        for (const auto &svc : act.services) {
+            REQUIRE(savedAct.services.find(svc.first) != savedAct.services.end());
+            for (const auto &kv: svc.second) {
+                REQUIRE(savedAct.services[svc.first].find(kv.first) != savedAct.services[svc.first].end());
+                REQUIRE(savedAct.services[svc.first][kv.first] == kv.second);
+            }
+        }
     }
 
     SECTION("Edit Account") {
