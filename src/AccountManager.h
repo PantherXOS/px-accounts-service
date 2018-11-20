@@ -35,7 +35,7 @@ public:
 
     vector<string> listAccounts(ProviderFilters_t providerFilter, ServiceFilters_t serviceFilter);
 
-    bool readAccount(const string &accountName, PXParser::AccountObject *account, bool force = false);
+    bool readAccount(const string &accountName, PXParser::AccountObject *account);
 
     bool setStatus(const string &accountName, PXParser::AccountStatus stat);
 
@@ -46,7 +46,6 @@ private:
     explicit AccountManager();
 
 protected:
-    map<string, PXParser::AccountObject> m_accountDict;
     map<string, PXParser::AccountStatus> m_statDict;
     vector<string> m_errorList;
 

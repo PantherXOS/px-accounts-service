@@ -45,7 +45,6 @@ bool AccountManager::createAccount(const PXParser::AccountObject &act) {
         addError("Error on saving account file");
         return false;
     }
-    m_accountDict[accountName] = act;
     setStatus(accountName, PXParser::AC_NONE);
     return true;
 }
@@ -69,7 +68,7 @@ bool AccountManager::modifyAccount(const string &accountName, const PXParser::Ac
     }
 
     PXParser::AccountObject oldAct;
-    if (!readAccount(accountName, &oldAct, true)) {
+    if (!readAccount(accountName, &oldAct)) {
         addError("Error on reading old Account details.");
         return false;
     }
@@ -90,7 +89,6 @@ bool AccountManager::deleteAccount(const string &accountName) {
     if (!PXParser::remove(accountName)) {
         return false;
     }
-    m_accountDict.erase(accountName);
     m_statDict.erase(accountName);
     return true;
 }
@@ -131,17 +129,11 @@ vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, Se
     return accounts;
 }
 
-bool AccountManager::readAccount(const string &accountName, PXParser::AccountObject *account, bool force) {
-
-    PXParser::AccountObject act;
-    if (force || m_accountDict.find(accountName) == m_accountDict.end()) {
-        if (!PXParser::read(accountName, &act)) {
-            addError("Error on reading account file.");
-            return false;
-        }
-        m_accountDict[accountName] = act;
+bool AccountManager::readAccount(const string &accountName, PXParser::AccountObject *account) {
+    if (!PXParser::read(accountName, account)) {
+        addError("Error on reading account file.");
+        return false;
     }
-    *account = m_accountDict[accountName];
     return  true;
 }
 

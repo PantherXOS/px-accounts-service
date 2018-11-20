@@ -33,8 +33,8 @@ bool PXParser::read(const string &acName, PXParser::AccountObject *ac) {
                 for (const auto &service : it) {
                     auto serviceName = service.first.as<string>();
                     const YAML::Node& params = service.second;
-                    for (const auto& param: params[serviceName]) {
-                        ac->services[serviceName][param.first.as<string>()] = param.second.as<string>();
+                    for (const auto& p : params) {
+                        ac->services[serviceName][p.first.as<string>()] = p.second.as<string>();
                     }
                 }
             }
@@ -118,4 +118,25 @@ bool PXParser::remove(const string &acName) {
         return PXUTILS::FILE::remove(acPath);
     }
     return true;
+}
+
+void PXParser::print_account(const PXParser::AccountObject &act) {
+    cout << endl;
+    cout << "Account Details: " << endl;
+    cout << "Title    : " << act.title << endl;
+    cout << "Provider : " << act.provider << endl;
+    cout << "Active   : " << act.is_active << endl;
+    cout << "Settings : " << act.settings.size() << endl;
+    for (const auto &p : act.settings) {
+        cout << "\t" << p.first << " -> " << p.second << endl;
+    }
+    cout << "Services : " << act.services.size() << endl;
+    for (const auto &svc : act.services) {
+        cout << "\t" << svc.first << endl;
+        for (const auto &p : svc.second) {
+            cout << "\t\t" << p.first << " -> " << p.second << endl;
+        }
+    }
+    cout << "--------------------------------------" << endl;
+
 }
