@@ -50,6 +50,8 @@ namespace PXParser {
     inline string fullPath(const string &acName) {
         return accountsPath() + acName + string(".yaml");
     }
+
+    void print_account(const AccountObject& act);
 }
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H

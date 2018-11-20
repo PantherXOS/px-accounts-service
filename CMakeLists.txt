@@ -25,6 +25,15 @@ add_executable(px_accounts_service ${accountSources} ${accountHeaders}
         src/AccountUtils.cpp
         src/AccountParser.cpp)
 
+add_executable(account_reader ${accountSources} ${accountHeaders}
+        tests/account_reader.cpp
+        src/RPCServer.cpp
+        src/RPCHandler.cpp
+        src/AccountManager.cpp
+        src/AccountUtils.cpp
+        src/AccountParser.cpp)
+target_include_directories(account_reader PRIVATE src)
+
 
 add_executable(test_account_manager
         tests/test_account_manager.cpp
