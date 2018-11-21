@@ -1,7 +1,10 @@
+# GitLab CI Automation for PantherX Packages
+# Author: Franz Geffke <franz@pantherx.org>
+# Version: 0.0.1
+
 stages:
   - quality
   - security
-  - dependency
   - upload
 
 code_quality:
@@ -20,8 +23,7 @@ code_quality:
         --volume /var/run/docker.sock:/var/run/docker.sock
         "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
   artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
+      paths: [gl-code-quality-report.json]
 
 sast:
   stage: security
@@ -39,27 +41,7 @@ sast:
         --volume /var/run/docker.sock:/var/run/docker.sock
         "registry.gitlab.com/gitlab-org/security-products/sast:$SP_VERSION" /app/bin/run /code
   artifacts:
-    reports:
-      sast: gl-sast-report.json
-
-dependency_scanning:
-  stage: dependency
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-        --env DEP_SCAN_DISABLE_REMOTE_CHECKS="${DEP_SCAN_DISABLE_REMOTE_CHECKS:-false}"
-        --volume "$PWD:/code"
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/security-products/dependency-scanning:$SP_VERSION" /code
-  artifacts:
-    reports:
-      dependency_scanning: gl-dependency-scanning-report.json
+    paths: [gl-sast-report.json]
 
 upload:
   stage: upload
