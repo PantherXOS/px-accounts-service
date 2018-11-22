@@ -4,6 +4,8 @@ project(px_accounts_service)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS -pthread)
 
+execute_process(COMMAND git submodule update --init --recursive WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 find_package(yaml-cpp)
 find_package(CapnProto CONFIG REQUIRED)
 capnp_generate_cpp( accountSources accountHeaders
