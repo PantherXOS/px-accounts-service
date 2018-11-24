@@ -30,6 +30,8 @@ add_library(${LIB_NAME}
         AccountManager.cpp
         AccountUtils.cpp
         AccountParser.cpp)
+install(TARGETS ${LIB_NAME} DESTINATION lib)
 
 add_executable(${EXE_NAME} main.cpp)
 target_link_libraries(${EXE_NAME} ${LIB_NAME})
+install(TARGETS ${EXE_NAME} DESTINATION bin)
