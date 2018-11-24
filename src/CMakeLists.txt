@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.0)
 
 get_filename_component(PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 set(INTERFACE_DIR ${PARENT_DIR}/interface)

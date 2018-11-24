@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.0)
+
 set(UNIT_TEST_LIST
         test_account_manager.cpp
         test_rpc_server.cpp)
