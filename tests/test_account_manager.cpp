@@ -2,7 +2,7 @@
 // Created by Reza Alizadeh Majd on 11/12/18.
 //
 
-#define CATCH_CONFIG_MAIN
+//#define CATCH_CONFIG_MAIN
 
 #include <catch2/catch.hpp>
 

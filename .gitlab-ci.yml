@@ -46,6 +46,8 @@ sast:
 upload:
   stage: upload
   image: alpine:latest
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   script:
     - apk add py-pip
     - pip install --user awscli

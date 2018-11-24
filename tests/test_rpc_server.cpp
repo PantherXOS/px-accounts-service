@@ -2,7 +2,7 @@
 // Created by Reza Alizadeh Majd on 11/12/18.
 //
 
-#define CATCH_CONFIG_RUNNER
+//#define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 #include <RPCServer.h>
 #include <capnp/ez-rpc.h>
@@ -11,19 +11,20 @@
 #include <AccountParser.h>
 #include <iostream>
 
+#include <RPCServer.h>
 #define SERVER_ADDRESS "127.0.0.1:1234"
 
-int main(int argc, char *argv[]) {
-
-    RPCServer srv(SERVER_ADDRESS);
-    srv.start();
-
-    int result = Catch::Session().run(argc, argv);
-
-    srv.stop();
-
-    return result;
-}
+//int main(int argc, char *argv[]) {
+//
+//    RPCServer srv(SERVER_ADDRESS);
+//    srv.start();
+//
+//    int result = Catch::Session().run(argc, argv);
+//
+//    srv.stop();
+//
+//    return result;
+//}
 
 bool ac2rpc(const PXParser::AccountObject &ac, Account::Builder &rpc)
 {
