@@ -1,16 +1,18 @@
 # GitLab CI Automation for PantherX Packages
 # Author: Franz Geffke <franz@pantherx.org>
-# Version: 0.0.3
+# Version: 0.0.4
 
+# Git submodules
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
-  - testing
-  - upload
+  - test
+  - deploy
 
-code_quality:
-  stage: testing
+# temporarily disabled code quality check due timeout issues
+.code_quality:
+  stage: test
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -27,9 +29,9 @@ code_quality:
   artifacts:
     reports:
       codequality: gl-code-quality-report.json
-
+      
 sast:
-  stage: testing
+  stage: test
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -47,8 +49,8 @@ sast:
     reports:
       sast: gl-sast-report.json
 
-upload:
-  stage: upload
+deploy:
+  stage: deploy
   image: alpine:latest
   script:
     - apk add py-pip
