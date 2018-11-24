@@ -1,17 +1,16 @@
 # GitLab CI Automation for PantherX Packages
 # Author: Franz Geffke <franz@pantherx.org>
-# Version: 0.0.2
+# Version: 0.0.3
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
-  - quality
-  - security
+  - testing
   - upload
 
 code_quality:
-  stage: quality
+  stage: testing
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -30,7 +29,7 @@ code_quality:
       codequality: gl-code-quality-report.json
 
 sast:
-  stage: security
+  stage: testing
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
