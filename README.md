@@ -1,50 +1,37 @@
----
-category: desktop
-developer: Reza Alizadeh Majd <r.majd@pantherx.org>
-priority: 10
-packages:
-  - px_accounts_service
-related:
-  - px_accounts_ui
-  - px_accounts
-  - px_accounts_helper_*
-  - px_accounts_plugin_*
----
-
 # Online Accounts Management Service
 
-- `px_accounts_ui` **Online Accounts** ui-application (frontend, only UI)
-- `px_accounts` Command line interface for **Online Accounts**
-- `px_accounts_service` background-service for **Online Accounts** that serves Account related requests using _RPC_
-- `px_accounts_helper_*` verify credentials **(1)**
-- `px_accounts_plugin_*` support for provider & protocols
+- `px-accounts-ui` **Online Accounts** ui-application (frontend, only UI)
+- `px-accounts` Command line interface for **Online Accounts**
+- `px-accounts-service` background-service for **Online Accounts** that serves Account related requests using _RPC_
+- `px-accounts-helper-*` verify credentials **(1)**
+- `px-accounts-plugin-*` support for provider & protocols
 
 **(1)** a small helper script, that either reports `OK` or `ERROR(message)`  
 
 ## Important features
 
 - Add, edit, delete accounts
-- Save credentials with `px_pass_service`
+- Save credentials with `px-pass-service`
 - Keep track of account status
 
 ## Implementation
 
 ```mermaid
 graph TD
-SVC>px_accounts_service]
-CMD>px_accounts]
-GUI>px_accounts_ui]
+SVC>px-accounts-service]
+CMD>px-accounts]
+GUI>px-accounts-ui]
 DB("~/.userdata/accounts/*")
-PAS>px_pass]
+PAS>px-pass-service]
 MOD[modules]
-HLP>px_accounts_helper_*]
-PLG>px_accounts_plugin_*]
+HLP>px-accounts-helper-*]
+PLG>px-accounts-plugin-*]
 
 KDE>KDE Gui] -.- |RPC| SVC
 GTK>GTK Gui] -.- |RPC| SVC
 GUI -.- |RPC| SVC
 CMD -.- |RPC| SVC
-PXAPP>px_...] -.- |RPC| SVC
+PXAPP>px...] -.- |RPC| SVC
 SVC --- MOD
 SVC -.- |RPC| PAS
 MOD --> HLP
@@ -57,14 +44,14 @@ PLG --> |support new account types| K[Crypto, VPN, Proxy, 3rd party]
 **Accounts** manages all app-related accounts such as Email, Calendar, Contacts, Matrix, IRC, Dropbox, Telegram, among others.
 
 - Configuration is stored in `~/.userdata/accounts` (file_name: `<account-name>.yaml`)
-- Credentials are stored using `px_pass_service`, via _RPC_
-- Applications (ex.: `px_mail_service`) request account credentials via _RPC_ `px_pass_service`
-- Add, modify or remove accounts through `px_accounts_service` using _RPC_
-- `px_accounts_ui` UI for `px_accounts_service` via _RPC_
+- Credentials are stored using `px-pass-service`, via _RPC_
+- Applications (ex.: `px-mail-service`) request account credentials via _RPC_ `px-pass-service`
+- Add, modify or remove accounts through `px-accounts-service` using _RPC_
+- `px-accounts-ui` UI for `px-accounts-service` via _RPC_
 
 ### Initially Supported Services
 
-_All protocols and providers, will be implemented using a `px_accounts_plugin_*`_
+_All protocols and providers, will be implemented using a `px-accounts-plugin-*`_
 
 #### Core
 
@@ -107,15 +94,15 @@ _All protocols and providers, will be implemented using a `px_accounts_plugin_*`
 
 **Q: What does the `px_accounts_ui` do?**
 
-- Qt5 UI for `px_accounts_service`
+- Qt5 UI for `px-accounts-service`
 - does not run in the background.
-- send commands to  `px_accounts_service` using _RPC_ and visualize response in GUI.
+- send commands to  `px-accounts-service` using _RPC_ and visualize response in GUI.
 
 **Q: What does the `px_accounts` do?**
 
-- command line interface for `px_accounts_service`
+- command line interface for `px-accounts-service`
 - parse user inputs
-- send commands to `px_accounts_service` using _RPC_; generate readable response for user
+- send commands to `px-accounts-service` using _RPC_; generate readable response for user
 
 **Q: What does the `px_accounts_service` do?**
 
@@ -141,7 +128,7 @@ The current state of an account is determined two-ways:
 
 ## `px_accounts_service` Internal Architecture:
 
-`px_accounts_service` is responsible for following tasks:
+`px-accounts-service` is responsible for following tasks:
 - provide RPC interface for other applications to access online accounts.
 - Add, Verify, Edit and Delete online account details using 3rd party helpers and plugins.
 - hold account status details.
@@ -149,16 +136,16 @@ The current state of an account is determined two-ways:
 ```mermaid
 graph TD;
 APP>3rd party apps.]
-CMD>px_accounts]
-PAS>px_pass]
-PLG>px_accounts_plugin_...]
-HLP>px_accounts_helper_...]
+CMD>px-accounts]
+PAS>px-pass-service]
+PLG>px-accounts-plugin...]
+HLP>px-accounts-helper...]
 RPC[RPC Server]
 ACT[Account Manager]
 MOD[Modules]
 FS(File System)
   
-subgraph px_accounts_service
+subgraph px-accounts-service
 ACT --- FS
 RPC --- ACT
 ACT --- MOD
@@ -171,8 +158,8 @@ MOD --- HLP
 ACT -.- |rpc| PAS
 ```
 
-### `px_accounts_service` tasks:
-Following tasks should be done by `px_accounts_service`:
+### `px-accounts-service` tasks:
+Following tasks should be done by `px-accounts-service`:
 1. get list of online accounts
 2. get account details
 3. add new account
@@ -181,10 +168,10 @@ Following tasks should be done by `px_accounts_service`:
 6. set account status
 7. get account status
 
-### `px_accounts_service` communication interface:
-We will provide 3 types of interfaces that are available for interacting with `px_accounts_service`.
+### `px-accounts-service` communication interface:
+We will provide 3 types of interfaces that are available for interacting with `px-accounts-service`.
 - Account Structure that holds the details of each online account.
-- Public Communication Interface that is available for all modules to communicate with `px_accounts_service` using RPC.
+- Public Communication Interface that is available for all modules to communicate with `px-accounts-service` using RPC.
 - Protected Communication Interface that is only available for internal Account module communications. initial design for these interfaces is as following structure:
 
 #### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/Account.capnp)
@@ -238,9 +225,7 @@ interface AccountWriter extends(AccountReader) {
    edit @1 (account: Account) -> (result: Bool);
    remove @2 (title: Text) -> (result: Bool);
 }
-
 ```
-
 
 ## Build Instructions:
 1. install following libraries:
