@@ -3,8 +3,7 @@
 - `px-accounts-ui` **Online Accounts** ui-application (frontend, only UI)
 - `px-accounts` Command line interface for **Online Accounts**
 - `px-accounts-service` background-service for **Online Accounts** that serves Account related requests using _RPC_
-- `px-accounts-helper-*` verify credentials **(1)**
-- `px-accounts-plugin-*` support for provider & protocols
+- `px-accounts-plugin-*` support for provider & protocols, verify credentials **(1)**
 
 **(1)** a small helper script, that either reports `OK` or `ERROR(message)`  
 
@@ -24,7 +23,6 @@ GUI>px-accounts-ui]
 DB("~/.userdata/accounts/*")
 PAS>px-pass-service]
 MOD[modules]
-HLP>px-accounts-helper-*]
 PLG>px-accounts-plugin-*]
 
 KDE>KDE Gui] -.- |RPC| SVC
@@ -34,12 +32,13 @@ CMD -.- |RPC| SVC
 PXAPP>px...] -.- |RPC| SVC
 SVC --- MOD
 SVC -.- |RPC| PAS
-MOD --> HLP
 MOD --> PLG
 SVC --> |file system| DB
-HLP --> |verify credentials| J(Server)
+PLG --> |verify credentials| J(Server)
 PLG --> |support new account types| K[Crypto, VPN, Proxy, 3rd party]
 ```
+
+---
 
 **Accounts** manages all app-related accounts such as Email, Calendar, Contacts, Matrix, IRC, Dropbox, Telegram, among others.
 
@@ -107,7 +106,7 @@ _All protocols and providers, will be implemented using a `px-accounts-plugin-*`
 **Q: What does the `px_accounts_service` do?**
 
 - read, modify and delete accounts stored in `~/.userdata/accounts`
-- verify account details using 3rd-party plugins and helpers. 
+- verify account details using 3rd-party plugins. 
 - provide _RPC_ Server in order to serve received requests from other applications. 
 - Keep track of account status with one of following possible states:
 
@@ -130,7 +129,7 @@ The current state of an account is determined two-ways:
 
 `px-accounts-service` is responsible for following tasks:
 - provide RPC interface for other applications to access online accounts.
-- Add, Verify, Edit and Delete online account details using 3rd party helpers and plugins.
+- Add, Verify, Edit and Delete online account details using 3rd party plugins.
 - hold account status details.
 
 ```mermaid
@@ -139,7 +138,6 @@ APP>3rd party apps.]
 CMD>px-accounts]
 PAS>px-pass-service]
 PLG>px-accounts-plugin...]
-HLP>px-accounts-helper...]
 RPC[RPC Server]
 ACT[Account Manager]
 MOD[Modules]
@@ -154,7 +152,6 @@ end
 APP -.- |rpc| RPC
 CMD -.- |rpc| RPC
 MOD --- PLG
-MOD --- HLP
 ACT -.- |rpc| PAS
 ```
 
