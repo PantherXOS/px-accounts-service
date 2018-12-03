@@ -39,7 +39,7 @@ add_library(${LIB_NAME}
         PluginManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
 install(TARGETS ${LIB_NAME} DESTINATION lib)
-configure_file(testmodule.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(px-accounts-service-plugin-sample.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable(${EXE_NAME} main.cpp)
 target_link_libraries(${EXE_NAME} ${LIB_NAME})
