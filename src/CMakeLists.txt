@@ -25,6 +25,7 @@ include_directories(${CapnProto_INCLUDE_DIRS}
 
 link_libraries(CapnProto::capnp-rpc yaml-cpp)
 set(CMAKE_CXX_FLAGS -pthread)
+set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 
 
 add_library(${LIB_NAME}
