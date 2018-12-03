@@ -12,7 +12,7 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
             .def("test", &Plugin::verify)
             .def_readwrite("title", &Plugin::title);
 
-    py::bind_map<RawParamMap>(m, "RawParamMap");
+    py::bind_map<StrStrMap>(m, "StrStrMap");
     py::bind_vector<StringList>(m, "StringList");
     py::bind_vector<ServiceParamList>(m, "ServiceParamList");
 
@@ -30,10 +30,20 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
             .def_readwrite("params",   &VerifyResult::params)
             .def_readwrite("errors",   &VerifyResult::errors);
 
+    py::class_<AuthResult>(m, "AuthResult")
+            .def(py::init())
+            .def_readwrite("authenticated", &AuthResult::authenticated)
+            .def_readwrite("tokens", &AuthResult::tokens)
+            .def_readwrite("errors", &AuthResult::errors);
+
 }
 
-VerifyResult PyPlugin::verify(const map<string, string> &params) {
+VerifyResult PyPlugin::verify(const StrStrMap &params) {
     PYBIND11_OVERLOAD_PURE(VerifyResult, Plugin, verify, params);
+}
+
+AuthResult PyPlugin::authenticate(const ServiceParamList &params) {
+    PYBIND11_OVERLOAD_PURE(AuthResult, Plugin, authenticate, params);
 }
 
 
@@ -77,7 +87,12 @@ string PluginContainer::getTitle() {
     return _plugin.attr("title").cast<string>();
 }
 
-VerifyResult PluginContainer::verify(const map<string, string> &params) {
+VerifyResult PluginContainer::verify(const StrStrMap &params) {
     auto res = _plugin.attr("verify")(params);
     return  res.cast<VerifyResult>();
+}
+
+AuthResult PluginContainer::authenticate(const ServiceParamList &params) {
+    auto res = _plugin.attr("authenticate")(params);
+    return res.cast<AuthResult>();
 }

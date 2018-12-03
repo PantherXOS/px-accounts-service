@@ -17,7 +17,7 @@ using namespace py::literals;
 
 
 typedef vector<string> StringList;
-typedef map<string, string> RawParamMap;
+typedef map<string, string> StrStrMap;
 
 struct ServiceParam {
     string key;
@@ -34,7 +34,15 @@ struct VerifyResult {
     StringList       errors;
 };
 
-PYBIND11_MAKE_OPAQUE(RawParamMap);
+
+struct AuthResult {
+    bool       authenticated;
+    StrStrMap   tokens;
+    StringList errors;
+};
+
+
+PYBIND11_MAKE_OPAQUE(StrStrMap);
 PYBIND11_MAKE_OPAQUE(StringList);
 PYBIND11_MAKE_OPAQUE(ServiceParamList);
 
@@ -48,7 +56,8 @@ public:
 
     string getTitle();
 
-    VerifyResult verify(const map<string, string> &);
+    VerifyResult verify(const StrStrMap &);
+    AuthResult authenticate(const ServiceParamList &);
 
 protected:
     bool             _inited = false;
@@ -63,7 +72,8 @@ public:
     explicit Plugin() = default;
     virtual ~Plugin() = default;
 
-    virtual VerifyResult verify(const std::map<std::string, std::string> &params) = 0;
+    virtual VerifyResult verify(const StrStrMap &params) = 0;
+    virtual AuthResult authenticate(const ServiceParamList &) = 0;
 
 public:
     string title;
@@ -72,7 +82,8 @@ public:
 // ============================================================================
 class PyPlugin final : public Plugin {
 public:
-    virtual VerifyResult verify(const map<string, string> &params);
+    virtual VerifyResult verify(const StrStrMap &params) override;
+    virtual AuthResult authenticate(const ServiceParamList &) override;
 };
 
 
