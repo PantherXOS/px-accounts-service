@@ -31,6 +31,10 @@ PluginContainer &PluginManager::operator[](const std::string &title) {
     return  _plugins[title];
 }
 
+bool PluginManager::exists(const string &title) {
+    return _plugins.find(title) != _plugins.end();
+}
+
 map<string, PluginContainer> &PluginManager::plugins() {
     return _plugins;
 }

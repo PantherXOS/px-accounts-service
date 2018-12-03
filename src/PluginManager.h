@@ -18,6 +18,7 @@ public:
     static PluginManager &Instance();
 
     PluginContainer &operator[](const std::string &);
+    bool exists(const string &);
     map<string, PluginContainer> &plugins();
 
 protected:

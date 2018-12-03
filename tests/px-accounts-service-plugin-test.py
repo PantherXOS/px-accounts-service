@@ -24,9 +24,17 @@ if pkgutil.find_loader('PluginFramework') is not None:
                 if k not in klist:
                     result.verified = False
                     result.errors.append('{} is not in params'.format(k))
-                elif params[k] != pdict[k]:
-                    result.verified = False
-                    result.errors.append('{} value is invalid {} != {}'.format(k, params[k], pdict[k]))
+                # elif params[k] != pdict[k]:
+                #     result.verified = False
+                #     result.errors.append('{} value is invalid {} != {}'.format(k, params[k], pdict[k]))
+            if result.verified:
+                for k in params:
+                    p = PluginFramework.ServiceParam()
+                    p.key = k
+                    p.val = params[k]
+                    if k in pdict.keys():
+                        p.is_required = True
+                    result.params.append(p)
             return result
 
         def authenticate(self, params):
