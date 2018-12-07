@@ -91,19 +91,19 @@ _All protocols and providers, will be implemented using a `px-accounts-plugin-*`
 
 ## FAQ
 
-**Q: What does the `px_accounts_ui` do?**
+**Q: What does the `px-accounts-ui` do?**
 
 - Qt5 UI for `px-accounts-service`
 - does not run in the background.
 - send commands to  `px-accounts-service` using _RPC_ and visualize response in GUI.
 
-**Q: What does the `px_accounts` do?**
+**Q: What does the `px-accounts` do?**
 
 - command line interface for `px-accounts-service`
 - parse user inputs
 - send commands to `px-accounts-service` using _RPC_; generate readable response for user
 
-**Q: What does the `px_accounts_service` do?**
+**Q: What does the `px-accounts-service` do?**
 
 - read, modify and delete accounts stored in `~/.userdata/accounts`
 - verify account details using 3rd-party plugins. 
@@ -125,7 +125,7 @@ The current state of an account is determined two-ways:
 - should connection fail, report _offline_ 
 
 
-## `px_accounts_service` Internal Architecture:
+## `px-accounts-service` Internal Architecture:
 
 `px-accounts-service` is responsible for following tasks:
 - provide RPC interface for other applications to access online accounts.
