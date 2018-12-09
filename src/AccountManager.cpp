@@ -4,6 +4,7 @@
 
 #include "AccountManager.h"
 #include "AccountUtils.h"
+#include "PluginManager.h"
 
 AccountManager::AccountManager() = default;
 
@@ -31,8 +32,17 @@ bool AccountManager::verifyAccount(const PXParser::AccountObject &act) {
         addError("'title' is required");
         return false;
     }
-    // todo: Aditional Account Parameter Verification should be implemented in Account Plugin Loader Task
-    return true;
+
+    bool verified = true;
+    for (const auto &kv : act.services) {
+        if (PluginManager::Instance().exists(kv.first)) {
+            auto vResult = PluginManager::Instance()[kv.first].verify(kv.second);
+            verified &= vResult.verified;
+        } else {
+            verified = false;
+        }
+    }
+    return verified;
 }
 
 bool AccountManager::createAccount(const PXParser::AccountObject &act) {

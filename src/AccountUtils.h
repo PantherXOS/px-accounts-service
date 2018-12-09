@@ -16,6 +16,9 @@ namespace PXUTILS {
         string title2name(const string &title);
     }
 
+    namespace PLUGIN {
+        string package2module(const string& title);
+    }
 
     namespace FILE
     {
