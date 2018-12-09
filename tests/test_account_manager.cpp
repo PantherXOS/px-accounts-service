@@ -24,8 +24,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     newAccount.settings["first key"] = "first value";
     newAccount.settings["second key"] = "second value";
 
-    newAccount.services["sample_service"]["k1"] = "v1";
-    newAccount.services["sample_service"]["k2"] = "v2";
+    newAccount.services["test"]["k1"] = "v1";
+    newAccount.services["test"]["k2"] = "v2";
 
 
     string accountName = PXUTILS::ACCOUNT::title2name(newAccount.title);
@@ -50,8 +50,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(newAccount.settings.find("second key") != newAccount.settings.end());
         REQUIRE(newAccount.settings["second key"] == "second value");
         REQUIRE(newAccount.services.size() == 1);
-        REQUIRE(newAccount.services.find("sample_service") != newAccount.services.end());
-        REQUIRE(newAccount.services["sample_service"].size() == 2);
+        REQUIRE(newAccount.services.find("test") != newAccount.services.end());
+        REQUIRE(newAccount.services["test"].size() == 2);
     }
 
     SECTION("Change Account active status") {

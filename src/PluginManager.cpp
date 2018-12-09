@@ -5,10 +5,14 @@
 
 #include "PluginManager.h"
 
+#ifndef PLUGIN_CMD
+
 #ifdef __linux__
 #define PLUGIN_CMD "guix package --list-installed | grep -o '^px-accounts-service-plugin-[a-zA-Z0-9\\-]*'"
 #else
 #define PLUGIN_CMD "ls -l | grep -o 'px-accounts-service-plugin-[a-zA-Z0-9\\-]*'"
+#endif
+
 #endif
 
 

@@ -89,8 +89,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     act.settings["first key"] = "first value";
     act.settings["second key"] = "second value";
 
-    act.services["sample_service"]["k1"] = "val11";
-    act.services["sample_service"]["k2"] = "val12";
+    act.services["test"]["k1"] = "val11";
+    act.services["test"]["k2"] = "val12";
 
     capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
     auto& waitScope = rpcClient.getWaitScope();

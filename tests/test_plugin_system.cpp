@@ -25,7 +25,7 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
         auto vResult = plugin.verify(params);
         REQUIRE_FALSE(vResult.verified);
         CAPTURE(vResult.errors);
-        REQUIRE(vResult.errors[0] == string("k2 is not in params"));
+        REQUIRE(vResult.errors[0] == string("Param 'k2' is required"));
 
         params["k2"] = "v2";
         vResult = plugin.verify(params);

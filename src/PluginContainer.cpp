@@ -3,6 +3,7 @@
 //
 
 #include "PluginContainer.h"
+#include "AccountUtils.h"
 
 PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
 
@@ -50,7 +51,7 @@ AuthResult PyPlugin::authenticate(const ServiceParamList &params) {
 PluginContainer::PluginContainer(const string &title, const string &path) {
 
     py::dict locals;
-    locals["module_name"] = py::cast(title);
+    locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(title));
     if (!path.empty()) {
         locals["path"] = py::cast(path);
     }
