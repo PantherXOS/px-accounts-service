@@ -6,6 +6,7 @@ set(INTERFACE_DIR ${PARENT_DIR}/interface)
 find_package(yaml-cpp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(pybind11 REQUIRED)
+find_package(nng REQUIRED)
 
 
 find_package(CapnProto CONFIG REQUIRED)
@@ -36,8 +37,10 @@ add_library(${LIB_NAME}
         AccountUtils.cpp
         AccountParser.cpp
         PluginContainer.cpp
-        PluginManager.cpp)
-target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed)
+        PluginManager.cpp
+        EventManager.cpp)
+target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
+                                  PRIVATE nng::nng)
 install(TARGETS ${LIB_NAME} DESTINATION lib)
 configure_file(px-accounts-service-plugin-sample.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 

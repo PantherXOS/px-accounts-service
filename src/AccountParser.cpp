@@ -13,6 +13,13 @@
 #define ACCOUNT_SETTING_KEY  "settings"
 #define ACCOUNT_SERVICE_KEY  "services"
 
+map<PXParser::AccountStatus, string> PXParser::AccounrStatusString = {
+        { AC_NONE,    "NONE" },
+        { AC_ONLINE,  "ONLINE" },
+        { AC_OFFLINE, "OFFLINE" },
+        { AC_ERROR,   "ERROR" }
+};
+
 bool PXParser::read(const string &acName, PXParser::AccountObject *ac) {
     string acPath = PXParser::fullPath(acName);
     if (!PXUTILS::FILE::exists(acPath)) {

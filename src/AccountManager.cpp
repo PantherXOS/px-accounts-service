@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "AccountUtils.h"
 #include "PluginManager.h"
+#include "EventManager.h"
 
 AccountManager::AccountManager() = default;
 
@@ -148,7 +149,11 @@ bool AccountManager::readAccount(const string &accountName, PXParser::AccountObj
 }
 
 bool AccountManager::setStatus(const string &accountName, PXParser::AccountStatus stat) {
+    PXParser::AccountStatus oldStat = m_statDict[accountName];
     m_statDict[accountName] = stat;
+    if (oldStat != stat) {
+        EventManager::EMIT_STATUS_CHANGE(accountName, oldStat, stat);
+    }
     return true;
 }
 
