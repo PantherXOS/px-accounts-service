@@ -33,6 +33,7 @@ add_library(${LIB_NAME}
         ${accountSources} ${accountHeaders}
         RPCServer.cpp
         RPCHandler.cpp
+        AccountDefinitions.cpp
         AccountManager.cpp
         AccountUtils.cpp
         AccountParser.cpp

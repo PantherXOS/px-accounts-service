@@ -32,7 +32,7 @@ protected:
 public:
     virtual ~EventManager() = default;
     static EventManager &Instance();
-    static void EMIT_STATUS_CHANGE(string src, PXParser::AccountStatus from, PXParser::AccountStatus to);
+    static void EMIT_STATUS_CHANGE(string src, AccountStatus from, AccountStatus to);
 
 private:
     static EventManager _instance;

@@ -7,33 +7,12 @@
 
 #define BASE_ACCOUNT_PATH    "~/.userdata/accounts/"
 
+#include "AccountDefinitions.h"
 #include "AccountUtils.h"
 
-#include <iostream>
-#include <map>
-
-using namespace std;
 
 
 namespace PXParser {
-
-    struct AccountObject {
-        typedef map<string, string> ParamDict;
-        string title;
-        string provider;
-        bool is_active;
-        ParamDict settings;
-        map<string, ParamDict> services;
-    };
-
-    enum AccountStatus {
-        AC_NONE,
-        AC_ONLINE,
-        AC_OFFLINE,
-        AC_ERROR
-    };
-
-    extern map<AccountStatus, string> AccounrStatusString;
 
     bool read(const string &acName, AccountObject *ac);
 

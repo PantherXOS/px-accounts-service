@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <RPCServer.h>
+#include <RPCHandler.h>
 #define SERVER_ADDRESS "127.0.0.1:1234"
 
 //int main(int argc, char *argv[]) {
@@ -26,54 +27,7 @@
 //    return result;
 //}
 
-bool ac2rpc(const PXParser::AccountObject &ac, Account::Builder &rpc)
-{
-    rpc.setTitle(ac.title);
-    rpc.setProvider(ac.provider);
-    rpc.setActive(ac.is_active);
 
-    int i, j;
-    i = 0;
-    auto rpcSettings = rpc.initSettings(static_cast<unsigned int>(ac.settings.size()));
-    for (const auto &kv : ac.settings) {
-        rpcSettings[i].setKey(kv.first);
-        rpcSettings[i].setValue(kv.second);
-        i++;
-    }
-
-    i = 0;
-    auto rpcServices = rpc.initServices(static_cast<unsigned int>(ac.services.size()));
-    for (const auto &svc : ac.services) {
-        j = 0;
-        rpcServices[i].setName(svc.first);
-        auto svcParams = rpcServices[i].initParams(svc.second.size());
-        for (const auto &p : svc.second) {
-            svcParams[j].setKey(p.first);
-            svcParams[j].setValue(p.second);
-            j++;
-        }
-        i++;
-    }
-    return true;
-}
-
-bool rpc2ac(const Account::Reader &rpc, PXParser::AccountObject &act)
-{
-    act.title = rpc.getTitle().cStr();
-    act.provider = rpc.getProvider().cStr();
-    act.is_active = rpc.getActive();
-
-    for (const auto &s : rpc.getSettings()) {
-        act.settings[s.getKey().cStr()] = s.getValue().cStr();
-    }
-
-    for (const auto &svc : rpc.getServices()) {
-        for (const auto &p : svc.getParams()) {
-            act.services[svc.getName().cStr()][p.getKey().cStr()] = p.getValue().cStr();
-        }
-    }
-    return true;
-}
 
 
 TEST_CASE("Account Writer Tests", "[RPCServer]") {
@@ -81,7 +35,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     std::string title1 = "RPC Test Account";
     std::string title2 = "RPC Test Account Edited";
 
-    PXParser::AccountObject act;
+    AccountObject act;
     act.title = title1;
     act.provider = "sample provider";
     act.is_active = false;
@@ -106,7 +60,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
         capnp::MallocMessageBuilder msg;
         Account::Builder account = msg.initRoot<Account>();
-        ac2rpc(act, account);
+        RPCHandler::ACT2RPC(act, account);
 
         auto request = client.addRequest();
         request.setAccount(account);
@@ -119,8 +73,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
-        PXParser::AccountObject savedAct;
-        rpc2ac(getRes.getAccount(), savedAct);
+        AccountObject savedAct;
+        RPCHandler::RPC2ACT(getRes.getAccount(), savedAct);
 
         REQUIRE(savedAct.title == act.title);
         REQUIRE(savedAct.provider == act.provider);
@@ -143,13 +97,13 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
-        PXParser::AccountObject testAct;
-        rpc2ac(getRes.getAccount(), testAct);
+        AccountObject testAct;
+        RPCHandler::RPC2ACT(getRes.getAccount(), testAct);
         testAct.title = title2;
 
         capnp::MallocMessageBuilder msg;
         Account::Builder account = msg.initRoot<Account>();
-        ac2rpc(testAct, account);
+        RPCHandler::ACT2RPC(testAct, account);
 
         auto editReq = client.editRequest();
         editReq.setTitle(PXUTILS::ACCOUNT::title2name(title1));

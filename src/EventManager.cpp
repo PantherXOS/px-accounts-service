@@ -54,9 +54,9 @@ EventManager &EventManager::Instance() {
     return _instance;
 }
 
-void EventManager::EMIT_STATUS_CHANGE(string src, PXParser::AccountStatus from, PXParser::AccountStatus to) {
+void EventManager::EMIT_STATUS_CHANGE(string src, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["old"] = PXParser::AccounrStatusString[from];
-    params["new"] = PXParser::AccounrStatusString[to];
+    params["old"] = AccounrStatusString[from];
+    params["new"] = AccounrStatusString[to];
     _instance.emit(src, ACCOUNT_STATUS_CHANGE, params);
 }

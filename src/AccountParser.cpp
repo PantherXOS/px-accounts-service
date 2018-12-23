@@ -13,14 +13,8 @@
 #define ACCOUNT_SETTING_KEY  "settings"
 #define ACCOUNT_SERVICE_KEY  "services"
 
-map<PXParser::AccountStatus, string> PXParser::AccounrStatusString = {
-        { AC_NONE,    "NONE" },
-        { AC_ONLINE,  "ONLINE" },
-        { AC_OFFLINE, "OFFLINE" },
-        { AC_ERROR,   "ERROR" }
-};
 
-bool PXParser::read(const string &acName, PXParser::AccountObject *ac) {
+bool PXParser::read(const string &acName, AccountObject *ac) {
     string acPath = PXParser::fullPath(acName);
     if (!PXUTILS::FILE::exists(acPath)) {
         return false;
@@ -54,7 +48,7 @@ bool PXParser::read(const string &acName, PXParser::AccountObject *ac) {
     return true;
 }
 
-bool PXParser::write(const string &acName, const PXParser::AccountObject &ac) {
+bool PXParser::write(const string &acName, const AccountObject &ac) {
 
     YAML::Emitter emitter;
     try {
@@ -127,7 +121,7 @@ bool PXParser::remove(const string &acName) {
     return true;
 }
 
-void PXParser::print_account(const PXParser::AccountObject &act) {
+void PXParser::print_account(const AccountObject &act) {
     cout << endl;
     cout << "Account Details: " << endl;
     cout << "Title    : " << act.title << endl;

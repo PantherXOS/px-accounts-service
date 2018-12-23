@@ -16,7 +16,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     std::string title1 = "My Test Account";
     std::string title2 = "My Edited Title";
 
-    PXParser::AccountObject newAccount, account;
+    AccountObject newAccount, account;
     newAccount.title = title1;
     newAccount.provider = "sample provider";
     newAccount.is_active = false;

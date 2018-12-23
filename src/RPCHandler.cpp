@@ -42,7 +42,7 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    PXParser::AccountObject actObj;
+    AccountObject actObj;
     KJ_ASSERT(AccountManager::Instance().readAccount(title, &actObj), "Account not found");
 
     auto account = ctx.getResults().initAccount();
@@ -80,7 +80,7 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    auto stat = (PXParser::AccountStatus)ctx.getParams().getStat();
+    auto stat = (AccountStatus)ctx.getParams().getStat();
 
     KJ_ASSERT(AccountManager::Instance().setStatus(title, stat), "set account status failed");
     ctx.getResults().setResult(true);
@@ -93,7 +93,7 @@ kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    PXParser::AccountStatus  stat = AccountManager::Instance().getStatus(title);
+    AccountStatus  stat = AccountManager::Instance().getStatus(title);
     ctx.getResults().setStatus((Account::Status)stat);
 
     return kj::READY_NOW;
@@ -104,8 +104,8 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
 
     auto rpcAccount = ctx.getParams().getAccount();
-    PXParser::AccountObject account;
-    KJ_ASSERT(this->parse(rpcAccount, &account), "Error on parse received account");
+    AccountObject account;
+    KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
     KJ_ASSERT(AccountManager::Instance().createAccount(account), "Create new account failed.");
     ctx.getResults().setResult(true);
@@ -120,8 +120,8 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
 
     auto title = ctx.getParams().getTitle().cStr();
     auto rpcAccount = ctx.getParams().getAccount();
-    PXParser::AccountObject account;
-    KJ_ASSERT(this->parse(rpcAccount, &account), "Error on parse received account");
+    AccountObject account;
+    KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
     KJ_ASSERT(AccountManager::Instance().modifyAccount(title, account), "Modify Existing Account failed.");
     ctx.getResults().setResult(true);
@@ -140,26 +140,49 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
     return  kj::READY_NOW;
 }
 
-bool RPCHandler::parse(const Account::Reader &rpcAccount, PXParser::AccountObject *pAccount) {
+bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
+    act.title = rpc.getTitle().cStr();
+    act.provider = rpc.getProvider().cStr();
+    act.is_active = rpc.getActive();
 
-    pAccount->title = rpcAccount.getTitle().cStr();
-    pAccount->provider = rpcAccount.getProvider().cStr();
-    pAccount->is_active = rpcAccount.getActive();
-
-    for (const auto &item : rpcAccount.getSettings()) {
-        KJ_REQUIRE(item.hasKey(), "'key' parameter is not set for setting");
-        KJ_REQUIRE(item.hasValue(), "'value' parameter is not set for setting");
-        pAccount->settings[item.getKey().cStr()] = item.getValue().cStr();
+    for (const auto &s : rpc.getSettings()) {
+        act.settings[s.getKey().cStr()] = s.getValue().cStr();
     }
 
-    for (const auto &svc : rpcAccount.getServices()) {
-        KJ_REQUIRE(svc.hasName(), "service 'name' is not set");
-        auto name = svc.getName().cStr();
-        for (const auto &param : svc.getParams()) {
-            KJ_REQUIRE(param.hasKey(), "'key' parameter is not set for service");
-            KJ_REQUIRE(param.hasValue(), "'value' parameter is not set for service");
-            pAccount->services[name][param.getKey().cStr()] = param.getValue().cStr();
+    for (const auto &svc : rpc.getServices()) {
+        for (const auto &p : svc.getParams()) {
+            act.services[svc.getName().cStr()][p.getKey().cStr()] = p.getValue().cStr();
         }
+    }
+    return true;
+}
+
+bool RPCHandler::ACT2RPC(const AccountObject &act, Account::Builder &rpc) {
+    rpc.setTitle(act.title);
+    rpc.setProvider(act.provider);
+    rpc.setActive(act.is_active);
+
+    int i, j;
+    i = 0;
+    auto rpcSettings = rpc.initSettings(static_cast<unsigned int>(act.settings.size()));
+    for (const auto &kv : act.settings) {
+        rpcSettings[i].setKey(kv.first);
+        rpcSettings[i].setValue(kv.second);
+        i++;
+    }
+
+    i = 0;
+    auto rpcServices = rpc.initServices(static_cast<unsigned int>(act.services.size()));
+    for (const auto &svc : act.services) {
+        j = 0;
+        rpcServices[i].setName(svc.first);
+        auto svcParams = rpcServices[i].initParams(svc.second.size());
+        for (const auto &p : svc.second) {
+            svcParams[j].setKey(p.first);
+            svcParams[j].setValue(p.second);
+            j++;
+        }
+        i++;
     }
     return true;
 }
