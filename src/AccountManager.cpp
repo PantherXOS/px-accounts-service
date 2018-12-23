@@ -7,16 +7,17 @@
 #include "PluginManager.h"
 #include "EventManager.h"
 
+AccountManager AccountManager::_instance;
+
 AccountManager::AccountManager() = default;
 
 AccountManager &AccountManager::Instance() {
-    static AccountManager instance;
-    instance.resetErrors();
-    return instance;
+    _instance.resetErrors();
+    return _instance;
 }
 
-vector<string> AccountManager::getErrors() {
-    return m_errorList;
+vector<string> &AccountManager::LastErrors() {
+    return _instance.m_errorList;
 }
 
 void AccountManager::resetErrors() {

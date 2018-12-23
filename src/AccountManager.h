@@ -14,8 +14,7 @@ public:
 
 public:
     static AccountManager &Instance();
-
-    vector<string> getErrors();
+    static vector<string> &LastErrors();
 
 protected:
     void resetErrors();
@@ -46,6 +45,7 @@ private:
     explicit AccountManager();
 
 protected:
+    static AccountManager _instance;
     map<string, AccountStatus> m_statDict;
     vector<string> m_errorList;
 
