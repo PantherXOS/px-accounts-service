@@ -7,7 +7,7 @@
 #include <catch2/catch.hpp>
 #include <RPCServer.h>
 
-#define SERVER_ADDRESS "127.0.0.1:1234"
+#include "test_common.h"
 
 
 int main(int argc, char *argv[]) {

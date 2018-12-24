@@ -26,8 +26,9 @@ public:
     kj::Promise<void> edit(EditContext ctx) override;
     kj::Promise<void> remove(RemoveContext ctx) override;
 
-protected:
-    bool parse(const Account::Reader &rpcAccount, PXParser::AccountObject *pAccount);
+public:
+    static bool RPC2ACT(const Account::Reader &rpc, AccountObject &act);
+    static bool ACT2RPC(const AccountObject &act, Account::Builder &rpc);
 };
 
 

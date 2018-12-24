@@ -5,17 +5,19 @@
 #include "AccountManager.h"
 #include "AccountUtils.h"
 #include "PluginManager.h"
+#include "EventManager.h"
+
+AccountManager AccountManager::_instance;
 
 AccountManager::AccountManager() = default;
 
 AccountManager &AccountManager::Instance() {
-    static AccountManager instance;
-    instance.resetErrors();
-    return instance;
+    _instance.resetErrors();
+    return _instance;
 }
 
-vector<string> AccountManager::getErrors() {
-    return m_errorList;
+vector<string> &AccountManager::LastErrors() {
+    return _instance.m_errorList;
 }
 
 void AccountManager::resetErrors() {
@@ -26,7 +28,7 @@ void AccountManager::addError(const string &msg) {
     m_errorList.push_back(msg);
 }
 
-bool AccountManager::verifyAccount(const PXParser::AccountObject &act) {
+bool AccountManager::verifyAccount(const AccountObject &act) {
 
     if (act.title.empty()) {
         addError("'title' is required");
@@ -45,7 +47,7 @@ bool AccountManager::verifyAccount(const PXParser::AccountObject &act) {
     return verified;
 }
 
-bool AccountManager::createAccount(const PXParser::AccountObject &act) {
+bool AccountManager::createAccount(const AccountObject &act) {
     if (!verifyAccount(act)) {
         addError("Account verification failed");
         return false;
@@ -55,11 +57,11 @@ bool AccountManager::createAccount(const PXParser::AccountObject &act) {
         addError("Error on saving account file");
         return false;
     }
-    setStatus(accountName, PXParser::AC_NONE);
+    setStatus(accountName, AC_NONE);
     return true;
 }
 
-bool AccountManager::modifyAccount(const string &accountName, const PXParser::AccountObject &act) {
+bool AccountManager::modifyAccount(const string &accountName, const AccountObject &act) {
 
     if (!verifyAccount(act)) {
         addError("Account verification failed");
@@ -77,7 +79,7 @@ bool AccountManager::modifyAccount(const string &accountName, const PXParser::Ac
         }
     }
 
-    PXParser::AccountObject oldAct;
+    AccountObject oldAct;
     if (!readAccount(accountName, &oldAct)) {
         addError("Error on reading old Account details.");
         return false;
@@ -113,7 +115,7 @@ vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, Se
 
         bool accepted = providerFilter.empty() && serviceFilter.empty();
         if (!accepted) {
-            PXParser::AccountObject act;
+            AccountObject act;
             if (PXParser::read(actName, &act)) {
 
                 for (const auto &provider : providerFilter) {
@@ -139,7 +141,7 @@ vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, Se
     return accounts;
 }
 
-bool AccountManager::readAccount(const string &accountName, PXParser::AccountObject *account) {
+bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
     if (!PXParser::read(accountName, account)) {
         addError("Error on reading account file.");
         return false;
@@ -147,13 +149,17 @@ bool AccountManager::readAccount(const string &accountName, PXParser::AccountObj
     return  true;
 }
 
-bool AccountManager::setStatus(const string &accountName, PXParser::AccountStatus stat) {
+bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
+    AccountStatus oldStat = m_statDict[accountName];
     m_statDict[accountName] = stat;
+    if (oldStat != stat) {
+        EventManager::EMIT_STATUS_CHANGE(accountName, oldStat, stat);
+    }
     return true;
 }
 
-PXParser::AccountStatus AccountManager::getStatus(const string &accountName) {
+AccountStatus AccountManager::getStatus(const string &accountName) {
     if (m_statDict.find(accountName) == m_statDict.end())
-        return PXParser::AC_NONE;
+        return AC_NONE;
     return m_statDict[accountName];
 }

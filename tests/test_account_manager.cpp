@@ -16,7 +16,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     std::string title1 = "My Test Account";
     std::string title2 = "My Edited Title";
 
-    PXParser::AccountObject newAccount, account;
+    AccountObject newAccount, account;
     newAccount.title = title1;
     newAccount.provider = "sample provider";
     newAccount.is_active = false;
@@ -36,7 +36,11 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Create New Account") {
-        REQUIRE(AccountManager::Instance().createAccount(newAccount));
+        bool createResult = AccountManager::Instance().createAccount(newAccount);
+        for (const auto& err : AccountManager::LastErrors()) {
+            WARN(err);
+        }
+        REQUIRE(createResult);
     }
 
     SECTION("Read Created Account") {
