@@ -4,6 +4,7 @@
 
 #include "EventManager.h"
 #include <capnp/serialize-packed.h>
+#include <kj/io.h>
 #include <interface/Account.capnp.h>
 
 #define IPC_DIR  "~/.userdata/events"
@@ -39,16 +40,16 @@ void EventManager::emit(string src, EventManager::EventType type, map<string, st
         Account::AccountEvent::Builder evt = message.initRoot<Account::AccountEvent>();
         evt.setSource(src);
         evt.setType((Account::EventType)type);
-        auto evParams = evt.initParams(params.size());
+        auto evParams = evt.initParams(static_cast<unsigned int>(params.size()));
         int i = 0;
         for (const auto &kv : params) {
             evParams[i].setKey(kv.first);
             evParams[i].setValue(kv.second);
             i++;
         }
-        auto data = capnp::messageToFlatArray(message).asBytes();
-        string strData(data.begin(), data.end());
-        if (nng_send(sock, (void*)strData.c_str(), strData.size() + 1, 0) != 0) {
+        kj::Array<capnp::word> words = capnp::messageToFlatArray(message);
+        kj::ArrayPtr<kj::byte> data = words.asBytes();
+        if (nng_send(sock, data.begin(), data.size(), 0) != 0) {
             perror("ng_send");
         }
     }

@@ -17,9 +17,10 @@ set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 add_executable(${TARGET_NAME}
         main.cpp
         ${UNIT_TEST_LIST})
-
+find_package(CapnProto CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME}
-        PUBLIC ${LIB_NAME})
+        PUBLIC ${LIB_NAME}
+        PRIVATE CapnProto::capnp-rpc)
 
 target_include_directories(${TARGET_NAME}
         PUBLIC ${PYTHON_INCLUDE_DIRS}

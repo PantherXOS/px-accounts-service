@@ -129,14 +129,14 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
             WARN("account list is empty");
     }
 
-    SECTION("List imap Accounts") {
+    SECTION("List test Accounts") {
         auto listReq = client.listRequest();
         auto serviceFilter = listReq.initServiceFilter(1);
-        serviceFilter.set(0, "imap");
+        serviceFilter.set(0, "test");
         auto listRes = listReq.send().wait(waitScope);
         REQUIRE(listRes.hasAccounts());
         if (listRes.getAccounts().size() == 0)
-            WARN("'imap' accounts not found");
+            WARN("'test' accounts not found");
     }
 
     SECTION("Get Account Details") {

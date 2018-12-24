@@ -2,6 +2,7 @@
 // Created by Reza Alizadeh Majd on 2018-12-23.
 //
 
+#include <cstring>
 #include <thread>
 #include <chrono>
 #include <catch2/catch.hpp>
@@ -21,15 +22,6 @@
 
 #define  IPC_PATH   "~/.userdata/events/accounts"
 
-
-/**
- * Test Procedure steps:
- * 1. Start RPCServer
- * 2. create new Account
- * 3. create  event subscriber and subscribe to EventSystem
- * 4. change account status
- * 5. wait for subscriber to receive change results
- */
 TEST_CASE("Event System Tests", "[EventSystem]") {
 
     AccountObject act;
@@ -68,30 +60,34 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         REQUIRE(nng_setopt(subSock, NNG_OPT_SUB_SUBSCRIBE, "", 0) == 0);
 
         string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
+        CAPTURE(ipcSock.c_str());
         REQUIRE(nng_dial(subSock, ipcSock.c_str(), NULL, 0) == 0);
+        INFO("DIAL finished");
 
         std::thread statThread = std::thread([&]() {
+            INFO("Client Thread");
             capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
             kj::WaitScope &waitScope = rpcClient.getWaitScope();
             AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
 
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
 
             auto setReq = client.setStatusRequest();
             setReq.setTitle(PXUTILS::ACCOUNT::title2name(act.title));
             setReq.setStat(Account::Status::ONLINE);
             setReq.send().wait(waitScope);
+            INFO("Send DONE");
         });
 
-        char *buff;
+        unsigned char *buff;
         size_t sz;
         REQUIRE(nng_recv(subSock, &buff, &sz, NNG_FLAG_ALLOC) == 0);
+        CAPTURE(sz);
 
-        capnp::word dataWords[sz];
-        std::memcpy(dataWords, buff, sz);
-        kj::ArrayPtr<capnp::word> dataWordsPtr(dataWords, dataWords + sz);
-        capnp::FlatArrayMessageReader message(dataWordsPtr);
-        Account::AccountEvent::Reader evtData = message.getRoot<Account::AccountEvent>();
+        kj::ArrayPtr<uint8_t> data(buff, sz);
+        kj::ArrayInputStream strm(data);
+        capnp::InputStreamMessageReader reader(strm);
+        Account::AccountEvent::Reader evtData = reader.getRoot<Account::AccountEvent>();
         REQUIRE(evtData.getSource().cStr() == act.title);
         REQUIRE(evtData.getType() == Account::EventType::STATUS_CHANGE);
         bool oldFound = false, newFound = false;
