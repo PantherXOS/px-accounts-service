@@ -6,11 +6,15 @@
 #include <capnp/serialize-packed.h>
 #include <interface/Account.capnp.h>
 
-#define  IPC_PATH   "~/.userdata/event/accounts"
+#define IPC_DIR  "~/.userdata/events"
+#define IPC_PATH IPC_DIR "/accounts"
+#define IPC_MKDIR_CMD "mkdir -p " IPC_DIR
 
 EventManager EventManager::_instance;
 
 EventManager::EventManager() {
+
+    system(IPC_MKDIR_CMD);
 
     int rv;
     if ((rv = nng_pub0_open(&sock)) != 0) {
@@ -18,8 +22,8 @@ EventManager::EventManager() {
         exit(EXIT_FAILURE);
     }
 
-    string ipcSock = string("ipc:") + PXUTILS::FILE::abspath(IPC_PATH);
-    if ((rv = nng_listen(sock, ipcSock.c_str(), NULL, 0)) < 0) {
+    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
+    if ((rv = nng_listen(sock, ipcSock.c_str(), NULL, 0)) != 0) {
         perror("nng_listen");
         perror(ipcSock.c_str());
         exit(EXIT_FAILURE);
