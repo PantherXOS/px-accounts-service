@@ -36,7 +36,11 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Create New Account") {
-        REQUIRE(AccountManager::Instance().createAccount(newAccount));
+        bool createResult = AccountManager::Instance().createAccount(newAccount);
+        for (const auto& err : AccountManager::LastErrors()) {
+            WARN(err);
+        }
+        REQUIRE(createResult);
     }
 
     SECTION("Read Created Account") {

@@ -50,6 +50,6 @@ if pkgutil.find_loader('PluginFramework') is not None:
 
         def authenticate(self, params):
             result = PluginFramework.AuthResult()
-            result.authenticated = False
-            result.errors.append('Method not implemented')
+            result.authenticated = True
+            result.errors.append('Sample Authentication Approved')
             return result
