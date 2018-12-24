@@ -10,7 +10,7 @@
 #ifdef __linux__
 #define PLUGIN_CMD "guix package --list-installed | grep -o '^px-accounts-service-plugin-[a-zA-Z0-9\\-]*'"
 #else
-#define PLUGIN_CMD "ls -l | grep -o 'px-accounts-service-plugin-[a-zA-Z0-9\\-]*'"
+#define PLUGIN_CMD "ls -l | grep -o 'px_accounts_service_plugin_[a-zA-Z0-9\\_]*'"
 #endif
 
 #endif
