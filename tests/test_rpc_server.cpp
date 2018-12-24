@@ -4,7 +4,6 @@
 
 //#define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
-#include <RPCServer.h>
 #include <capnp/ez-rpc.h>
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
@@ -13,21 +12,7 @@
 
 #include <RPCServer.h>
 #include <RPCHandler.h>
-#define SERVER_ADDRESS "127.0.0.1:1234"
-
-//int main(int argc, char *argv[]) {
-//
-//    RPCServer srv(SERVER_ADDRESS);
-//    srv.start();
-//
-//    int result = Catch::Session().run(argc, argv);
-//
-//    srv.stop();
-//
-//    return result;
-//}
-
-
+#include "test_common.h"
 
 
 TEST_CASE("Account Writer Tests", "[RPCServer]") {
