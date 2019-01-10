@@ -171,7 +171,7 @@ We will provide 3 types of interfaces that are available for interacting with `p
 - Public Communication Interface that is available for all modules to communicate with `px-accounts-service` using RPC.
 - Protected Communication Interface that is only available for internal Account module communications. initial design for these interfaces is as following structure:
 
-#### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/Account.capnp)
+#### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/Account.capnp)
  
 ```
 struct Account {
@@ -198,7 +198,7 @@ struct Account {
 }
 ```
 
-#### 2. Public Communication Interface. [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/AccountReader.capnp)
+#### 2. Public Communication Interface. [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/AccountReader.capnp)
 ```
 using Account = import "Account.capnp".Account;
 
@@ -211,7 +211,7 @@ interface AccountReader {
 }
 ```
 
-#### 3. Internal Communication Interface. [link](https://git.pantherx.org/development/applications/px_accounts_service/blob/master/interface/AccountWriter.capnp)
+#### 3. Internal Communication Interface. [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/AccountWriter.capnp)
 ```
 using Account = import "Account.capnp".Account;
 using AccountReader = import "AccountReader.capnp".AccountReader;
@@ -231,7 +231,7 @@ interface AccountWriter extends(AccountReader) {
 
 2. get latest version from repository using following command: 
 ```sh
-git clone https://git.pantherx.org/development/applications/px_accounts_service.git
+git clone https://git.pantherx.org/development/applications/px-accounts-service.git
 ```
 
 3. init submodules using following command:
