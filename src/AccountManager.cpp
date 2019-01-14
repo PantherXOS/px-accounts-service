@@ -40,7 +40,15 @@ bool AccountManager::verifyAccount(const AccountObject &act) {
         if (PluginManager::Instance().exists(kv.first)) {
             auto vResult = PluginManager::Instance()[kv.first].verify(kv.second);
             verified &= vResult.verified;
+
+            if (verified) {
+                auto authResult = PluginManager::Instance()[kv.first].authenticate(vResult.params);
+                verified &= authResult.authenticated;
+            }
+
         } else {
+            string err = "unknown service: " + kv.first;
+            addError(err);
             verified = false;
         }
     }
