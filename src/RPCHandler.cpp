@@ -43,7 +43,11 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
 
     auto title = ctx.getParams().getTitle().cStr();
     AccountObject actObj;
-    KJ_ASSERT(AccountManager::Instance().readAccount(title, &actObj), "Account not found");
+    bool res = AccountManager::Instance().readAccount(title, &actObj);
+    for (const auto &err : AccountManager::LastErrors()) {
+        KJ_DBG(err);
+    }
+    KJ_ASSERT(res, "Account not found");
 
     auto account = ctx.getResults().initAccount();
     account.setTitle(actObj.title);
@@ -81,8 +85,11 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
 
     auto title = ctx.getParams().getTitle().cStr();
     auto stat = (AccountStatus)ctx.getParams().getStat();
-
-    KJ_ASSERT(AccountManager::Instance().setStatus(title, stat), "set account status failed");
+    bool res = AccountManager::Instance().setStatus(title, stat);
+    for (const auto &err : AccountManager::LastErrors()) {
+        KJ_DBG(err);
+    }
+    KJ_ASSERT(res, "set account status failed");
     ctx.getResults().setResult(true);
 
     return kj::READY_NOW;
@@ -107,7 +114,11 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
-    KJ_ASSERT(AccountManager::Instance().createAccount(account), "Create new account failed.");
+    bool res = AccountManager::Instance().createAccount(account);
+    for (const auto &err : AccountManager::LastErrors()) {
+        KJ_DBG(err);
+    }
+    KJ_ASSERT(res, "Create new account failed.");
     ctx.getResults().setResult(true);
 
     return kj::READY_NOW;
@@ -122,8 +133,11 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
     auto rpcAccount = ctx.getParams().getAccount();
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
-
-    KJ_ASSERT(AccountManager::Instance().modifyAccount(title, account), "Modify Existing Account failed.");
+    bool res = AccountManager::Instance().modifyAccount(title, account);
+    for (const auto &err : AccountManager::LastErrors()) {
+        KJ_DBG(err);
+    }
+    KJ_ASSERT(res, "Modify Existing Account failed.");
     ctx.getResults().setResult(true);
 
     return kj::READY_NOW;
@@ -134,7 +148,11 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    KJ_ASSERT(AccountManager::Instance().deleteAccount(title), "Remove Account Failed");
+    bool res = AccountManager::Instance().deleteAccount(title);
+    for (const auto &err : AccountManager::LastErrors()) {
+        KJ_DBG(err);
+    }
+    KJ_ASSERT(res, "Remove Account Failed");
     ctx.getResults().setResult(true);
 
     return  kj::READY_NOW;

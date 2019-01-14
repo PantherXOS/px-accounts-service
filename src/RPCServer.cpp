@@ -49,7 +49,6 @@ void RPCServer::start() {
             }
         }, this);
     }
-
 }
 
 void RPCServer::stop() {
