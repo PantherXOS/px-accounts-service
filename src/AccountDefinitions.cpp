@@ -4,7 +4,7 @@
 
 #include "AccountDefinitions.h"
 
-map<AccountStatus, string> AccounrStatusString = {
+map<AccountStatus, string> AccountStatusString = {
         { AC_NONE,    "NONE" },
         { AC_ONLINE,  "ONLINE" },
         { AC_OFFLINE, "OFFLINE" },

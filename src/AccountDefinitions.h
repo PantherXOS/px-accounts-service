@@ -27,6 +27,6 @@ enum AccountStatus {
     AC_OFFLINE,
     AC_ERROR
 };
-extern map<AccountStatus, string> AccounrStatusString;
+extern map<AccountStatus, string> AccountStatusString;
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTDEFINITIONS_H

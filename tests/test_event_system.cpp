@@ -93,11 +93,11 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         bool oldFound = false, newFound = false;
         for (const auto &param : evtData.getParams()) {
             if (param.getKey().cStr() == string("old")) {
-                REQUIRE(param.getValue().cStr() == AccounrStatusString[AC_NONE]);
+                REQUIRE(param.getValue().cStr() == AccountStatusString[AC_NONE]);
                 oldFound = true;
             }
             if (param.getKey().cStr() == string("new")) {
-                REQUIRE(param.getValue().cStr() == AccounrStatusString[AC_ONLINE]);
+                REQUIRE(param.getValue().cStr() == AccountStatusString[AC_ONLINE]);
                 newFound = true;
             }
         }

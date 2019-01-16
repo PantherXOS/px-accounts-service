@@ -61,7 +61,7 @@ EventManager &EventManager::Instance() {
 
 void EventManager::EMIT_STATUS_CHANGE(string src, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["old"] = AccounrStatusString[from];
-    params["new"] = AccounrStatusString[to];
+    params["old"] = AccountStatusString[from];
+    params["new"] = AccountStatusString[to];
     _instance.emit(src, ACCOUNT_STATUS_CHANGE, params);
 }
