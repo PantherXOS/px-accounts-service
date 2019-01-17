@@ -73,7 +73,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 
 bool AccountManager::verifyAccountService(const string &svcName, const map<string, string> &params) {
 
-    if (PluginManager::Instance().exists(svcName)) {
+    if (!PluginManager::Instance().exists(svcName)) {
         addError(string("unknown service '") + svcName + string("'"));
         return false;
     }
