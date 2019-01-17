@@ -10,14 +10,13 @@
 #include <vector>
 using namespace std;
 
+#include "AccountDefinitions.h"
+
 #include <pybind11/embed.h>
 #include <pybind11/stl_bind.h>
 namespace py = pybind11;
 using namespace py::literals;
 
-
-typedef vector<string> StringList;
-typedef map<string, string> StrStrMap;
 
 struct ServiceParam {
     string key;

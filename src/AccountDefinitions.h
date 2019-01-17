@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 #include <map>
-
+#include <vector>
 using namespace std;
 
 
@@ -28,5 +28,8 @@ enum AccountStatus {
     AC_ERROR
 };
 extern map<AccountStatus, string> AccountStatusString;
+
+typedef vector<string> StringList;
+typedef map<string, string> StrStrMap;
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTDEFINITIONS_H

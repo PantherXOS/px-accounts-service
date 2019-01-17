@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "AccountUtils.h"
 #include "PluginManager.h"
+#include "ProviderHandler.h"
 #include "EventManager.h"
 
 AccountManager AccountManager::_instance;
@@ -28,7 +29,7 @@ void AccountManager::addError(const string &msg) {
     m_errorList.push_back(msg);
 }
 
-bool AccountManager::verifyAccount(const AccountObject &act) {
+bool AccountManager::verifyAccount(AccountObject &act) {
 
     if (act.title.empty()) {
         addError("'title' is required");
@@ -36,7 +37,9 @@ bool AccountManager::verifyAccount(const AccountObject &act) {
     }
 
     if (!act.provider.empty()) {
-        return verifyAccountProvider(act);
+        if (!updateProviderRelatedParams(act)) {
+            return false;
+        }
     }
 
     bool verified = true;
@@ -46,8 +49,25 @@ bool AccountManager::verifyAccount(const AccountObject &act) {
     return verified;
 }
 
-bool AccountManager::verifyAccountProvider(const AccountObject &act) {
-    addError("verifyAccountProvider method is not implemented.");
+bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
+
+    if (!ProviderHandler::Instance().exists(act.provider)) {
+        addError(string("unknown provider: '") + act.provider + string("'"));
+        return false;
+    }
+
+    bool verified = true;
+    ProviderStruct &provider = ProviderHandler::Instance()[act.provider];
+    for (const auto &plg : provider.plugins) {
+        const string &plgName = plg.first;
+        const auto &plgParams = plg.second;
+
+        for (const auto &prm : plgParams) {
+            const auto &pkey = prm.first;
+            const auto &pval = prm.second;
+            act.services[plgName][pkey] = pval;
+        }
+    }
     return true;
 }
 
@@ -78,7 +98,7 @@ bool AccountManager::verifyAccountService(const string &svcName, const map<strin
     return true;
 }
 
-bool AccountManager::createAccount(const AccountObject &act) {
+bool AccountManager::createAccount(AccountObject &act) {
     if (!verifyAccount(act)) {
         addError("Account verification failed");
         return false;
@@ -92,7 +112,7 @@ bool AccountManager::createAccount(const AccountObject &act) {
     return true;
 }
 
-bool AccountManager::modifyAccount(const string &accountName, const AccountObject &act) {
+bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
 
     if (!verifyAccount(act)) {
         addError("Account verification failed");

@@ -39,6 +39,7 @@ add_library(${LIB_NAME}
         AccountParser.cpp
         PluginContainer.cpp
         PluginManager.cpp
+        ProviderHandler.cpp
         EventManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
                                   PRIVATE nng::nng)
