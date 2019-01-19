@@ -1,7 +1,7 @@
 ---
 provider:
   title: test_provider
-  services:
+  plugins:
     - test:
         k1: provider_val1
         k3: provider_val3

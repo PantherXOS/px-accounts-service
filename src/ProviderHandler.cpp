@@ -8,7 +8,7 @@
 
 #define PROVIDER_KEY          "provider"
 #define PROVIDER_KEY_TITLE    "title"
-#define PROVIDER_KEY_SERVICES "services"
+#define PROVIDER_KEY_PLUGINS "plugins"
 
 
 ProviderHandler ProviderHandler::_instance;
@@ -49,7 +49,7 @@ bool ProviderHandler::initProvider(string providerPath) {
         YAML::Node root = YAML::LoadFile(providerPath);
         provider.title = root[PROVIDER_KEY][PROVIDER_KEY_TITLE].as<string>();
 
-        for (const auto &it : root[PROVIDER_KEY][PROVIDER_KEY_SERVICES]) {
+        for (const auto &it : root[PROVIDER_KEY][PROVIDER_KEY_PLUGINS]) {
             for (const auto &svc : it) {
                 string svcName = svc.first.as<string>();
                 const YAML::Node &params = svc.second;
