@@ -8,3 +8,8 @@ set(EXE_NAME ${PROJECT_NAME})
 
 add_subdirectory(src)
 add_subdirectory(tests)
+
+file (COPY providers DESTINATION ${CMAKE_BINARY_DIR}/src/)
+file (COPY providers DESTINATION ${CMAKE_BINARY_DIR}/tests/)
+file (COPY px_accounts_service_plugin_test.py DESTINATION ${CMAKE_BINARY_DIR}/src/)
+file (COPY px_accounts_service_plugin_test.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
