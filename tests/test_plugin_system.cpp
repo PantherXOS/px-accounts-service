@@ -12,25 +12,45 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
 
     auto &mgr = PluginManager::Instance();
 
-    REQUIRE(mgr.plugins().size() > 0);
+    SECTION("Check Loaded Plugins") {
 
-    for (auto &kv : mgr.plugins()) {
-        auto & plugin = kv.second;
+        REQUIRE(mgr.plugins().size() > 0);
+        REQUIRE(mgr.exists("test"));
+    }
 
-        REQUIRE(kv.first == plugin.getTitle());
+    SECTION("Check verify Method") {
+
+        REQUIRE(mgr.exists("test"));
 
         StrStrMap params;
         params["k1"] = "v1";
 
-        auto vResult = plugin.verify(params);
+        auto vResult = mgr["test"].verify(params);
         REQUIRE_FALSE(vResult.verified);
         CAPTURE(vResult.errors);
         REQUIRE(vResult.errors[0] == string("Param 'k2' is required"));
 
         params["k2"] = "v2";
-        vResult = plugin.verify(params);
+        vResult = mgr["test"].verify(params);
         REQUIRE(vResult.verified);
         CAPTURE(vResult.errors);
-        REQUIRE(vResult.errors.size() == 0);
+        REQUIRE(vResult.errors.empty());
+    }
+
+    SECTION("Check authenticate method.") {
+        REQUIRE(mgr.exists("test"));
+
+        StrStrMap params;
+        params["k1"] = "v1";
+        params["k2"] = "v2";
+        auto vResult = mgr["test"].verify(params);
+        REQUIRE(vResult.verified);
+        CAPTURE(vResult.errors);
+        REQUIRE(vResult.errors.empty());
+
+        auto authResult = mgr["test"].authenticate(vResult.params);
+        REQUIRE(authResult.authenticated);
+        CAPTURE(authResult.errors);
+        REQUIRE(authResult.errors.empty());
     }
 }

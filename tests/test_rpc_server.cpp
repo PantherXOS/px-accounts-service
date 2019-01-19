@@ -22,7 +22,6 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     AccountObject act;
     act.title = title1;
-    act.provider = "sample provider";
     act.is_active = false;
 
     act.settings["first key"] = "first value";

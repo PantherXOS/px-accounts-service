@@ -15,10 +15,10 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
     std::string title1 = "My Test Account";
     std::string title2 = "My Edited Title";
+    std::string title3 = "Test Provider Account";
 
     AccountObject newAccount, account;
     newAccount.title = title1;
-    newAccount.provider = "sample provider";
     newAccount.is_active = false;
 
     newAccount.settings["first key"] = "first value";
@@ -33,6 +33,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     SECTION("Cleanup Old Test files") {
         REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title1)));
         REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title2)));
+        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title3)));
     }
 
     SECTION("Create New Account") {
@@ -82,5 +83,32 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     SECTION("Delete Account") {
         accountName = PXUTILS::ACCOUNT::title2name(title2);
         REQUIRE(AccountManager::Instance().deleteAccount(accountName));
+    }
+
+    SECTION("Create Account with Provider") {
+        AccountObject providerAccount;
+        providerAccount.title = title3;
+        providerAccount.provider = "test_provider";
+        providerAccount.services["test"]["k2"] = "v2";
+
+        bool createResult = AccountManager::Instance().createAccount(providerAccount);
+        for (const auto& err : AccountManager::LastErrors()) {
+            WARN(err);
+        }
+        REQUIRE(createResult);
+
+        string providerActName = PXUTILS::ACCOUNT::title2name(title3);
+        REQUIRE(AccountManager::Instance().readAccount(providerActName, &account));
+        REQUIRE(providerAccount.provider == account.provider);
+        REQUIRE(EXISTS(providerAccount.services, "test"));
+        REQUIRE(EXISTS(providerAccount.services["test"], "k1"));
+        REQUIRE(EXISTS(providerAccount.services["test"], "k2"));
+        REQUIRE(EXISTS(providerAccount.services["test"], "k3"));
+
+        REQUIRE(providerAccount.services["test"]["k1"] == "provider_val1");
+        REQUIRE(providerAccount.services["test"]["k2"] == "v2");
+        REQUIRE(providerAccount.services["test"]["k3"] == "provider_val3");
+
+        REQUIRE(AccountManager::Instance().deleteAccount(providerActName));
     }
 }

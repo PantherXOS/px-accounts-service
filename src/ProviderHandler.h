@@ -9,11 +9,17 @@
 #include "AccountDefinitions.h"
 
 #ifdef __linux__
+
+#ifndef PROVIDER_STORE_PATH
 #define PROVIDER_STORE_PATH "~/.guix-profile/etc/accounts/providers/"
+#endif
 #define PROVIDER_USER_PATH  "~/.userdata/accounts/providers/"
+
 #else
+
 #define PROVIDER_STORE_PATH "./providers/"
 #define PROVIDER_USER_PATH  "~/.userdata/accounts/providers/"
+
 #endif
 
 
