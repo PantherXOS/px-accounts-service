@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define EXISTS(m, v) (m.find(v) != m.end())
+
 namespace PXUTILS {
 
     namespace ACCOUNT {

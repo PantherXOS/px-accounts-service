@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "AccountUtils.h"
 #include "PluginManager.h"
+#include "ProviderHandler.h"
 #include "EventManager.h"
 
 AccountManager AccountManager::_instance;
@@ -28,34 +29,76 @@ void AccountManager::addError(const string &msg) {
     m_errorList.push_back(msg);
 }
 
-bool AccountManager::verifyAccount(const AccountObject &act) {
+bool AccountManager::verifyAccount(AccountObject &act) {
 
     if (act.title.empty()) {
         addError("'title' is required");
         return false;
     }
 
+    if (!act.provider.empty()) {
+        if (!updateProviderRelatedParams(act)) {
+            return false;
+        }
+    }
+
     bool verified = true;
     for (const auto &kv : act.services) {
-        if (PluginManager::Instance().exists(kv.first)) {
-            auto vResult = PluginManager::Instance()[kv.first].verify(kv.second);
-            verified &= vResult.verified;
-
-            if (verified) {
-                auto authResult = PluginManager::Instance()[kv.first].authenticate(vResult.params);
-                verified &= authResult.authenticated;
-            }
-
-        } else {
-            string err = "unknown service: " + kv.first;
-            addError(err);
-            verified = false;
-        }
+        verified &= verifyAccountService(kv.first, kv.second);
     }
     return verified;
 }
 
-bool AccountManager::createAccount(const AccountObject &act) {
+bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
+
+    if (!ProviderHandler::Instance().exists(act.provider)) {
+        addError(string("unknown provider: '") + act.provider + string("'"));
+        return false;
+    }
+
+    bool verified = true;
+    ProviderStruct &provider = ProviderHandler::Instance()[act.provider];
+    for (const auto &plg : provider.plugins) {
+        const string &plgName = plg.first;
+        const auto &plgParams = plg.second;
+
+        for (const auto &prm : plgParams) {
+            const auto &pkey = prm.first;
+            const auto &pval = prm.second;
+            act.services[plgName][pkey] = pval;
+        }
+    }
+    return true;
+}
+
+bool AccountManager::verifyAccountService(const string &svcName, const map<string, string> &params) {
+
+    if (!PluginManager::Instance().exists(svcName)) {
+        addError(string("unknown service '") + svcName + string("'"));
+        return false;
+    }
+
+    PluginContainer &svcPlugin = PluginManager::Instance()[svcName];
+    auto verifyResult = svcPlugin.verify(params);
+    if (!verifyResult.verified) {
+        for (const auto &err : verifyResult.errors) {
+            addError(err);
+        }
+        return false;
+    }
+
+    auto authResult = svcPlugin.authenticate(verifyResult.params);
+    if (!authResult.authenticated) {
+        for (const auto &err : authResult.errors) {
+            addError(err);
+        }
+        return false;
+    }
+    //todo: after successful authentication, we need to save protected params to px-pass-service
+    return true;
+}
+
+bool AccountManager::createAccount(AccountObject &act) {
     if (!verifyAccount(act)) {
         addError("Account verification failed");
         return false;
@@ -69,7 +112,7 @@ bool AccountManager::createAccount(const AccountObject &act) {
     return true;
 }
 
-bool AccountManager::modifyAccount(const string &accountName, const AccountObject &act) {
+bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
 
     if (!verifyAccount(act)) {
         addError("Account verification failed");

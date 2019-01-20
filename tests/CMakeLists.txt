@@ -4,11 +4,10 @@ set(UNIT_TEST_LIST
         test_account_manager.cpp
         test_rpc_server.cpp
         test_plugin_system.cpp
+        test_providers.cpp
         test_event_system.cpp)
 
 set(TARGET_NAME tests)
-
-configure_file(px_accounts_service_plugin_test.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 find_package(PythonLibs REQUIRED)
 

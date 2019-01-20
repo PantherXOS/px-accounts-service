@@ -21,14 +21,17 @@ protected:
 
     void addError(const string &msg);
 
-    bool verifyAccount(const AccountObject &act);
+    bool verifyAccount(AccountObject &act);
+
+    bool updateProviderRelatedParams(AccountObject &act);
+    bool verifyAccountService(const string& svcName, const map<string, string> &params);
 
 
 public:
 
-    bool createAccount(const AccountObject &act);
+    bool createAccount(AccountObject &act);
 
-    bool modifyAccount(const string &accountName, const AccountObject &act);
+    bool modifyAccount(const string &accountName, AccountObject &act);
 
     bool deleteAccount(const string &accountName);
 

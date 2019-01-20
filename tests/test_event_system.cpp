@@ -26,7 +26,6 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
 
     AccountObject act;
     act.title = "event_test_account";
-    act.provider = "sample provider";
     act.is_active = true;
     act.services["test"]["k1"] = "v1";
     act.services["test"]["k2"] = "v2";

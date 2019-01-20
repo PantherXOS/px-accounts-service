@@ -39,12 +39,11 @@ add_library(${LIB_NAME}
         AccountParser.cpp
         PluginContainer.cpp
         PluginManager.cpp
+        ProviderHandler.cpp
         EventManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
                                   PRIVATE nng::nng)
 install(TARGETS ${LIB_NAME} DESTINATION lib)
-configure_file(px-accounts-service-plugin-sample.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-configure_file(px_accounts_service_plugin_test.py ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable(${EXE_NAME} main.cpp)
 target_link_libraries(${EXE_NAME} ${LIB_NAME})
