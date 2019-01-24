@@ -11,14 +11,15 @@
 #include <vector>
 using namespace std;
 
+typedef vector<string> StringList;
+typedef map<string, string> StrStrMap;
 
 struct AccountObject {
-    typedef map<string, string> ParamDict;
     string title;
     string provider;
     bool is_active;
-    ParamDict settings;
-    map<string, ParamDict> services;
+    StrStrMap settings;
+    map<string, StrStrMap> services;
 };
 
 enum AccountStatus {
@@ -29,7 +30,5 @@ enum AccountStatus {
 };
 extern map<AccountStatus, string> AccountStatusString;
 
-typedef vector<string> StringList;
-typedef map<string, string> StrStrMap;
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTDEFINITIONS_H

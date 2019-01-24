@@ -33,14 +33,13 @@ void RPCServer::start() {
         tServer = std::thread([](void* param){
             auto instance = static_cast<RPCServer*>(param);
 
-            kj::AsyncIoContext asyncIO = kj::setupAsyncIo();
-            auto &waitScope = asyncIO.waitScope;
-            auto &ioProvider = *asyncIO.provider;
-            auto &network = ioProvider.getNetwork();
+            kj::AsyncIoContext ctx = kj::setupAsyncIo();
+            auto &waitScope = ctx.waitScope;
+            auto &network = ctx.provider->getNetwork();
             auto addr = network.parseAddress(instance->address).wait(waitScope);
-            auto listner = addr->listen();
+            auto listener = addr->listen();
             capnp::TwoPartyServer server(kj::heap<RPCHandler>());
-            auto serverPromise = server.listen(*listner);
+            auto serverPromise = server.listen(*listener);
 
             instance->isRunning = true;
 

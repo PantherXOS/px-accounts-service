@@ -31,6 +31,9 @@ struct VerifyResult {
     bool             verified;
     ServiceParamList params;
     StringList       errors;
+
+    VerifyResult(): verified(false) {
+    }
 };
 
 

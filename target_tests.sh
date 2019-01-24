@@ -14,7 +14,7 @@ CMD="$CMD;
      make;
      echo '#####################################################################################';
      cd tests/;
-     ./tests;
+     ./tests 'Account Management Tasks';
      "
 
 ssh root@127.0.0.1 -p 2222 $CMD

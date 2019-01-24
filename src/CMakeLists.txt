@@ -17,7 +17,9 @@ file(MAKE_DIRECTORY "${CAPNPC_OUTPUT_DIR}")
 capnp_generate_cpp(accountSources accountHeaders
                 ${INTERFACE_DIR}/Account.capnp
                 ${INTERFACE_DIR}/AccountReader.capnp
-                ${INTERFACE_DIR}/AccountWriter.capnp)
+                ${INTERFACE_DIR}/AccountWriter.capnp
+                ${INTERFACE_DIR}/password/interface.capnp
+                ${INTERFACE_DIR}/password/passwordbook.capnp)
 
 include_directories(${CapnProto_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
@@ -40,6 +42,7 @@ add_library(${LIB_NAME}
         PluginContainer.cpp
         PluginManager.cpp
         ProviderHandler.cpp
+        PasswordHandler.cpp
         EventManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
                                   PRIVATE nng::nng)
