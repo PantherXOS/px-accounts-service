@@ -34,6 +34,7 @@ set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 add_library(${LIB_NAME}
         ${accountSources} ${accountHeaders}
         RPCServer.cpp
+        RPCClient.cpp
         RPCHandler.cpp
         AccountDefinitions.cpp
         AccountManager.cpp
