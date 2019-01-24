@@ -39,7 +39,7 @@ struct VerifyResult {
 
 struct AuthResult {
     bool       authenticated;
-    StrStrMap   tokens;
+    StrStrMap  tokens;
     StringList errors;
 };
 
