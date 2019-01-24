@@ -5,12 +5,10 @@
 #ifndef PX_ACCOUNTS_SERVICE_PASSWORDHANDLER_H
 #define PX_ACCOUNTS_SERVICE_PASSWORDHANDLER_H
 
-#include "AccountDefinitions.h"
 #include <iostream>
-#include <kj/async-unix.h>
-#include <capnp/rpc-twoparty.h>
-//#include <capnp/ez-rpc.h>
-#include <interface/password/interface.capnp.h>
+#include "AccountDefinitions.h"
+#include "RPCClient.h"
+#include "interface/password/interface.capnp.h"
 
 using namespace std;
 
@@ -47,18 +45,19 @@ public:
     bool set(string act, string svc, string key, string val);
     PasswordStruct get(string act, string svc, string key);
 
+
+protected:
+    bool isRegistered();
+    bool registerToPassService(string userPass);
+
 protected:
     inline static string MAKE_USERNAME(const string &svc, const string &key) { return svc + string("_") + key; }
+
 
 private:
     static PasswordHandler _instance;
 
-    std::string _rpcPath;
-
-//    kj::AsyncIoContext*            _ctx;
-//    kj::Own<capnp::TwoPartyClient> _rpcClient;
-//    PasswordInterface::Client      _client;
-
+    RPCClient<PasswordInterface, PasswordInterface::Client> _rpcClient;
 };
 
 
