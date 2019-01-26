@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <thread>
+#include <chrono>
 #include <functional>
 
 using namespace std;
@@ -16,14 +17,25 @@ using namespace std;
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
 
+#define EXEC_INTERVAL 1000
+
 template <typename TBase, typename TClient>
 class RPCClient {
 
 public:
-    explicit RPCClient(const string &path) : rpcPath(string("unix:") + path) {
+    explicit RPCClient(const string &path) : rpcPath(path) {
     }
 
     void performRequest(std::function<void(kj::AsyncIoContext& ctx, TClient &client)> func) {
+        std::cout << "request ... ";
+
+        // check for timeout between password requests.
+        // todo: need to find a way to automatically handle this issue.
+        auto  elapsedDuration = chrono::high_resolution_clock::now()  - lastExec;
+        auto elapsedMS = chrono::duration_cast<chrono::milliseconds>(elapsedDuration).count();
+        if (elapsedMS < EXEC_INTERVAL) {
+            std::this_thread::sleep_for(chrono::milliseconds(EXEC_INTERVAL - elapsedMS));
+        }
 
         auto thClient = std::thread([&]() {
             auto ctx = kj::setupAsyncIo();
@@ -34,10 +46,13 @@ public:
             func(ctx, client);
         });
         thClient.join();
+        lastExec = chrono::high_resolution_clock::now();
+        std::cout << "> done." << std::endl;
     }
 
 protected:
     string rpcPath;
+    chrono::high_resolution_clock::time_point lastExec;
 
 };
 

@@ -9,12 +9,15 @@ rsync -av -e "ssh -p 2222" --exclude ".git" --exclude "cmake-build-debug" --excl
 CMD='export GUILE_LOAD_PATH=$GUILE_LOAD_PATH:.'
 CMD="$CMD;
      cd $TARGET_PATH;
-     mkdir -p build && cd build;
+     mkdir -p build && cd build ;
      cmake ..;
-     make;
-     echo '#####################################################################################';
-     cd tests/;
+     make &&
+     echo '#####################################################################################' &&
+     cd tests/ &&
      ./tests 'Account Management Tasks';
+
+#     cd src/ &&
+#     ./px-accounts-service ;
      "
 
 ssh root@127.0.0.1 -p 2222 $CMD

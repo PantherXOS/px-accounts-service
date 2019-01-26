@@ -12,6 +12,8 @@
 
 int main(int argc, char *argv[]) {
 
+    setvbuf( stdout, NULL, _IONBF, 0 );
+
     RPCServer srv(SERVER_ADDRESS);
     srv.start();
 

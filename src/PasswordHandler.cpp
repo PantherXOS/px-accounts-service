@@ -15,6 +15,8 @@ PasswordHandler::PasswordHandler() : _rpcClient(string("unix:") + PXUTILS::FILE:
 
     if (!isRegistered()) {
         registerToPassService("123");
+    } else {
+        std::cout << "> account service is already registered" << std::endl;
     }
 
 }
@@ -37,6 +39,7 @@ bool PasswordHandler::isRegistered() {
         errCode = resp.getErrorCode();
         errText = resp.getErrorText();
     });
+    std::cout << "[" << __func__ << "] " << registered << " - " << errCode << " - " << errText << std::endl;
     if (!registered) {
         addError(errText);
     }
@@ -57,6 +60,7 @@ bool PasswordHandler::registerToPassService(string userPass) {
         errCode = resp.getErrorCode();
         errText = resp.getErrorText();
     });
+    std::cout << "[" << __func__ << "] " << errCode << " - " << errText << std::endl;
     if (errCode != 0) {
         addError(errText);
         return false;
@@ -84,6 +88,7 @@ bool PasswordHandler::set(string act, string svc, string key, string val) {
         errCode   = resp.getErrorCode();
         errText   = resp.getErrorText().cStr();
     });
+    std::cout << "[" << __func__ << "] " << errCode << " - " << errText << std::endl;
 
     if (errCode != 0) {
         addError(errText);
