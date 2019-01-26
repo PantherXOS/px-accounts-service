@@ -44,7 +44,6 @@ bool AccountManager::verifyAccount(AccountObject &act) {
     }
 
     bool verified = true;
-    map<string, VerifyResult> verificationMap;
     for (const auto &kv : act.services) {
         verified &= verifyAccountService(act, kv.first);
     }
@@ -80,14 +79,16 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         return false;
     }
 
+    AccountService &curService = act.services[svcName];
     PluginContainer &svcPlugin = PluginManager::Instance()[svcName];
-    auto verifyResult = svcPlugin.verify(act.services[svcName]);
+    auto verifyResult = svcPlugin.verify(curService);
     if (!verifyResult.verified) {
         for (const auto &err : verifyResult.errors) {
             addError(err);
         }
         return false;
     }
+    curService.applyVerification(verifyResult.params);
 
     auto authResult = svcPlugin.authenticate(verifyResult.params);
     if (!authResult.authenticated) {
@@ -106,7 +107,6 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             }
         }
     }
-
 
     return true;
 }

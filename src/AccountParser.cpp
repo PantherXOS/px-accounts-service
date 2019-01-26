@@ -84,12 +84,19 @@ bool PXParser::write(const string &acName, const AccountObject &ac) {
                         for (const auto &kv : ac.services) {
                             emitter << YAML::BeginMap;
                             {
-                                emitter << YAML::Key << kv.first;
+                                const auto &svcName = kv.first;
+                                const auto &svc = kv.second;
+
+                                emitter << YAML::Key << svcName;
                                 emitter << YAML::Value << YAML::BeginMap;
                                 {
-                                    for (const auto &p : kv.second) {
-                                        emitter << YAML::Key << p.first;
-                                        emitter << YAML::Value << p.second;
+                                    for (const auto &p : svc) {
+                                        const auto &key = p.first;
+                                        const auto &val = p.second;
+                                        if (!svc.isProtected(key)) {
+                                            emitter << YAML::Key << key;
+                                            emitter << YAML::Value << val;
+                                        }
                                     }
                                 }
                                 emitter << YAML::EndMap;
