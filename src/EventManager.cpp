@@ -23,7 +23,14 @@ EventManager::EventManager() {
         exit(EXIT_FAILURE);
     }
 
-    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
+    string ipcFullPath = PXUTILS::FILE::abspath(IPC_PATH);
+    if (PXUTILS::FILE::exists(ipcFullPath)) {
+        PXUTILS::FILE::remove(ipcFullPath);
+    }
+
+    string ipcSock = string("ipc://") + ipcFullPath;
+
+//    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
     if ((rv = nng_listen(sock, ipcSock.c_str(), NULL, 0)) != 0) {
         perror("nng_listen");
         perror(ipcSock.c_str());
