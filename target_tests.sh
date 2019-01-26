@@ -14,7 +14,8 @@ CMD="$CMD;
      make &&
      echo '#####################################################################################' &&
      cd tests/ &&
-     ./tests 'Account Management Tasks';
+     ./tests;
+#     ./tests 'Account Management Tasks';
 
 #     cd src/ &&
 #     ./px-accounts-service ;
