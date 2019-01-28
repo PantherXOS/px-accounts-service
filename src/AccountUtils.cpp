@@ -116,5 +116,5 @@ string PXUTILS::PATH::unix2path(const string &upath) {
     if (isunix(upath)) {
         path.replace(0, strlen(UNIX_PATH_HEADER), "");
     }
-    return upath;
+    return path;
 }
