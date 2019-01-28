@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-    PasswordHandler::Init(PASSWORD_SIMULATOR_PATH);
+    PasswordHandler::Init(PASSWORD_SIMULATOR_PATH, "123");
 
     RPCServer<RPCHandler> srv(SERVER_ADDRESS);
     srv.start();

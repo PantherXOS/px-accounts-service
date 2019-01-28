@@ -50,5 +50,6 @@ target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
 install(TARGETS ${LIB_NAME} DESTINATION lib)
 
 add_executable(${EXE_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC ../vendor/)
 target_link_libraries(${EXE_NAME} ${LIB_NAME})
 install(TARGETS ${EXE_NAME} DESTINATION bin)

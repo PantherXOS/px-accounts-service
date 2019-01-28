@@ -40,7 +40,7 @@ protected:
 public:
     static PasswordHandler &Instance();
     inline static const StringList & LastErrors() { return _instance.ErrorList(); }
-    static bool Init(const string &addr);
+    static bool Init(const string &addr, const string &userPass);
     ~PasswordHandler();
 
     bool set(string act, string svc, string key, string val);

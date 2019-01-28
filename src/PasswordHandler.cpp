@@ -14,10 +14,10 @@ PasswordHandler &PasswordHandler::Instance() {
     return PasswordHandler::_instance;
 }
 
-bool PasswordHandler::Init(const string &addr) {
+bool PasswordHandler::Init(const string &addr, const string &userPass) {
     _instance.m_rpcClient = new RPCClient<PasswordInterface, PasswordInterface::Client>(addr);
     if (!_instance.isRegistered()) {
-        _instance.registerToPassService("123");
+        _instance.registerToPassService(userPass);
     } else {
         std::cout << "> account service is already registered" << std::endl;
     }

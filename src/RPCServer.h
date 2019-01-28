@@ -15,11 +15,18 @@
 
 
 
-template <class T>
+template <class HNDLR>
 class RPCServer {
 
 public:
-    explicit RPCServer(std::string addr) : address(std::move(addr)) {}
+    explicit RPCServer(std::string addr) : address(std::move(addr)) {
+        if (PXUTILS::PATH::isunix(address)) {
+            string rpcPath = PXUTILS::PATH::unix2path(address);
+            if (PXUTILS::FILE::exists(rpcPath)) {
+                PXUTILS::FILE::remove(rpcPath);
+            }
+        }
+    }
 
 public:
     void start() {
@@ -32,7 +39,7 @@ public:
                 auto &network = ctx.provider->getNetwork();
                 auto addr = network.parseAddress(instance->address).wait(waitScope);
                 auto listener = addr->listen();
-                capnp::TwoPartyServer server(kj::heap<T>());
+                capnp::TwoPartyServer server(kj::heap<HNDLR>());
                 auto serverPromise = server.listen(*listener);
 
                 instance->isRunning = true;
@@ -43,12 +50,14 @@ public:
             }, this);
         }
     }
+
     void stop() {
         if (isRunning) {
             isRunning = false;
             tServer.join();
         }
     }
+
     void restart() {
         stop();
         start();
