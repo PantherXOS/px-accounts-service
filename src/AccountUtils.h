@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#define EXISTS(m, v) (m.find(v) != m.end())
+#define EXISTS(m, v) ((m).find((v)) != (m).end())
 
 namespace PXUTILS {
 
@@ -26,6 +26,8 @@ namespace PXUTILS {
     {
         string abspath(const string &path);
 
+        string basedir(const string &path);
+
         vector<string> dirfiles(const string &path, string ext);
 
         string extpart(const string &fname);
@@ -37,7 +39,12 @@ namespace PXUTILS {
         bool write(const string &path, const string &data);
     }
 
+    namespace PATH
+    {
+        bool isunix(const string &path);
 
+        string unix2path(const string &upath);
+    }
 }
 
 

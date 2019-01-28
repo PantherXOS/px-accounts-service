@@ -35,12 +35,13 @@ struct PasswordStruct {
 class PasswordHandler : public ErrorReporter {
 
 protected:
-    explicit PasswordHandler();
+    explicit PasswordHandler() = default;
 
 public:
     static PasswordHandler &Instance();
     inline static const StringList & LastErrors() { return _instance.ErrorList(); }
-    ~PasswordHandler() = default;
+    static bool Init(const string &addr);
+    ~PasswordHandler();
 
     bool set(string act, string svc, string key, string val);
     PasswordStruct get(string act, string svc, string key);
@@ -56,8 +57,9 @@ protected:
 
 private:
     static PasswordHandler _instance;
+    static bool _inited;
 
-    RPCClient<PasswordInterface, PasswordInterface::Client> _rpcClient;
+    RPCClient<PasswordInterface, PasswordInterface::Client> *m_rpcClient = nullptr;
 };
 
 

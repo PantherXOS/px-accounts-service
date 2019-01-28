@@ -4,8 +4,8 @@
 
 #include "AccountUtils.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <sys/stat.h>
 #include <wordexp.h>
 #include <dirent.h>
@@ -44,6 +44,15 @@ string PXUTILS::FILE::abspath(const string &path) {
         wordfree(&w);
     }
     return res;
+}
+
+string PXUTILS::FILE::basedir(const string &path) {
+    string dir;
+    size_t lastpos = path.rfind('/');
+    if (lastpos != std::string::npos) {
+        dir = path.substr(0, lastpos);
+    }
+    return dir;
 }
 
 vector<string> PXUTILS::FILE::dirfiles(const string &path, string ext) {
@@ -95,3 +104,17 @@ bool PXUTILS::FILE::write(const string &path, const string &data) {
     return true;
 }
 
+
+#define UNIX_PATH_HEADER "unix:"
+
+bool PXUTILS::PATH::isunix(const string &path) {
+    return (path.find(UNIX_PATH_HEADER) == 0);
+}
+
+string PXUTILS::PATH::unix2path(const string &upath) {
+    string path = upath;
+    if (isunix(upath)) {
+        path.replace(0, strlen(UNIX_PATH_HEADER), "");
+    }
+    return upath;
+}

@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Reza Alizadeh Majd on 2019-01-24.
 //
@@ -23,7 +25,7 @@ template <typename TBase, typename TClient>
 class RPCClient {
 
 public:
-    explicit RPCClient(const string &path) : rpcPath(path) {
+    explicit RPCClient(string addr) : rpcPath(std::move(addr)) {
     }
 
     void performRequest(std::function<void(kj::AsyncIoContext& ctx, TClient &client)> func) {

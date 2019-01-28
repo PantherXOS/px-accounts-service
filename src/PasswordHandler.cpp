@@ -6,23 +6,30 @@
 #include "PasswordHandler.h"
 #include "AccountUtils.h"
 
-#define RPC_PASSWORD_SOCKET     "~/.userdata/rpc/password"
-
 PasswordHandler PasswordHandler::_instance;
+bool PasswordHandler::_inited = false;
 
-
-PasswordHandler::PasswordHandler() : _rpcClient(string("unix:") + PXUTILS::FILE::abspath(RPC_PASSWORD_SOCKET)) {
-
-    if (!isRegistered()) {
-        registerToPassService("123");
-    } else {
-        std::cout << "> account service is already registered" << std::endl;
-    }
-
-}
 
 PasswordHandler &PasswordHandler::Instance() {
     return PasswordHandler::_instance;
+}
+
+bool PasswordHandler::Init(const string &addr) {
+    _instance.m_rpcClient = new RPCClient<PasswordInterface, PasswordInterface::Client>(addr);
+    if (!_instance.isRegistered()) {
+        _instance.registerToPassService("123");
+    } else {
+        std::cout << "> account service is already registered" << std::endl;
+    }
+    _inited = true;
+    return true;
+}
+
+PasswordHandler::~PasswordHandler() {
+    if (m_rpcClient != nullptr) {
+        delete m_rpcClient;
+        m_rpcClient = nullptr;
+    }
 }
 
 bool PasswordHandler::isRegistered() {
@@ -32,7 +39,7 @@ bool PasswordHandler::isRegistered() {
     int errCode = -1;
     string errText;
 
-    _rpcClient.performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
+    m_rpcClient->performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
         auto req = client.accIsRegisterdRequest();
         auto resp = req.send().wait(ctx.waitScope);
         registered = resp.getIsRegisterd();
@@ -52,7 +59,7 @@ bool PasswordHandler::registerToPassService(string userPass) {
     int errCode = -1;
     string errText;
 
-    _rpcClient.performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
+    m_rpcClient->performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
         auto req = client.registerPxAccountServiceRequest();
         req.setPassword(userPass);
 
@@ -76,7 +83,7 @@ bool PasswordHandler::set(string act, string svc, string key, string val) {
     int errCode = -1;
     std::string errText;
 
-    _rpcClient.performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
+    m_rpcClient->performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
         auto req = client.accCreateNewEntryRequest();
 //        req.setPack("");
         req.setPage(act);
@@ -110,7 +117,7 @@ PasswordStruct PasswordHandler::get(string act, string svc, string key) {
     string errText;
     string password;
 
-    _rpcClient.performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
+    m_rpcClient->performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
         auto req = client.accGetPasswordRequest();
         req.setPage(act);
         req.setUserName(PasswordHandler::MAKE_USERNAME(svc, key));
@@ -131,4 +138,3 @@ PasswordStruct PasswordHandler::get(string act, string svc, string key) {
     }
     return result;
 }
-
