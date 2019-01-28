@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 
 add_executable(${TARGET_NAME}
         main.cpp
+        PasswordSimulator.cpp
         ${UNIT_TEST_LIST})
 find_package(CapnProto CONFIG REQUIRED)
 target_link_libraries(${TARGET_NAME}
