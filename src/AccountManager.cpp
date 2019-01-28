@@ -6,6 +6,7 @@
 #include "AccountUtils.h"
 #include "PluginManager.h"
 #include "ProviderHandler.h"
+#include "PasswordHandler.h"
 #include "EventManager.h"
 
 AccountManager AccountManager::_instance;
@@ -44,7 +45,7 @@ bool AccountManager::verifyAccount(AccountObject &act) {
 
     bool verified = true;
     for (const auto &kv : act.services) {
-        verified &= verifyAccountService(kv.first, kv.second);
+        verified &= verifyAccountService(act, kv.first);
     }
     return verified;
 }
@@ -71,21 +72,23 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
     return true;
 }
 
-bool AccountManager::verifyAccountService(const string &svcName, const map<string, string> &params) {
+bool AccountManager::verifyAccountService(AccountObject &act, const string &svcName) {
 
     if (!PluginManager::Instance().exists(svcName)) {
         addError(string("unknown service '") + svcName + string("'"));
         return false;
     }
 
+    AccountService &curService = act.services[svcName];
     PluginContainer &svcPlugin = PluginManager::Instance()[svcName];
-    auto verifyResult = svcPlugin.verify(params);
+    auto verifyResult = svcPlugin.verify(curService);
     if (!verifyResult.verified) {
         for (const auto &err : verifyResult.errors) {
             addError(err);
         }
         return false;
     }
+    curService.applyVerification(verifyResult.params);
 
     auto authResult = svcPlugin.authenticate(verifyResult.params);
     if (!authResult.authenticated) {
@@ -94,7 +97,17 @@ bool AccountManager::verifyAccountService(const string &svcName, const map<strin
         }
         return false;
     }
-    //todo: after successful authentication, we need to save protected params to px-pass-service
+
+    for (const auto &token : authResult.tokens) {
+        const auto &key = token.first;
+        const auto &val = token.second;
+        if (!PasswordHandler::Instance().set(act.title, svcName, key, val)) {
+            for (const auto &err: PasswordHandler::LastErrors()) {
+                addError(err);
+            }
+        }
+    }
+
     return true;
 }
 

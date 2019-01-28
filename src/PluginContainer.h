@@ -18,25 +18,19 @@ namespace py = pybind11;
 using namespace py::literals;
 
 
-struct ServiceParam {
-    string key;
-    string val;
-    bool   is_required;
-    bool   is_protected;
-    string default_val;
-};
-typedef vector<ServiceParam> ServiceParamList;
-
 struct VerifyResult {
     bool             verified;
     ServiceParamList params;
     StringList       errors;
+
+    VerifyResult(): verified(false) {
+    }
 };
 
 
 struct AuthResult {
     bool       authenticated;
-    StrStrMap   tokens;
+    StrStrMap  tokens;
     StringList errors;
 };
 

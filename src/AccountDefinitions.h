@@ -9,16 +9,44 @@
 #include <string>
 #include <map>
 #include <vector>
+
 using namespace std;
 
+typedef vector<string> StringList;
+typedef map<string, string> StrStrMap;
+
+struct ServiceParam {
+    string key;
+    string val;
+    bool   is_required;
+    bool   is_protected;
+    string default_val;
+};
+typedef vector<ServiceParam> ServiceParamList;
+
+
+class AccountService : public StrStrMap {
+
+public:
+    bool verified() { return _verified; }
+
+    void applyVerification(const ServiceParamList &params);
+
+    bool isProtected(string key) const;
+    bool isRequired(string key) const;
+
+protected:
+    bool _verified = false;
+    map<string, bool> _requiredDict;
+    map<string, bool> _protectedDict;
+};
 
 struct AccountObject {
-    typedef map<string, string> ParamDict;
     string title;
     string provider;
     bool is_active;
-    ParamDict settings;
-    map<string, ParamDict> services;
+    StrStrMap settings;
+    map<string, AccountService> services;
 };
 
 enum AccountStatus {
@@ -29,7 +57,5 @@ enum AccountStatus {
 };
 extern map<AccountStatus, string> AccountStatusString;
 
-typedef vector<string> StringList;
-typedef map<string, string> StrStrMap;
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTDEFINITIONS_H

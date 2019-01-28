@@ -63,7 +63,12 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.is_active = true;
-        REQUIRE(AccountManager::Instance().modifyAccount(accountName, account));
+        account.services["test"]["k1"] = "v1";  // protected params need to be re-added during account modification
+        bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
+        for (const auto &err : AccountManager::LastErrors()) {
+            WARN(err);
+        }
+        REQUIRE(modifyResult);
 
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
         REQUIRE(account.is_active == true);
@@ -73,7 +78,12 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.title = title2;
-        REQUIRE(AccountManager::Instance().modifyAccount(accountName, account));
+        account.services["test"]["k1"] = "v1"; // protected params need to be re-added during account modification
+        bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
+        for (const auto &err : AccountManager::LastErrors()) {
+            WARN(err);
+        }
+        REQUIRE(modifyResult);
 
         string newAccountName = PXUTILS::ACCOUNT::title2name(account.title);
         REQUIRE_FALSE(AccountManager::Instance().readAccount(accountName, &account));

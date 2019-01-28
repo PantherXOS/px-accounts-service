@@ -50,5 +50,8 @@ if pkgutil.find_loader('PluginFramework') is not None:
 
         def authenticate(self, params):
             result = PluginFramework.AuthResult()
+            # token = PluginFramework.StrStrMap()
+            # token['t1'] = 'token_value1'
+            result.tokens['t1'] = 'token_value1'
             result.authenticated = True
             return result

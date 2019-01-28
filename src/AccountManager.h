@@ -24,7 +24,7 @@ protected:
     bool verifyAccount(AccountObject &act);
 
     bool updateProviderRelatedParams(AccountObject &act);
-    bool verifyAccountService(const string& svcName, const map<string, string> &params);
+    bool verifyAccountService(AccountObject& act, const string& svcName);
 
 
 public:
