@@ -13,13 +13,10 @@
 
 int main(int argc, char* argv[]) {
 
-//    CLI::App app { "guix-tools: Additional tools to work with Guix Package Manager" };
-//
-//    CLI::App* pkgApp =app.add_subcommand("package", "Guix 'package' related commands");
 
     setvbuf( stdout, nullptr, _IONBF, 0 );
 
-    string pass;
+    string pass = "123";
     string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
     string rpcPassPath = string("unix:") + PXUTILS::FILE::abspath(RPC_CLIENT_PASS_PATH);
 
