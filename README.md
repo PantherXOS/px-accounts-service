@@ -165,6 +165,38 @@ Following tasks should be done by `px-accounts-service`:
 6. set account status
 7. get account status
 
+### Account Config file format:
+Each Account details stores in a separated `YAML` file in `~/.userdata/accounts/` folder. structure of *Account Configuration Files* are as follows: 
+
+```yaml
+
+---
+account:
+  title: account_title
+  provider: provider_name
+  active: true
+  settings: 
+    key1: val1
+    key2: val2
+  services:
+    - service_name:
+        service_key1: service_val1
+        service_key2: service_val2
+...
+
+```
+
+here is a shord description about each account details:
+
+ 1. `title`:  represents the accounts title
+ 2. `provider`: if an account is created based on a provider, this parameter is set to name of provider.
+ 3. `active`: boolean flag that represents the whether an account is active or not.
+ 4. `settings`: a map of optional key-value pairs that each account might have.
+ 5. `services`: a map of account services, that its key represents the *service name*, and value points to other map 
+of key-value pairs of *service parameters*.
+
+ 
+
 ### `px-accounts-service` communication interface:
 We will provide 3 types of interfaces that are available for interacting with `px-accounts-service`.
 - Account Structure that holds the details of each online account.
