@@ -10,11 +10,16 @@
 #define RPC_SERVER_PATH         "~/.userdata/rpc/accounts"
 #define RPC_CLIENT_PASS_PATH    "~/.userdata/rpc/password"
 
+void IntHandler(int dummy) {
+    puts("Server Terminated.");
+    exit(0);
+}
 
 int main(int argc, char* argv[]) {
 
 
     setvbuf( stdout, nullptr, _IONBF, 0 );
+    signal(SIGINT, IntHandler);
 
     string pass = "123";
     string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
