@@ -73,6 +73,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 }
 
 bool AccountManager::verifyAccountService(AccountObject &act, const string &svcName) {
+    LOG_INF("verifying '%s'", svcName.c_str());
 
     if (!PluginManager::Instance().exists(svcName)) {
         addError(string("unknown service '") + svcName + string("'"));
@@ -88,6 +89,12 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         }
         return false;
     }
+    LOG_INF("%s", "parameters are verified:");
+    for (const auto &param : verifyResult.params) {
+        LOG_INF("\t%s : %s%s%s", param.key.c_str(), param.val.c_str(),
+                (param.is_protected ? " - PROTECTED" : ""),
+                (param.is_required ? " - REQUIRED": ""));
+    }
     curService.applyVerification(verifyResult.params);
 
     auto authResult = svcPlugin.authenticate(verifyResult.params);
@@ -96,6 +103,10 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             addError(err);
         }
         return false;
+    }
+    LOG_INF("%s", "service authenticated:");
+    for (const auto &token : authResult.tokens) {
+        LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
     }
 
     for (const auto &token : authResult.tokens) {

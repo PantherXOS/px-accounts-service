@@ -9,10 +9,12 @@
 #include <sys/stat.h>
 #include <wordexp.h>
 #include <dirent.h>
+#include <stdarg.h>
 
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <map>
 
 string PXUTILS::ACCOUNT::title2name(const string &title) {
     string result = title;
@@ -25,7 +27,7 @@ string PXUTILS::ACCOUNT::title2name(const string &title) {
     return result;
 }
 
-string PXUTILS::PLUGIN::package2module(const string& title) {
+string PXUTILS::PLUGIN::package2module(const string &title) {
     string result = title;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
         if (c == '-') {
@@ -55,15 +57,24 @@ string PXUTILS::FILE::basedir(const string &path) {
     return dir;
 }
 
+string PXUTILS::FILE::filename(const string &path) {
+    string fname;
+    size_t lastpos = path.rfind('/');
+    if (lastpos != std::string::npos) {
+        fname = path.substr(lastpos + 1);
+    }
+    return fname;
+}
+
 vector<string> PXUTILS::FILE::dirfiles(const string &path, string ext) {
     vector<string> result;
     if (!ext.empty() && ext[0] == '.') {
         ext = ext.substr(1);
     }
 
-    DIR* dirp = opendir(path.c_str());
+    DIR *dirp = opendir(path.c_str());
     if (dirp != nullptr) {
-        struct dirent * dp;
+        struct dirent *dp;
         while ((dp = readdir(dirp)) != nullptr) {
             if (strcmp(dp->d_name, ".") == 0)
                 continue;
@@ -83,9 +94,9 @@ string PXUTILS::FILE::extpart(const string &fname) {
     const char *fpointer = fname.c_str();
     const char *d = strrchr(fpointer, '.');
     if (!d || d == fpointer) {
-        return  string();
+        return string();
     }
-    return string(d+1);
+    return string(d + 1);
 }
 
 bool PXUTILS::FILE::exists(const string &fpath) {
@@ -118,3 +129,28 @@ string PXUTILS::PATH::unix2path(const string &upath) {
     }
     return path;
 }
+
+
+// ============================================================================
+void Logger::log(Logger::LOG_LEVEL lvl, const char *file, const char *func, int line, const char *format, ...) {
+
+    static map<Logger::LOG_LEVEL, std::string> lvlNames;
+    lvlNames[Logger::LVL_ERR] = "ERR";
+    lvlNames[Logger::LVL_WRN] = "WRN";
+    lvlNames[Logger::LVL_INF] = "INF";
+
+    if (lvl <= m_logLevel) {
+        char buffer[1024];
+        va_list args;
+        va_start (args, format);
+        vsprintf(buffer, format, args);
+        va_end (args);
+
+        string fname = PXUTILS::FILE::filename(file);
+        std::cout << "[" << lvlNames[lvl] << "] - " << "[" << fname << "][" << func << "](" << line << "): "
+                  << buffer << std::endl;
+    }
+}
+
+Logger gLogger;
+// ============================================================================

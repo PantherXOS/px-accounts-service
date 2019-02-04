@@ -28,6 +28,8 @@ namespace PXUTILS {
 
         string basedir(const string &path);
 
+        string filename(const string &path);
+
         vector<string> dirfiles(const string &path, string ext);
 
         string extpart(const string &fname);
@@ -46,6 +48,31 @@ namespace PXUTILS {
         string unix2path(const string &upath);
     }
 }
+
+
+class Logger {
+
+public:
+    enum LOG_LEVEL {
+        LVL_ERR = 0,
+        LVL_WRN = 1,
+        LVL_INF = 2
+    };
+
+public:
+    explicit Logger() = default;
+    void log(LOG_LEVEL lvl, const char* file, const char* func, int line, const char* format, ...);
+
+    void setLevel(LOG_LEVEL lvl) { m_logLevel = lvl; }
+
+private:
+    LOG_LEVEL m_logLevel = LVL_WRN;
+};
+
+extern Logger gLogger;
+#define LOG_ERR(fmt, ...) gLogger.log(Logger::LVL_ERR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_WRN(fmt, ...) gLogger.log(Logger::LVL_WRN, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_INF(fmt, ...) gLogger.log(Logger::LVL_INF, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
 
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTUTILS_H

@@ -13,7 +13,9 @@ CMD="$CMD;
      cmake ..;
      make &&
      echo '#####################################################################################' &&
-     ./src/px-accounts-service -p 123;
+     echo 'DONE';
+#     ./src/px-accounts-service;
+#     ./src/px-accounts-service -p 123;
 #     cd tests/ &&
 #     ./tests;
 #     ./tests 'Account Management Tasks';

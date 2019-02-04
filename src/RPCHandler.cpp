@@ -12,6 +12,7 @@
 using namespace std;
 
 kj::Promise<void> RPCHandler::list(AccountReader::Server::ListContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     vector<string> pFilter;
     vector<string> sFilter;
@@ -38,6 +39,7 @@ kj::Promise<void> RPCHandler::list(AccountReader::Server::ListContext ctx) {
 }
 
 kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
@@ -80,6 +82,7 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
 }
 
 kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
@@ -96,6 +99,7 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
 }
 
 kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
@@ -107,6 +111,7 @@ kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext 
 }
 
 kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
 
@@ -125,6 +130,7 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
 }
 
 kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
     KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
@@ -144,6 +150,7 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
 }
 
 kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
+    LOG_INF("%s", "==========================================================");
 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
 

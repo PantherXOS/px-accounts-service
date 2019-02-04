@@ -21,15 +21,21 @@ int main(int argc, char* argv[]) {
     setvbuf( stdout, nullptr, _IONBF, 0 );
     signal(SIGINT, IntHandler);
 
+    bool isDebug = false;
     string pass = "123";
     string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
     string rpcPassPath = string("unix:") + PXUTILS::FILE::abspath(RPC_CLIENT_PASS_PATH);
 
     CLI::App app { "px-accounts-service: Online Accounts Management Service" };
+    app.add_flag("-d,--debug", isDebug, "Run px-accounts-service in debug mode");
     app.add_option("-p,--password", pass, "px-accounts-pass related password");
     app.add_option("--pass-path", rpcPassPath, "modify px-pass-service rpc path");
 
     CLI11_PARSE(app, argc, argv);
+
+    if (isDebug) {
+        gLogger.setLevel(Logger::LVL_INF);
+    }
 
     PasswordHandler::Init(rpcPassPath, pass);
 
