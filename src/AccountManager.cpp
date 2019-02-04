@@ -39,6 +39,7 @@ bool AccountManager::verifyAccount(AccountObject &act) {
 
     if (!act.provider.empty()) {
         if (!updateProviderRelatedParams(act)) {
+            addError("update provider params failed");
             return false;
         }
     }
@@ -54,9 +55,11 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 
     if (!ProviderHandler::Instance().exists(act.provider)) {
         addError(string("unknown provider: '") + act.provider + string("'"));
+        LOG_ERR("unknown provider: %s", act.provider.c_str());
         return false;
     }
 
+    LOG_INF("Updating provider '%s' params:", act.provider.c_str());
     bool verified = true;
     ProviderStruct &provider = ProviderHandler::Instance()[act.provider];
     for (const auto &plg : provider.plugins) {
@@ -67,6 +70,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
             const auto &pkey = prm.first;
             const auto &pval = prm.second;
             act.services[plgName][pkey] = pval;
+            LOG_INF("\t[%s][%s] = %s", plgName.c_str(), pkey.c_str(), pval.c_str());
         }
     }
     return true;
@@ -95,6 +99,7 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
                 (param.is_protected ? " - PROTECTED" : ""),
                 (param.is_required ? " - REQUIRED": ""));
     }
+
     curService.applyVerification(verifyResult.params);
 
     auto authResult = svcPlugin.authenticate(verifyResult.params);
