@@ -59,6 +59,9 @@ private:
     static PasswordHandler _instance;
     static bool _inited;
 
+    bool m_isRegistered = false;
+    string m_userPassword;
+
     RPCClient<PasswordInterface, PasswordInterface::Client> *m_rpcClient = nullptr;
 };
 
