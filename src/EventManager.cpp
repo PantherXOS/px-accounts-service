@@ -3,6 +3,7 @@
 //
 
 #include "EventManager.h"
+#include <chrono>
 #include <capnp/serialize-packed.h>
 #include <kj/io.h>
 #include <interface/event.capnp.h>
