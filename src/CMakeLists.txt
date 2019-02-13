@@ -18,6 +18,7 @@ capnp_generate_cpp(accountSources accountHeaders
                 ${INTERFACE_DIR}/Account.capnp
                 ${INTERFACE_DIR}/AccountReader.capnp
                 ${INTERFACE_DIR}/AccountWriter.capnp
+                ${INTERFACE_DIR}/event.capnp
                 ${INTERFACE_DIR}/password/interface.capnp
                 ${INTERFACE_DIR}/password/passwordbook.capnp)
 

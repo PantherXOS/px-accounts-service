@@ -9,7 +9,7 @@
 #include <map>
 
 #include <nng/nng.h>
-#include <nng/protocol/pubsub0/pub.h>
+#include <nng/protocol/pipeline0/push.h>
 
 #include "AccountParser.h"
 
@@ -19,25 +19,21 @@ using  namespace std;
 class EventManager {
 
 public:
-    enum EventType {
-        NONE,
-        ACCOUNT_STATUS_CHANGE
-    };
 
 protected:
     explicit EventManager();
 
-    void emit(string src, EventType type, map<string, string> params);
+    void emit(string topic, const map<string, string> &params);
 
 public:
-    virtual ~EventManager() = default;
+    virtual ~EventManager();
     static EventManager &Instance();
-    static void EMIT_STATUS_CHANGE(string src, AccountStatus from, AccountStatus to);
+    static void EMIT_STATUS_CHANGE(string act, AccountStatus from, AccountStatus to);
 
 private:
     static EventManager _instance;
-    nng_socket sock;
-    bool inited = false;
+    nng_socket m_sock;
+    bool m_inited = false;
 
 };
 

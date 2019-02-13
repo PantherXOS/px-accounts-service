@@ -5,48 +5,53 @@
 #include "EventManager.h"
 #include <capnp/serialize-packed.h>
 #include <kj/io.h>
-#include <interface/Account.capnp.h>
+#include <interface/event.capnp.h>
 
-#define IPC_DIR  "~/.userdata/events"
-#define IPC_PATH IPC_DIR "/accounts"
-#define IPC_MKDIR_CMD "mkdir -p " IPC_DIR
+#define RPC_DIR "~/.userdata/rpc"
+#define RPC_PATH RPC_DIR "/events"
+#define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
 EventManager EventManager::_instance;
 
 EventManager::EventManager() {
 
-    system(IPC_MKDIR_CMD);
+    system(RPC_MKPATH_CMD);
 
     int rv;
-    if ((rv = nng_pub0_open(&sock)) != 0) {
-        perror("nng_pub0_open");
+    if ((rv = nng_push0_open(&m_sock)) != 0) {
+        LOG_ERR("unable to open socket", rv);
         exit(EXIT_FAILURE);
     }
 
-    string ipcFullPath = PXUTILS::FILE::abspath(IPC_PATH);
-    if (PXUTILS::FILE::exists(ipcFullPath)) {
-        PXUTILS::FILE::remove(ipcFullPath);
-    }
-
-    string ipcSock = string("ipc://") + ipcFullPath;
-
-//    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
-    if ((rv = nng_listen(sock, ipcSock.c_str(), NULL, 0)) != 0) {
-        perror("nng_listen");
-        perror(ipcSock.c_str());
+    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(RPC_PATH);
+    if ((rv = nng_dial(m_sock, ipcSock.c_str(), nullptr, 0)) != 0) {
+        LOG_ERR("connect error", rv);
         exit(EXIT_FAILURE);
     }
-    inited = true;
+    m_inited = true;
 }
 
+EventManager::~EventManager() {
+    if (m_inited) {
+        nng_close(m_sock);
+        m_inited = false;
+    }
+}
 
-void EventManager::emit(string src, EventManager::EventType type, map<string, string> params) {
+void EventManager::emit(string topic, const map<string, string> &params) {
 
-    if (inited) {
+    if (m_inited) {
+        uint64_t now_secs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+        ).count());
+
         capnp::MallocMessageBuilder message;
-        Account::AccountEvent::Builder evt = message.initRoot<Account::AccountEvent>();
-        evt.setSource(src);
-        evt.setType((Account::EventType)type);
+        EventData::Builder evt = message.initRoot<EventData>();
+        evt.setTopic(topic);
+        evt.setSource("px-accounts-service");
+        evt.setTime(now_secs);
+        evt.setEvent("account");
+
         auto evParams = evt.initParams(static_cast<unsigned int>(params.size()));
         int i = 0;
         for (const auto &kv : params) {
@@ -56,8 +61,9 @@ void EventManager::emit(string src, EventManager::EventType type, map<string, st
         }
         kj::Array<capnp::word> words = capnp::messageToFlatArray(message);
         kj::ArrayPtr<kj::byte> data = words.asBytes();
-        if (nng_send(sock, data.begin(), data.size(), 0) != 0) {
-            perror("ng_send");
+        int ret;
+        if ((ret = nng_send(m_sock, data.begin(), data.size(), 0)) != 0) {
+            LOG_WRN("send error", ret);
         }
     }
 }
@@ -66,9 +72,10 @@ EventManager &EventManager::Instance() {
     return _instance;
 }
 
-void EventManager::EMIT_STATUS_CHANGE(string src, AccountStatus from, AccountStatus to) {
+void EventManager::EMIT_STATUS_CHANGE(string act, AccountStatus from, AccountStatus to) {
     map<string, string> params;
+    params["account"] = act;
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
-    _instance.emit(src, ACCOUNT_STATUS_CHANGE, params);
+    _instance.emit("account_status_change", params);
 }

@@ -12,17 +12,6 @@ struct Account {
         params @1 : List(Param);
     }
 
-    enum EventType {
-        none         @0;
-        statusChange @1;
-    }
-
-    struct AccountEvent {
-        source  @0 : Text;
-        type    @1 : EventType;
-        params  @2 : List(Param);
-    }
-
     struct Param {
         key   @0 : Text;
         value @1 : Text;

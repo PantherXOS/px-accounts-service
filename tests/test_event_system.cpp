@@ -14,13 +14,14 @@
 #include <AccountDefinitions.h>
 #include <AccountParser.h>
 #include <interface/AccountWriter.capnp.h>
+#include <interface/event.capnp.h>
 #include <RPCServer.h>
 #include <RPCHandler.h>
 #include <EventManager.h>
 
 #include "test_common.h"
 
-#define  IPC_PATH   "~/.userdata/events/accounts"
+#define  IPC_PATH   "~/.userdata/event/channels/account"
 
 TEST_CASE("Event System Tests", "[EventSystem]") {
 
@@ -86,11 +87,13 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         kj::ArrayPtr<uint8_t> data(buff, sz);
         kj::ArrayInputStream strm(data);
         capnp::InputStreamMessageReader reader(strm);
-        Account::AccountEvent::Reader evtData = reader.getRoot<Account::AccountEvent>();
-        REQUIRE(evtData.getSource().cStr() == act.title);
-        REQUIRE(evtData.getType() == Account::EventType::STATUS_CHANGE);
-        bool oldFound = false, newFound = false;
+        EventData::Reader evtData = reader.getRoot<EventData>();
+        bool oldFound = false, newFound = false, actFound = false;
         for (const auto &param : evtData.getParams()) {
+            if (param.getKey().cStr() == string("account")) {
+                REQUIRE(param.getValue().cStr() == act.title);
+                actFound = true;
+            }
             if (param.getKey().cStr() == string("old")) {
                 REQUIRE(param.getValue().cStr() == AccountStatusString[AC_NONE]);
                 oldFound = true;
@@ -100,7 +103,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
                 newFound = true;
             }
         }
-        REQUIRE((oldFound && newFound));
+        REQUIRE((actFound && oldFound && newFound));
         nng_free(buff, sz);
 
         statThread.join();
