@@ -256,6 +256,28 @@ interface AccountWriter extends(AccountReader) {
 }
 ```
 
+#### 4. Online Accounts Events
+
+1. _Account Status Change_
+```yaml
+EventData:
+  topic: "account_status_change"
+  source: "px-accounts-service"
+  time: 12356789
+  event: "account"
+  params:
+    -
+      key: "account"
+      value: "test_account"
+    -
+      key: "from"
+      value: "online"
+    -
+      key: "to"
+      value: "offline"
+```
+
+
 ## Build Instructions:
 1. install following libraries:
    * yaml-cpp

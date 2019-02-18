@@ -88,6 +88,11 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         kj::ArrayInputStream strm(data);
         capnp::InputStreamMessageReader reader(strm);
         EventData::Reader evtData = reader.getRoot<EventData>();
+
+        REQUIRE(evtData.getTopic() == "account_status_change");
+        REQUIRE(evtData.getSource() == "px-accounts-service");
+        REQUIRE(evtData.getEvent() == "account");
+
         bool oldFound = false, newFound = false, actFound = false;
         for (const auto &param : evtData.getParams()) {
             if (param.getKey().cStr() == string("account")) {
