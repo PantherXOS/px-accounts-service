@@ -23,12 +23,12 @@ public:
 protected:
     explicit EventManager();
 
-    void emit(string topic, const map<string, string> &params);
+    void emit(const string &event, const map<string, string> &params);
 
 public:
     virtual ~EventManager();
     static EventManager &Instance();
-    static void EMIT_STATUS_CHANGE(string act, AccountStatus from, AccountStatus to);
+    static void EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to);
 
 private:
     static EventManager _instance;

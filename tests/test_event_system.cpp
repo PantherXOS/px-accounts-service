@@ -36,7 +36,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(act.title)));
     }
 
-    SECTION("Create Test Accounet") {
+    SECTION("Create Test Account") {
         capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
         kj::WaitScope &waitScope = rpcClient.getWaitScope();
         AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
@@ -89,9 +89,9 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         capnp::InputStreamMessageReader reader(strm);
         EventData::Reader evtData = reader.getRoot<EventData>();
 
-        REQUIRE(evtData.getTopic() == "account_status_change");
+        REQUIRE(evtData.getTopic() == "account");
         REQUIRE(evtData.getSource() == "px-accounts-service");
-        REQUIRE(evtData.getEvent() == "account");
+        REQUIRE(evtData.getEvent() == "account_status_change");
 
         bool oldFound = false, newFound = false, actFound = false;
         for (const auto &param : evtData.getParams()) {

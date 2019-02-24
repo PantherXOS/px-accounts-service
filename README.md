@@ -261,10 +261,10 @@ interface AccountWriter extends(AccountReader) {
 1. _Account Status Change_
 ```yaml
 EventData:
-  topic: "account_status_change"
+  topic: "account"
   source: "px-accounts-service"
   time: 12356789
-  event: "account"
+  event: "account_status_change"
   params:
     -
       key: "account"

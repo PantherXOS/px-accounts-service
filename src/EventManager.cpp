@@ -39,7 +39,7 @@ EventManager::~EventManager() {
     }
 }
 
-void EventManager::emit(string topic, const map<string, string> &params) {
+void EventManager::emit(const string &event, const map<string, string> &params) {
 
     if (m_inited) {
         uint64_t now_secs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -48,10 +48,10 @@ void EventManager::emit(string topic, const map<string, string> &params) {
 
         capnp::MallocMessageBuilder message;
         EventData::Builder evt = message.initRoot<EventData>();
-        evt.setTopic(topic);
+        evt.setTopic("account");
         evt.setSource("px-accounts-service");
         evt.setTime(now_secs);
-        evt.setEvent("account");
+        evt.setEvent(event);
 
         auto evParams = evt.initParams(static_cast<unsigned int>(params.size()));
         int i = 0;
@@ -73,7 +73,7 @@ EventManager &EventManager::Instance() {
     return _instance;
 }
 
-void EventManager::EMIT_STATUS_CHANGE(string act, AccountStatus from, AccountStatus to) {
+void EventManager::EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to) {
     map<string, string> params;
     params["account"] = act;
     params["old"] = AccountStatusString[from];
