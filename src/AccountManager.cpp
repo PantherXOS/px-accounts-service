@@ -114,6 +114,16 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
     }
 
+    for (const auto &param : verifyResult.params) {
+        if (param.is_protected) {
+            if (!PasswordHandler::Instance().set(act.title, svcName, param.key, param.val)) {
+                for (const auto &err : PasswordHandler::LastErrors()) {
+                    addError(err);
+                }
+                return false;
+            }
+        }
+    }
     for (const auto &token : authResult.tokens) {
         const auto &key = token.first;
         const auto &val = token.second;
@@ -121,6 +131,7 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             for (const auto &err: PasswordHandler::LastErrors()) {
                 addError(err);
             }
+            return false;
         }
     }
 

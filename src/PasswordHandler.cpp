@@ -88,6 +88,11 @@ bool PasswordHandler::set(string act, string svc, string key, string val) {
     int errCode = -1;
     std::string errText;
 
+    LOG_INF("sending 'accCreateNewEntryRequest': \n\tpage: %s\n\tusername: %s\n\tpassword: %s",
+            act.c_str(),
+            PasswordHandler::MAKE_USERNAME(svc, key).c_str(),
+            val.c_str());
+
     m_rpcClient->performRequest([&](kj::AsyncIoContext &ctx, PasswordInterface::Client &client) {
         auto req = client.accCreateNewEntryRequest();
 //        req.setPack("");
@@ -100,9 +105,10 @@ bool PasswordHandler::set(string act, string svc, string key, string val) {
         errCode   = resp.getErrorCode();
         errText   = resp.getErrorText().cStr();
     });
-    std::cout << "[" << __func__ << "] " << errCode << " - " << errText << std::endl;
+//    std::cout << "[" << __func__ << "] " << errCode << " - " << errText << std::endl;
 
     if (errCode != 0) {
+        LOG_WRN("set password failed: %s (%d)", errText.c_str(), errCode);
         addError(errText);
         return false;
     }
