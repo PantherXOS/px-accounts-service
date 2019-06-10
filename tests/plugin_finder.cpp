@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-#include <PluginManager.h>
+#include <Plugins/PluginManager.h>
 
 int main()
 {

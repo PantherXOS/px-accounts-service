@@ -4,7 +4,7 @@
 
 #include <catch2/catch.hpp>
 
-#include <PluginManager.h>
+#include <Plugins/PluginManager.h>
 #include <iostream>
 
 

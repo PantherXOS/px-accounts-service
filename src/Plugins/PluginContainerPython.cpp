@@ -1,17 +1,18 @@
 //
-// Created by Reza Alizadeh Majd on 2018-12-02.
+// Created by Reza Alizadeh Majd on 2019-06-09.
 //
 
-#include "PluginContainer.h"
-#include "AccountUtils.h"
+#include "PluginContainerPython.h"
+#include "../AccountUtils.h"
+
+// ===PLUGIN DEFINITION MACRO =================================================
 
 PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
 
     m.doc() = "PantherX Online Accounts Plugin Framework for python";
 
-    py::class_<Plugin, PyPlugin>(m, "Plugin")
-            .def("test", &Plugin::verify)
-            .def_readwrite("title", &Plugin::title);
+    py::class_<PythonPlugin>(m, "Plugin")
+            .def_readwrite("title", &PythonPlugin::title);
 
     py::bind_map<StrStrMap>(m, "StrStrMap");
     py::bind_vector<StringList>(m, "StringList");
@@ -19,41 +20,42 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
 
     py::class_<ServiceParam>(m, "ServiceParam")
             .def(py::init())
-            .def_readwrite("key",          &ServiceParam::key)
-            .def_readwrite("val",          &ServiceParam::val)
-            .def_readwrite("is_required",  &ServiceParam::is_required)
+            .def_readwrite("key", &ServiceParam::key)
+            .def_readwrite("val", &ServiceParam::val)
+            .def_readwrite("is_required", &ServiceParam::is_required)
             .def_readwrite("is_protected", &ServiceParam::is_protected)
-            .def_readwrite("default_val",  &ServiceParam::default_val);
+            .def_readwrite("default_val", &ServiceParam::default_val);
 
     py::class_<VerifyResult>(m, "VerifyResult")
             .def(py::init())
             .def_readwrite("verified", &VerifyResult::verified)
-            .def_readwrite("params",   &VerifyResult::params)
-            .def_readwrite("errors",   &VerifyResult::errors);
+            .def_readwrite("params", &VerifyResult::params)
+            .def_readwrite("errors", &VerifyResult::errors);
 
     py::class_<AuthResult>(m, "AuthResult")
             .def(py::init())
             .def_readwrite("authenticated", &AuthResult::authenticated)
             .def_readwrite("tokens", &AuthResult::tokens)
             .def_readwrite("errors", &AuthResult::errors);
-
 }
 
-VerifyResult PyPlugin::verify(const StrStrMap &params) {
-    PYBIND11_OVERLOAD_PURE(VerifyResult, Plugin, verify, params);
+VerifyResult PythonPlugin::verify(const StrStrMap &params) {
+    PYBIND11_OVERLOAD_PURE(VerifyResult, PythonPlugin, verify, params);
 }
 
-AuthResult PyPlugin::authenticate(const ServiceParamList &params) {
-    PYBIND11_OVERLOAD_PURE(AuthResult, Plugin, authenticate, params);
+AuthResult PythonPlugin::authenticate(const ServiceParamList &params) {
+    PYBIND11_OVERLOAD_PURE(AuthResult, PythonPlugin, authenticate, params);
 }
 
+// ============================================================================
 
-PluginContainer::PluginContainer(const string &title, const string &path) {
+
+PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
 
     py::dict locals;
-    locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(title));
-    if (!path.empty()) {
-        locals["path"] = py::cast(path);
+    locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(info.name));
+    if (!info.path.empty()) {
+        locals["path"] = py::cast(info.path);
     }
     py::exec(R"(
 import sys
@@ -78,22 +80,23 @@ new_module = importlib.import_module(module_name)
 )",
              py::globals(), locals);
 
+    _info = info;
     _module = locals["new_module"];
     py::object PluginClass = _module.attr("Plugin");
     _plugin = PluginClass();
     _inited = true;
 }
 
-string PluginContainer::getTitle() {
+string PluginContainerPython::getTitle() {
     return _plugin.attr("title").cast<string>();
 }
 
-VerifyResult PluginContainer::verify(const StrStrMap &params) {
+VerifyResult PluginContainerPython::verify(const StrStrMap &params) {
     auto res = _plugin.attr("verify")(params);
-    return  res.cast<VerifyResult>();
+    return res.cast<VerifyResult>();
 }
 
-AuthResult PluginContainer::authenticate(const ServiceParamList &params) {
+AuthResult PluginContainerPython::authenticate(const ServiceParamList &params) {
     auto res = _plugin.attr("authenticate")(params);
     return res.cast<AuthResult>();
 }

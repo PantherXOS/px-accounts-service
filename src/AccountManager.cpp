@@ -4,7 +4,7 @@
 
 #include "AccountManager.h"
 #include "AccountUtils.h"
-#include "PluginManager.h"
+#include "Plugins/PluginManager.h"
 #include "ProviderHandler.h"
 #include "PasswordHandler.h"
 #include "EventManager.h"
@@ -85,7 +85,7 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
     }
 
     AccountService &curService = act.services[svcName];
-    PluginContainer &svcPlugin = PluginManager::Instance()[svcName];
+    PluginContainerBase &svcPlugin = PluginManager::Instance()[svcName];
     auto verifyResult = svcPlugin.verify(curService);
     if (!verifyResult.verified) {
         for (const auto &err : verifyResult.errors) {
