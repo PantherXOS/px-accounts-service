@@ -17,19 +17,17 @@ PYBIND11_MAKE_OPAQUE(StrStrMap);
 PYBIND11_MAKE_OPAQUE(StringList);
 PYBIND11_MAKE_OPAQUE(ServiceParamList);
 
-class PythonPlugin {
+class PythonPlugin : public IPlugin {
 
 public:
     explicit PythonPlugin() = default;
 
     virtual ~PythonPlugin() = default;
 
-    virtual VerifyResult verify(const StrStrMap &params);
+    VerifyResult verify(const StrStrMap &params) override;
 
-    virtual AuthResult authenticate(const ServiceParamList &);
+    AuthResult authenticate(const ServiceParamList &params) override;
 
-public:
-    string title;
 };
 
 

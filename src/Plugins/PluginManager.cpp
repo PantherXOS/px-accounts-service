@@ -11,6 +11,7 @@
 namespace py = pybind11;
 
 
+#define APP_PLUGIN_PATH "./plugins"
 #define USER_PLUGIN_PATH "~/.guix-profile/etc/px/accounts/plugins"
 #define SYSTEM_PLUGIN_PATH "/run/current-system/profile/etc/px/accounts/plugins"
 
@@ -19,6 +20,7 @@ PluginManager::PluginManager() {
     py::initialize_interpreter();
 
     init(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
+    init(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
     init(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
 }
 

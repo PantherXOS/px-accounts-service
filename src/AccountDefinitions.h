@@ -8,22 +8,10 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include <vector>
+
+#include "Plugins/PluginInterface.h"
 
 using namespace std;
-
-typedef vector<string> StringList;
-typedef map<string, string> StrStrMap;
-
-struct ServiceParam {
-    string key;
-    string val;
-    bool   is_required;
-    bool   is_protected;
-    string default_val;
-};
-typedef vector<ServiceParam> ServiceParamList;
-
 
 class AccountService : public StrStrMap {
 
@@ -33,6 +21,7 @@ public:
     void applyVerification(const ServiceParamList &params);
 
     bool isProtected(string key) const;
+
     bool isRequired(string key) const;
 
 protected:

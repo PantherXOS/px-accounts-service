@@ -6,12 +6,14 @@
 #include <yaml-cpp/yaml.h>
 
 #include "PluginContainerPython.h"
+#include "PluginContainerCpp.h"
 #include "../AccountUtils.h"
 
 
 #define PLUGIN_KEY "plugin"
 #define PLUGIN_NAME_KEY "name"
 #define PLUGIN_VERSION_KEY "version"
+#define PLUGIN_PATH_KEY "path"
 #define PLUGIN_TYPE_KEY "type"
 #define PLUGIN_TYPE_PYTHON_VAL "python"
 #define PLUGIN_TYPE_CPP_VAL "cpp"
@@ -27,6 +29,7 @@ PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginIn
                 PluginInfo inf;
                 inf.name = plugin[PLUGIN_KEY][PLUGIN_NAME_KEY].as<string>();
                 inf.version = plugin[PLUGIN_KEY][PLUGIN_VERSION_KEY].as<string>();
+                inf.path = plugin[PLUGIN_KEY][PLUGIN_PATH_KEY].as<string>();
                 inf.typeStr = plugin[PLUGIN_KEY][PLUGIN_TYPE_KEY].as<string>();
 
                 if (inf.typeStr == PLUGIN_TYPE_PYTHON_VAL) {
@@ -35,7 +38,7 @@ PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginIn
 
                 } else if (inf.typeStr == PLUGIN_TYPE_CPP_VAL) {
                     inf.type = PluginTypes::CppPlugin;
-                    LOG_WRN("plugin CPP not implemented yet: %s", inf.typeStr.c_str());
+                    result = new PluginContainerCpp(inf);
 
                 } else {
                     LOG_ERR("Invalid Plugin Type: %s", inf.typeStr.c_str());

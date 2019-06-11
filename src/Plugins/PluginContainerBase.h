@@ -6,22 +6,8 @@
 #define PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
 
 #include "../AccountDefinitions.h"
-
-struct VerifyResult {
-    bool             verified;
-    ServiceParamList params;
-    StringList       errors;
-
-    VerifyResult(): verified(false) {
-    }
-};
-
-struct AuthResult {
-    bool       authenticated;
-    StrStrMap  tokens;
-    StringList errors;
-};
-
+#include "../AccountUtils.h"
+#include "PluginInterface.h"
 
 enum class PluginTypes {
     PythonPlugin,

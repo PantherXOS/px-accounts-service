@@ -11,7 +11,7 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
 
     m.doc() = "PantherX Online Accounts Plugin Framework for python";
 
-    py::class_<PythonPlugin>(m, "Plugin")
+    py::class_<IPlugin, PythonPlugin>(m, "Plugin")
             .def_readwrite("title", &PythonPlugin::title);
 
     py::bind_map<StrStrMap>(m, "StrStrMap");

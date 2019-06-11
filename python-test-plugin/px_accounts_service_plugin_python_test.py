@@ -6,7 +6,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
 
     class Plugin(PluginFramework.Plugin):
 
-        title = 'test'
+        title = 'python-test'
 
         def __init__(self):
             pass

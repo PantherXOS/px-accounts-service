@@ -41,8 +41,10 @@ add_library(${LIB_NAME}
         AccountManager.cpp
         AccountUtils.cpp
         AccountParser.cpp
+        Plugins/DLLoader.h
         Plugins/PluginContainerBase.cpp
         Plugins/PluginContainerPython.cpp
+        Plugins/PluginContainerCpp.cpp
         Plugins/PluginManager.cpp
         ProviderHandler.cpp
         PasswordHandler.cpp
