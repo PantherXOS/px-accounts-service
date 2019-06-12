@@ -11,32 +11,24 @@
 #define PROVIDER_KEY_PLUGINS "plugins"
 
 
-ProviderHandler ProviderHandler::_instance;
-
 ProviderHandler::ProviderHandler() {
-    init();
+
+    init(PXUTILS::FILE::abspath(PROVIDER_SYSTEM_PATH));
+    init(PXUTILS::FILE::abspath(PROVIDER_APP_PATH));
+    init(PXUTILS::FILE::abspath(PROVIDER_USER_PATH));
 }
 
-bool ProviderHandler::init() {
+bool ProviderHandler::init(const string& path) {
 
-    string storePath = PXUTILS::FILE::abspath(PROVIDER_STORE_PATH);
-    string userPath = PXUTILS::FILE::abspath(PROVIDER_USER_PATH);
-
-    for (const auto &provider : PXUTILS::FILE::dirfiles(storePath, ".yaml")) {
-        if (!initProvider(storePath + provider)) {
-            return false;
-        }
-    }
-
-    for (const auto &provider : PXUTILS::FILE::dirfiles(userPath, ".yaml")) {
-        if (!initProvider(userPath + provider)) {
+    for (const string& providerName: PXUTILS::FILE::dirfiles(path, ".yaml")) {
+        if (!initProvider(string(path).append("/").append(providerName))) {
             return false;
         }
     }
     return true;
 }
 
-bool ProviderHandler::initProvider(string providerPath) {
+bool ProviderHandler::initProvider(const string &providerPath) {
 
     if (!PXUTILS::FILE::exists(providerPath)) {
         addError(string("Provider file not found: ") + providerPath );
@@ -71,7 +63,8 @@ bool ProviderHandler::initProvider(string providerPath) {
 }
 
 ProviderHandler &ProviderHandler::Instance() {
-    return _instance;
+    static ProviderHandler instance;
+    return instance;
 }
 
 ProviderStruct &ProviderHandler::operator[](const string &title) {
