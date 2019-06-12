@@ -6,7 +6,10 @@
 #define PX_ACCOUNTS_SERVICE_DLLOADER_H
 
 #include <iostream>
+#include <memory>
 #include <dlfcn.h>
+
+using namespace std;
 
 template<class T>
 class IDLLoader {

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(../src/Plugins)
 
 add_library(${PROJECT_NAME} SHARED
-        ../src/plugins/PluginInterface.h
+        ../src/Plugins/PluginInterface.h
         PluginInterface.cpp
         cpp-test-plugin.h
         cpp-test-plugin.cpp)

@@ -27,7 +27,7 @@ include_directories(${CapnProto_INCLUDE_DIRS}
         ${yaml-cpp_INCLUDE_DIRS}
         ${PYTHON_INCLUDE_DIRS})
 
-link_libraries(CapnProto::capnp-rpc yaml-cpp)
+link_libraries(CapnProto::capnp-rpc yaml-cpp dl)
 set(CMAKE_CXX_FLAGS -pthread)
 set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 

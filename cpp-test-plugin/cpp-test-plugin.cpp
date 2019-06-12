@@ -3,6 +3,7 @@
 //
 
 #include "cpp-test-plugin.h"
+#include <algorithm>
 
 VerifyResult CPPTestPlugin::verify(const StrStrMap &params) {
     StringList requiredParams{"k1", "k2"};
