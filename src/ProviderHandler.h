@@ -8,37 +8,32 @@
 
 #include "AccountDefinitions.h"
 
-#ifdef __linux__
-
-#ifndef PROVIDER_STORE_PATH
-#define PROVIDER_STORE_PATH "~/.guix-profile/etc/accounts/providers/"
-#endif
-#define PROVIDER_USER_PATH  "~/.userdata/accounts/providers/"
-
-#else
-
-#define PROVIDER_STORE_PATH "./providers/"
-#define PROVIDER_USER_PATH  "~/.userdata/accounts/providers/"
-
-#endif
+#define PROVIDER_APP_PATH    "./providers"
+#define PROVIDER_USER_PATH   BASE_USER_PATH   "/etc/px/accounts/providers"
+#define PROVIDER_SYSTEM_PATH BASE_SYSTEM_PATH "/etc/px/accounts/providers"
 
 
 struct ProviderStruct {
     string title;
-    map < string, StrStrMap > plugins;
+    map<string, StrStrMap> plugins;
 };
 
 class ProviderHandler {
 
 protected:
     explicit ProviderHandler();
-    bool init();
-    bool initProvider(string providerPath);
+
+    bool init(const string& path);
+
+    bool initProvider(const string &providerPath);
 
 public:
     static ProviderHandler &Instance();
+
     ProviderStruct &operator[](const string &title);
+
     bool exists(const string &title);
+
     map<string, ProviderStruct> &providers();
 
 
@@ -49,6 +44,7 @@ protected:
 
 protected:
     inline void addError(string err) { _errorList.push_back(err); }
+
     inline void resetErrors() { _errorList.clear(); }
 
 public:
