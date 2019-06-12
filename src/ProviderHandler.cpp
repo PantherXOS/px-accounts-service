@@ -11,8 +11,6 @@
 #define PROVIDER_KEY_PLUGINS "plugins"
 
 
-ProviderHandler ProviderHandler::_instance;
-
 ProviderHandler::ProviderHandler() {
 
     init(PXUTILS::FILE::abspath(PROVIDER_SYSTEM_PATH));
@@ -65,7 +63,8 @@ bool ProviderHandler::initProvider(const string &providerPath) {
 }
 
 ProviderHandler &ProviderHandler::Instance() {
-    return _instance;
+    static ProviderHandler instance;
+    return instance;
 }
 
 ProviderStruct &ProviderHandler::operator[](const string &title) {

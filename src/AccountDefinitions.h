@@ -12,7 +12,7 @@
 #include "Plugins/PluginInterface.h"
 
 #define BASE_USER_PATH   "~/.guix-profile"
-#define BASE_SYSTEM_PATH "/run/current-system/profile/"
+#define BASE_SYSTEM_PATH "/run/current-system/profile"
 
 using namespace std;
 

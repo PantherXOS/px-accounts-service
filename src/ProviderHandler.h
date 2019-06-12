@@ -38,7 +38,6 @@ public:
 
 
 protected:
-    static ProviderHandler _instance;
     map<string, ProviderStruct> _providers;
     StringList _errorList;
 
@@ -48,7 +47,7 @@ protected:
     inline void resetErrors() { _errorList.clear(); }
 
 public:
-    inline static StringList &LastErrors() { return _instance._errorList; }
+    inline static StringList &LastErrors() { return ProviderHandler::Instance()._errorList; }
 
 };
 
