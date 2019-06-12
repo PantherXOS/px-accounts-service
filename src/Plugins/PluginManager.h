@@ -5,26 +5,30 @@
 #ifndef PX_ACCOUNTS_SERVICE_PLUGINMANAGER_H
 #define PX_ACCOUNTS_SERVICE_PLUGINMANAGER_H
 
-#include "PluginContainer.h"
+#include "PluginContainerBase.h"
+
 
 class PluginManager {
 
 protected:
     explicit PluginManager();
-    bool init();
+
+    bool init(const std::string &path);
 
 public:
     virtual ~PluginManager();
+
     static PluginManager &Instance();
 
-    PluginContainer &operator[](const std::string &);
+    PluginContainerBase &operator[](const std::string &);
+
     bool exists(const string &);
-    map<string, PluginContainer> &plugins();
+
+    map<string, PluginContainerBase *> &plugins();
 
 protected:
-    map<string, PluginContainer> _plugins;
+    map<string, PluginContainerBase *> _plugins;
 };
-
 
 
 #endif //PX_ACCOUNTS_SERVICE_PLUGINMANAGER_H

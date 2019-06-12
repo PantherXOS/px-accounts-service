@@ -14,10 +14,11 @@ ENDIF(LOCAL)
 
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(cpp-test-plugin)
 
 file (COPY providers DESTINATION ${CMAKE_BINARY_DIR}/src/)
 file (COPY providers DESTINATION ${CMAKE_BINARY_DIR}/tests/)
-file (COPY px_accounts_service_plugin_test.py DESTINATION ${CMAKE_BINARY_DIR}/src/)
-file (COPY px_accounts_service_plugin_test.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
+file (COPY python-test-plugin/px_accounts_service_plugin_python_test.py DESTINATION ${CMAKE_BINARY_DIR}/src/)
+file (COPY python-test-plugin/px_accounts_service_plugin_python_test.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
 
 install(DIRECTORY providers DESTINATION etc/accounts/)

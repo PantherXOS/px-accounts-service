@@ -13,7 +13,7 @@
 
 #include "AccountParser.h"
 
-using  namespace std;
+using namespace std;
 
 
 class EventManager {
@@ -31,7 +31,6 @@ public:
     static void EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to);
 
 private:
-    static EventManager _instance;
     nng_socket m_sock;
     bool m_inited = false;
 

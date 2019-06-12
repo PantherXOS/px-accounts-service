@@ -12,7 +12,6 @@
 #define RPC_PATH RPC_DIR "/events"
 #define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
-EventManager EventManager::_instance;
 
 EventManager::EventManager() {
 
@@ -70,7 +69,8 @@ void EventManager::emit(const string &event, const map<string, string> &params) 
 }
 
 EventManager &EventManager::Instance() {
-    return _instance;
+    static EventManager instance;
+    return instance;
 }
 
 void EventManager::EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to) {
@@ -78,5 +78,5 @@ void EventManager::EMIT_STATUS_CHANGE(const string &act, AccountStatus from, Acc
     params["account"] = act;
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
-    _instance.emit("account_status_change", params);
+    EventManager::Instance().emit("account_status_change", params);
 }
