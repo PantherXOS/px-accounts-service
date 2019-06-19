@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
 
     if (isDebug) {
         gLogger.setLevel(Logger::LVL_INF);
+        LOG_INF("=== DEBUG MODE ===");
     }
 
     SecretManager::Init(rpcSecretPath);

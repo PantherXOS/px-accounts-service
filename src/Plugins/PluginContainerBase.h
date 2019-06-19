@@ -14,6 +14,7 @@ enum class PluginTypes {
     CppPlugin,
     UnknownPlugin
 };
+extern map<PluginTypes, string> PluginTypesStr;
 
 struct PluginInfo {
     string name;

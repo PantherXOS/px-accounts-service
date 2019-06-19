@@ -33,9 +33,9 @@ bool SecretManager::IsExists(const string &act, const string &svc, const string 
     bool result = false;
     try {
         string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-        string result = this->getParam(_currentUserr, act, paramKey);
+        this->getParam(_currentUserr, act, paramKey);
         result = true;
-    } catch (std::exception &err) {
+    } catch (const std::logic_error &err) {
         result = false;
     }
     return result;
@@ -43,7 +43,7 @@ bool SecretManager::IsExists(const string &act, const string &svc, const string 
 
 bool SecretManager::Set(const string &act, const string &svc, const string &key, const string &val) {
     string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-    if (!this->IsExists(act, svc, key)) {
+    if (this->IsExists(act, svc, key)) {
         return this->editParam(_currentUserr, act, paramKey, val);
     } else {
         return this->addParam(_currentUserr, act, paramKey, val);
@@ -152,7 +152,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
                 .wait(ctx.waitScope);
     });
     if (!isSucceed) {
-        throw new std::logic_error(errString);
+        throw std::logic_error(errString);
     }
     return paramVal;
 }

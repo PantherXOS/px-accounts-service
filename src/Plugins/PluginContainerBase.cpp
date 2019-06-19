@@ -18,8 +18,16 @@
 #define PLUGIN_TYPE_PYTHON_VAL "python"
 #define PLUGIN_TYPE_CPP_VAL "cpp"
 
+map<PluginTypes, string> PluginTypesStr = {
+        {PluginTypes::CppPlugin,     "CPP"},
+        {PluginTypes::PythonPlugin,  "PYTHON"},
+        {PluginTypes::UnknownPlugin, "UNKNOWN"}
+};
+
 
 PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginInfoPath) {
+
+    LOG_INF("create container for: %s", pluginInfoPath.c_str());
 
     PluginContainerBase *result = nullptr;
     if (PXUTILS::FILE::exists(pluginInfoPath)) {
