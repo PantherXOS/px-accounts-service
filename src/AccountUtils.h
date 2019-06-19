@@ -47,6 +47,10 @@ namespace PXUTILS {
 
         string unix2path(const string &upath);
     }
+
+    namespace SYSTEM {
+        string current_user();
+    }
 }
 
 

@@ -14,8 +14,7 @@
 #include "AccountUtils.h"
 
 
-
-template <class HNDLR>
+template<class HNDLR>
 class RPCServer {
 
 public:
@@ -31,8 +30,8 @@ public:
 public:
     void start() {
         if (!isRunning) {
-            tServer = std::thread([](void* param){
-                auto instance = static_cast<RPCServer*>(param);
+            tServer = std::thread([](void *param) {
+                auto instance = static_cast<RPCServer *>(param);
 
                 kj::AsyncIoContext ctx = kj::setupAsyncIo();
                 auto &waitScope = ctx.waitScope;

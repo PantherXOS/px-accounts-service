@@ -24,8 +24,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     newAccount.settings["first key"] = "first value";
     newAccount.settings["second key"] = "second value";
 
-    newAccount.services["test"]["k1"] = "v1";
-    newAccount.services["test"]["k2"] = "v2";
+    newAccount.services["python-test"]["k1"] = "v1";
+    newAccount.services["python-test"]["k2"] = "v2";
 
 
     string accountName = PXUTILS::ACCOUNT::title2name(newAccount.title);
@@ -55,15 +55,15 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(newAccount.settings.find("second key") != newAccount.settings.end());
         REQUIRE(newAccount.settings["second key"] == "second value");
         REQUIRE(newAccount.services.size() == 1);
-        REQUIRE(newAccount.services.find("test") != newAccount.services.end());
-        REQUIRE(newAccount.services["test"].size() == 2);
+        REQUIRE(newAccount.services.find("python-test") != newAccount.services.end());
+        REQUIRE(newAccount.services["python-test"].size() == 2);
     }
 
     SECTION("Change Account active status") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.is_active = true;
-        account.services["test"]["k1"] = "v1";  // protected params need to be re-added during account modification
+        account.services["python-test"]["k1"] = "v1";  // protected params need to be re-added during account modification
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
         for (const auto &err : AccountManager::LastErrors()) {
             WARN(err);
@@ -78,7 +78,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.title = title2;
-        account.services["test"]["k1"] = "v1"; // protected params need to be re-added during account modification
+        account.services["python-test"]["k1"] = "v1"; // protected params need to be re-added during account modification
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
         for (const auto &err : AccountManager::LastErrors()) {
             WARN(err);
@@ -99,7 +99,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         AccountObject providerAccount;
         providerAccount.title = title3;
         providerAccount.provider = "test_provider";
-        providerAccount.services["test"]["k2"] = "v2";
+        providerAccount.services["python-test"]["k2"] = "v2";
 
         bool createResult = AccountManager::Instance().createAccount(providerAccount);
         for (const auto& err : AccountManager::LastErrors()) {
@@ -110,14 +110,14 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         string providerActName = PXUTILS::ACCOUNT::title2name(title3);
         REQUIRE(AccountManager::Instance().readAccount(providerActName, &account));
         REQUIRE(providerAccount.provider == account.provider);
-        REQUIRE(EXISTS(providerAccount.services, "test"));
-        REQUIRE(EXISTS(providerAccount.services["test"], "k1"));
-        REQUIRE(EXISTS(providerAccount.services["test"], "k2"));
-        REQUIRE(EXISTS(providerAccount.services["test"], "k3"));
+        REQUIRE(EXISTS(providerAccount.services, "python-test"));
+        REQUIRE(EXISTS(providerAccount.services["python-test"], "k1"));
+        REQUIRE(EXISTS(providerAccount.services["python-test"], "k2"));
+        REQUIRE(EXISTS(providerAccount.services["python-test"], "k3"));
 
-        REQUIRE(providerAccount.services["test"]["k1"] == "provider_val1");
-        REQUIRE(providerAccount.services["test"]["k2"] == "v2");
-        REQUIRE(providerAccount.services["test"]["k3"] == "provider_val3");
+        REQUIRE(providerAccount.services["python-test"]["k1"] == "provider_val1");
+        REQUIRE(providerAccount.services["python-test"]["k2"] == "v2");
+        REQUIRE(providerAccount.services["python-test"]["k3"] == "provider_val3");
 
         REQUIRE(AccountManager::Instance().deleteAccount(providerActName));
     }

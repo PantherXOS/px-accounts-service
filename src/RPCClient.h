@@ -29,7 +29,7 @@ public:
     }
 
     void performRequest(std::function<void(kj::AsyncIoContext& ctx, TClient &client)> func) {
-        std::cout << "request ... ";
+//        std::cout << "request ... ";
 
         // check for timeout between password requests.
         // todo: need to find a way to automatically handle this issue.
@@ -49,7 +49,7 @@ public:
         });
         thClient.join();
         lastExec = chrono::high_resolution_clock::now();
-        std::cout << "> done." << std::endl;
+//        std::cout << "> done." << std::endl;
     }
 
 protected:
