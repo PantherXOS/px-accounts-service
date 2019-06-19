@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     setvbuf( stdout, nullptr, _IONBF, 0 );
 
-    gLogger.setLevel(Logger::LVL_INF);
+//    gLogger.setLevel(Logger::LVL_INF);
 
     register_test_plugin("px-accounts-service-plugin-cpp-test",
                          "0.0.1",

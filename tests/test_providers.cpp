@@ -22,8 +22,8 @@ TEST_CASE("Provider Related Tests", "[ProviderHandler]") {
         REQUIRE(mgr.exists(providerName));
 
         ProviderStruct &provider = mgr[providerName];
-        REQUIRE(EXISTS(provider.plugins, "test"));
-        REQUIRE(EXISTS(provider.plugins["test"], "k1"));
-        REQUIRE(EXISTS(provider.plugins["test"], "k3"));
+        REQUIRE(EXISTS(provider.plugins, "python-test"));
+        REQUIRE(EXISTS(provider.plugins["python-test"], "k1"));
+        REQUIRE(EXISTS(provider.plugins["python-test"], "k3"));
     }
 }
