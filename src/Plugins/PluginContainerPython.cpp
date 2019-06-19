@@ -55,11 +55,13 @@ PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
     py::dict locals;
     locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(info.name));
     if (!info.path.empty()) {
-        locals["path"] = py::cast(info.path);
+        locals["module_path"] = py::cast(info.path);
     }
     py::exec(R"(
 import sys
-sys.path.append('.')
+sys.path.append(module_path)
+for p in sys.path:
+   print(p)
 
 import importlib
 new_module = importlib.import_module(module_name)
