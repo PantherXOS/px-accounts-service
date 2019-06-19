@@ -11,31 +11,8 @@
 #include <sys/stat.h>
 #include <AccountUtils.h>
 
-void register_test_plugin(const string &name, const string &version, const string &type, const string &path) {
-    mkdir("./plugins", S_IRWXU | S_IRWXG | S_IRWXO);
-    string pluginFileName = "./plugins/" + name + ".yaml";
-    if (PXUTILS::FILE::exists(pluginFileName)) {
-        PXUTILS::FILE::remove(pluginFileName);
-    }
-    ofstream pluginStream;
-    pluginStream.open(pluginFileName);
-    pluginStream << "plugin:\n"
-                 << "   name: " << name << "\n"
-                 << "   version: " << version << "\n"
-                 << "   type: " << type << "\n"
-                 << "   path: " << path << "\n";
-}
 
 TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
-
-    register_test_plugin("px-accounts-service-plugin-cpp-test",
-                         "0.0.1",
-                         "cpp",
-                         "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.dylib");
-    register_test_plugin("px-accounts-service-plugin-python-test",
-                         "0.0.1",
-                         "python",
-                         ".");
 
     auto &mgr = PluginManager::Instance();
 

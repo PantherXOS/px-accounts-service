@@ -10,6 +10,7 @@
 #include <wordexp.h>
 #include <dirent.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #include <iostream>
 #include <fstream>
@@ -128,6 +129,16 @@ string PXUTILS::PATH::unix2path(const string &upath) {
         path.replace(0, strlen(UNIX_PATH_HEADER), "");
     }
     return path;
+}
+
+string PXUTILS::SYSTEM::current_user() {
+    const size_t buffLen = 100;
+    char buff[buffLen] = {0x00};
+    int res = getlogin_r(buff, buffLen);
+    if (res == 0) {
+        return string(buff);
+    }
+    return string();
 }
 
 

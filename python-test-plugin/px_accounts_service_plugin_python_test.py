@@ -41,6 +41,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
                 for k in optional_params.keys():
                     if k not in received_keys:
                         param = PluginFramework.ServiceParam()
+                        param.key = k
                         param.val = optional_params[k]
                         param.default_val = optional_params[k]
                         if k in protected_params:

@@ -15,12 +15,13 @@ set(CAPNPC_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/interface" CACHE STRING "" FO
 message(${CAPNPC_OUTPUT_DIR})
 file(MAKE_DIRECTORY "${CAPNPC_OUTPUT_DIR}")
 capnp_generate_cpp(accountSources accountHeaders
-                ${INTERFACE_DIR}/Account.capnp
-                ${INTERFACE_DIR}/AccountReader.capnp
-                ${INTERFACE_DIR}/AccountWriter.capnp
-                ${INTERFACE_DIR}/event.capnp
-                ${INTERFACE_DIR}/password/interface.capnp
-                ${INTERFACE_DIR}/password/passwordbook.capnp)
+        ${INTERFACE_DIR}/Account.capnp
+        ${INTERFACE_DIR}/AccountReader.capnp
+        ${INTERFACE_DIR}/AccountWriter.capnp
+        ${INTERFACE_DIR}/event.capnp
+        ${INTERFACE_DIR}/Secret.capnp
+        ${INTERFACE_DIR}/password/interface.capnp
+        ${INTERFACE_DIR}/password/passwordbook.capnp)
 
 include_directories(${CapnProto_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
@@ -47,10 +48,10 @@ add_library(${LIB_NAME}
         Plugins/PluginContainerCpp.cpp
         Plugins/PluginManager.cpp
         ProviderHandler.cpp
-        PasswordHandler.cpp
+        Secret/SecretManager.cpp
         EventManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
-                                  PRIVATE nng::nng)
+        PRIVATE nng::nng)
 install(TARGETS ${LIB_NAME} DESTINATION lib)
 
 add_executable(${EXE_NAME} main.cpp)

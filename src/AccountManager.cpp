@@ -6,7 +6,7 @@
 #include "AccountUtils.h"
 #include "Plugins/PluginManager.h"
 #include "ProviderHandler.h"
-#include "PasswordHandler.h"
+#include "Secret/SecretManager.h"
 #include "EventManager.h"
 
 AccountManager AccountManager::_instance;
@@ -114,12 +114,11 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
     }
 
+    LOG_INF("saving protected params:");
     for (const auto &param : verifyResult.params) {
         if (param.is_protected) {
-            if (!PasswordHandler::Instance().set(act.title, svcName, param.key, param.val)) {
-                for (const auto &err : PasswordHandler::LastErrors()) {
-                    addError(err);
-                }
+            if (!SecretManager::Instance().Set(act.title, svcName, param.key, param.val)) {
+                LOG_ERR("saving secret failed");
                 return false;
             }
         }
@@ -127,10 +126,8 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
     for (const auto &token : authResult.tokens) {
         const auto &key = token.first;
         const auto &val = token.second;
-        if (!PasswordHandler::Instance().set(act.title, svcName, key, val)) {
-            for (const auto &err: PasswordHandler::LastErrors()) {
-                addError(err);
-            }
+        if (!SecretManager::Instance().Set(act.title, svcName, key, val)) {
+            LOG_ERR("saving secret failed");
             return false;
         }
     }

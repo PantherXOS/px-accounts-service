@@ -41,3 +41,9 @@ target_include_directories(plugin_finder
         PUBLIC ${PYTHON_INCLUDE_DIRS}
         PUBLIC ../src/)
 
+
+add_executable(secret_tester secret_tester.cpp)
+target_link_libraries(secret_tester PUBLIC ${LIB_NAME})
+target_include_directories(secret_tester
+        PUBLIC ../src/
+        PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../src/)

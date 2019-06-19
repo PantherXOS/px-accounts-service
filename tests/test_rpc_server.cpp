@@ -27,8 +27,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     act.settings["first key"] = "first value";
     act.settings["second key"] = "second value";
 
-    act.services["test"]["k1"] = "v1";  // protected params need to be re-added during account modification
-    act.services["test"]["k2"] = "v2";
+    act.services["python-test"]["k1"] = "v1";  // protected params need to be re-added during account modification
+    act.services["python-test"]["k2"] = "v2";
 
     capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
     auto& waitScope = rpcClient.getWaitScope();
@@ -65,7 +65,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         REQUIRE(savedAct.is_active == act.is_active);
         REQUIRE(savedAct.settings.size() == act.settings.size());
         REQUIRE(savedAct.services.size() == act.services.size());
-        REQUIRE(savedAct.services["test"]["k2"] == act.services["test"]["k2"]);
+        REQUIRE(savedAct.services["python-test"]["k2"] == act.services["python-test"]["k2"]);
 //        for (const auto &svc : act.services) {
 //            REQUIRE(savedAct.services.find(svc.first) != savedAct.services.end());
 //            for (const auto &kv: svc.second) {
@@ -86,7 +86,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         AccountObject testAct;
         RPCHandler::RPC2ACT(getRes.getAccount(), testAct);
         testAct.title = title2;
-        testAct.services["test"]["k1"] = "v1"; // protected params need to be re-added during account modification
+        testAct.services["python-test"]["k1"] = "v1"; // protected params need to be re-added during account modification
 
         capnp::MallocMessageBuilder msg;
         Account::Builder account = msg.initRoot<Account>();
@@ -134,11 +134,11 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
     SECTION("List test Accounts") {
         auto listReq = client.listRequest();
         auto serviceFilter = listReq.initServiceFilter(1);
-        serviceFilter.set(0, "test");
+        serviceFilter.set(0, "python-test");
         auto listRes = listReq.send().wait(waitScope);
         REQUIRE(listRes.hasAccounts());
         if (listRes.getAccounts().size() == 0)
-            WARN("'test' accounts not found");
+            WARN("'python-test' accounts not found");
     }
 
     SECTION("Get Account Details") {
