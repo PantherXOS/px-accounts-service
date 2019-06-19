@@ -60,8 +60,8 @@ PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
     py::exec(R"(
 import sys
 sys.path.append(module_path)
-for p in sys.path:
-   print(p)
+# for p in sys.path:
+#    print(p)
 
 import importlib
 new_module = importlib.import_module(module_name)
