@@ -5,6 +5,7 @@
 #include "RPCServer.h"
 #include "RPCHandler.h"
 #include "Secret/SecretManager.h"
+#include "Plugins/PluginManager.h"
 #include "AccountUtils.h"
 
 #define RPC_SERVER_PATH         "~/.userdata/rpc/accounts"
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
     }
 
     SecretManager::Init(rpcSecretPath);
+    PluginManager::Instance();
 
     RPCServer<RPCHandler> srv(rpcActPath);
     srv.start();
