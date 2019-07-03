@@ -26,9 +26,6 @@ map<PluginTypes, string> PluginTypesStr = {
 
 
 PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginInfoPath) {
-
-    LOG_INF("create container for: %s", pluginInfoPath.c_str());
-
     PluginContainerBase *result = nullptr;
     if (PXUTILS::FILE::exists(pluginInfoPath)) {
         try {
