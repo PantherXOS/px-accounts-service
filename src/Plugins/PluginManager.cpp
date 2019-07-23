@@ -20,8 +20,8 @@ PluginManager::PluginManager() {
     py::initialize_interpreter();
 
     init(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
-    init(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
     init(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
+    init(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
 }
 
 PluginManager::~PluginManager() {
