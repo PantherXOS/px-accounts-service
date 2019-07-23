@@ -9,6 +9,8 @@
 
 ## Important features
 
+- RELEASED | **ACCOUNT:Cryptocurrency-ETH** [-plugin-cryptocurrency-support](https://git.pantherx.org/development/plugins/online-accounts-cryptocurrency-support) | NO-OAUTH
+- RELEASED | **PROTOCOL:ETH** [-plugin-protocol-etherscan](https://git.pantherx.org/development/plugins/online-accounts-plugin-protocol-etherscan) | NO-OAUTH
 - Add, edit, delete accounts
 - Save credentials with `px-pass-service`
 - Keep track of account status
