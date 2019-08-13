@@ -34,6 +34,7 @@ bool PXParser::read(const string &acName, AccountObject *ac) {
                 for (const auto &service : it) {
                     auto serviceName = service.first.as<string>();
                     const YAML::Node& params = service.second;
+                    ac->services[serviceName] = AccountService();
                     for (const auto& p : params) {
                         ac->services[serviceName][p.first.as<string>()] = p.second.as<string>();
                     }

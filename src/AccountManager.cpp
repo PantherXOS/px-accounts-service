@@ -231,7 +231,7 @@ vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, Se
 
 bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
     if (!PXParser::read(accountName, account)) {
-        addError("Error on reading account file.");
+        addError("Error on reading account file: '" + accountName + "'.");
         return false;
     }
     return  true;
