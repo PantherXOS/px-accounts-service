@@ -12,7 +12,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
             pass
 
         def verify(self, params):
-            required_params  = [ 'k1', 'k2' ]
+            required_params  = [ 'k2' ]
             protected_params = [ 'k1' ]
             optional_params  = { 'o1': 'ov1', 'o2': 'ov2' }
             result = PluginFramework.VerifyResult()
@@ -37,6 +37,13 @@ if pkgutil.find_loader('PluginFramework') is not None:
                     if k in protected_params:
                         param.is_protected = True
                     result.params.append(param)
+
+                for k in protected_params:
+                    if k not in received_keys:
+                        param = PluginFramework.ServiceParam()
+                        param.key = k
+                        param.is_protected = True
+                        result.params.append(param)
 
                 for k in optional_params.keys():
                     if k not in received_keys:

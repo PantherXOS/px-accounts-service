@@ -30,15 +30,8 @@ bool SecretManager::Init(const string &path) {
 }
 
 bool SecretManager::IsExists(const string &act, const string &svc, const string &key) const {
-    bool result = false;
-    try {
-        string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-        this->getParam(_currentUserr, act, paramKey);
-        result = true;
-    } catch (const std::logic_error &err) {
-        result = false;
-    }
-    return result;
+    string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
+    return this->checkParam(_currentUserr, act, paramKey);
 }
 
 bool SecretManager::Set(const string &act, const string &svc, const string &key, const string &val) {
@@ -50,6 +43,18 @@ bool SecretManager::Set(const string &act, const string &svc, const string &key,
     }
 }
 
+bool SecretManager::SetAccount(const string &act, const map<string, string> &params) {
+    bool result = true;
+    for (const auto &kv : params) {
+        if (this->checkParam(_currentUserr, act, kv.first)) {
+            result = result && this->editParam(_currentUserr, act, kv.first, kv.second);
+        } else {
+            result = result && this->addParam(_currentUserr, act, kv.first, kv.second);
+        }
+    }
+    return result;
+}
+
 string SecretManager::Get(const string &act, const string &svc, const string &key) {
     string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
     try {
@@ -57,7 +62,20 @@ string SecretManager::Get(const string &act, const string &svc, const string &ke
     } catch (std::exception &) {
         return string();
     }
+}
 
+map<string, string> SecretManager::GetAccount(const string &act) {
+    map<string, string> result;
+    try {
+        auto keyList = this->getParams(_currentUserr, act);
+        for (const auto &key : keyList) {
+            string val = this->getParam(_currentUserr, act, key);
+            result[key] = val;
+        }
+    } catch (std::exception &) {
+        result.clear();
+    }
+    return result;
 }
 
 bool SecretManager::Remove(const string &act, const string &svc, const string &key) {
@@ -69,8 +87,19 @@ bool SecretManager::Remove(const string &act, const string &svc, const string &k
     return result;
 }
 
-bool SecretManager::removeAccount(const string &act) {
+bool SecretManager::RemoveAccount(const string &act) {
     return this->delApplication(_currentUserr, act);
+}
+
+bool SecretManager::checkParam(const string &wlt, const string &app, const string &key) const {
+    bool result = false;
+    try {
+        this->getParam(wlt, app, key, true);
+        result = true;
+    } catch (const std::logic_error &err) {
+        result = false;
+    }
+    return result;
 }
 
 bool SecretManager::addParam(const string &wlt, const string &app, const string &key, const string &val) const {
@@ -129,7 +158,7 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
     return isSucceed;
 }
 
-string SecretManager::getParam(const string &wlt, const string &app, const string &key) const {
+string SecretManager::getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance) const {
     // getParam @3 (wallet : Text, application : Text, paramKey : Text)-> (paramValue  : Text);
     LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
     bool isSucceed = false;
@@ -146,7 +175,9 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
                     paramVal = result.getParamValue().cStr();
                 }, [&](kj::Exception &&err) {
                     isSucceed = false;
-                    LOG_ERR("getParam failed: %s", err.getDescription().cStr());
+                    if (!ignoreExistance) {
+                        LOG_ERR("getParam failed: %s", err.getDescription().cStr());
+                    }
                     errString = err.getDescription().cStr();
                 })
                 .wait(ctx.waitScope);
@@ -155,6 +186,36 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
         throw std::logic_error(errString);
     }
     return paramVal;
+}
+
+list<string> SecretManager::getParams(const string &wlt, const string &app) const {
+    // getParams        @2 (wallet : Text, application   : Text -> (params : List(Text));
+    LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
+
+    bool isSucceed = false;
+    list<string> result;
+    string errString;
+
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.getParamsRequest();
+        req.setWallet(wlt);
+        req.setApplication(app);
+        req.send()
+                .then([&](auto &&resp) {
+                    isSucceed = true;
+                    for (const auto &key : resp.getParams()) {
+                        result.push_back(key.cStr());
+                    }
+                }, [&](kj::Exception &&err) {
+                    isSucceed = false;
+                    errString = err.getDescription().cStr();
+                })
+                .wait(ctx.waitScope);
+    });
+    if (!requestSucceed || !isSucceed) {
+        LOG_ERR("getParams error: %s", errString.c_str());
+    }
+    return result;
 }
 
 bool SecretManager::delParam(const string &wlt, const string &app, const string &key) const {

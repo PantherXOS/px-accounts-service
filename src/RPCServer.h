@@ -27,6 +27,10 @@ public:
         }
     }
 
+    virtual ~RPCServer() {
+        this->stop();
+    }
+
 public:
     void start() {
         if (!isRunning) {

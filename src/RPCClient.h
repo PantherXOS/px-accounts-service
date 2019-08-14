@@ -21,7 +21,7 @@ using namespace std;
 
 #include "AccountUtils.h"
 
-#define EXEC_INTERVAL 1000
+//#define EXEC_INTERVAL 100
 
 template <typename TBase, typename TClient>
 class RPCClient {
@@ -34,12 +34,12 @@ public:
 //        std::cout << "request ... ";
 
         // check for timeout between password requests.
-        // todo: need to find a way to automatically handle this issue.
-        auto elapsedDuration = chrono::high_resolution_clock::now() - lastExec;
-        auto elapsedMS = chrono::duration_cast<chrono::milliseconds>(elapsedDuration).count();
-        if (elapsedMS < EXEC_INTERVAL) {
-            std::this_thread::sleep_for(chrono::milliseconds(EXEC_INTERVAL - elapsedMS));
-        }
+        // todo: need to find a way to automatically handle this issue. (remove if everything was OK)
+//        auto elapsedDuration = chrono::high_resolution_clock::now() - lastExec;
+//        auto elapsedMS = chrono::duration_cast<chrono::milliseconds>(elapsedDuration).count();
+//        if (elapsedMS < EXEC_INTERVAL) {
+//            std::this_thread::sleep_for(chrono::milliseconds(EXEC_INTERVAL - elapsedMS));
+//        }
 
         bool _isSucceed = false;
         auto thClient = std::thread([&]() {
@@ -57,13 +57,13 @@ public:
             }
         });
         thClient.join();
-        lastExec = chrono::high_resolution_clock::now();
+//        lastExec = chrono::high_resolution_clock::now();
         return _isSucceed;
     }
 
 protected:
     string rpcPath;
-    chrono::high_resolution_clock::time_point lastExec;
+//    chrono::high_resolution_clock::time_point lastExec;
 
 };
 
