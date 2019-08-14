@@ -32,6 +32,7 @@ void AccountManager::addError(const string &msg) {
 
 bool AccountManager::verifyAccount(AccountObject &act) {
 
+    LOG_INF("verifying Account: (title: '%s')", act.title.c_str());
     if (act.title.empty()) {
         addError("'title' is required");
         return false;
@@ -119,6 +120,7 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         if (param.is_protected) {
             if (!SecretManager::Instance().Set(act.title, svcName, param.key, param.val)) {
                 LOG_ERR("saving secret failed");
+                addError("unable to sat protected params.");
                 return false;
             }
         }

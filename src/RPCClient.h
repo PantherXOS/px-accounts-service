@@ -19,6 +19,8 @@ using namespace std;
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
 
+#include "AccountUtils.h"
+
 #define EXEC_INTERVAL 1000
 
 template <typename TBase, typename TClient>
@@ -28,28 +30,35 @@ public:
     explicit RPCClient(string addr) : rpcPath(std::move(addr)) {
     }
 
-    void performRequest(std::function<void(kj::AsyncIoContext& ctx, TClient &client)> func) {
+    bool performRequest(std::function<void(kj::AsyncIoContext &ctx, TClient &client)> func) {
 //        std::cout << "request ... ";
 
         // check for timeout between password requests.
         // todo: need to find a way to automatically handle this issue.
-        auto  elapsedDuration = chrono::high_resolution_clock::now()  - lastExec;
+        auto elapsedDuration = chrono::high_resolution_clock::now() - lastExec;
         auto elapsedMS = chrono::duration_cast<chrono::milliseconds>(elapsedDuration).count();
         if (elapsedMS < EXEC_INTERVAL) {
             std::this_thread::sleep_for(chrono::milliseconds(EXEC_INTERVAL - elapsedMS));
         }
 
+        bool _isSucceed = false;
         auto thClient = std::thread([&]() {
-            auto ctx = kj::setupAsyncIo();
-            auto netAddr = ctx.provider->getNetwork().parseAddress(rpcPath).wait(ctx.waitScope);
-            auto stream = netAddr->connect().wait(ctx.waitScope);
-            auto rpc = kj::heap<capnp::TwoPartyClient>(*stream);
-            TClient client = rpc->bootstrap().template castAs<TBase>();
-            func(ctx, client);
+            try {
+                auto ctx = kj::setupAsyncIo();
+                auto netAddr = ctx.provider->getNetwork().parseAddress(rpcPath).wait(ctx.waitScope);
+                auto stream = netAddr->connect().wait(ctx.waitScope);
+                auto rpc = kj::heap<capnp::TwoPartyClient>(*stream);
+                TClient client = rpc->bootstrap().template castAs<TBase>();
+                func(ctx, client);
+                _isSucceed = true;
+            }
+            catch (kj::Exception &ex) {
+                LOG_ERR("Error: %s", ex.getDescription().cStr());
+            }
         });
         thClient.join();
         lastExec = chrono::high_resolution_clock::now();
-//        std::cout << "> done." << std::endl;
+        return _isSucceed;
     }
 
 protected:

@@ -78,7 +78,7 @@ bool SecretManager::addParam(const string &wlt, const string &app, const string 
     LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
     bool isSucceed = false;
     string errString;
-    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.addParamRequest();
         req.setWallet(wlt);
         req.setApplication(app);
@@ -95,7 +95,7 @@ bool SecretManager::addParam(const string &wlt, const string &app, const string 
                 })
                 .wait(ctx.waitScope);
     });
-    if (!isSucceed) {
+    if (!requestSucceed || !isSucceed) {
         LOG_ERR("request failed: %s", errString.c_str());
     }
     return isSucceed;
@@ -106,7 +106,7 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
     LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
     bool isSucceed = false;
     string errString;
-    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.editParamRequest();
         req.setWallet(wlt);
         req.setApplication(app);
@@ -123,7 +123,7 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
                 })
                 .wait(ctx.waitScope);
     });
-    if (!isSucceed) {
+    if (!requestSucceed || !isSucceed) {
         LOG_ERR("editParam failed: %s", errString.c_str());
     }
     return isSucceed;
@@ -135,7 +135,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
     bool isSucceed = false;
     string paramVal;
     string errString;
-    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.getParamRequest();
         req.setWallet(wlt);
         req.setApplication(app);
@@ -151,7 +151,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
                 })
                 .wait(ctx.waitScope);
     });
-    if (!isSucceed) {
+    if (!requestSucceed || !isSucceed) {
         throw std::logic_error(errString);
     }
     return paramVal;
@@ -162,7 +162,7 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
     LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
     bool isSucceed = false;
     string errString;
-    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.delParamRequest();
         req.setWallet(wlt);
         req.setApplication(app);
@@ -177,7 +177,7 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
                 })
                 .wait(ctx.waitScope);
     });
-    if (!isSucceed) {
+    if (!requestSucceed || !isSucceed) {
         LOG_ERR("delParam error: %s", errString.c_str());
     }
     return isSucceed;
@@ -188,7 +188,7 @@ bool SecretManager::delApplication(const string &wlt, const string &app) const {
     LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
     bool isSucceed = false;
     string errString;
-    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.delApplicationRequest();
         req.setWallet(wlt);
         req.setApplication(app);
@@ -202,7 +202,7 @@ bool SecretManager::delApplication(const string &wlt, const string &app) const {
                 })
                 .wait(ctx.waitScope);
     });
-    if (!isSucceed) {
+    if (!requestSucceed || !isSucceed) {
         LOG_ERR("delApplication failed: %s", errString.c_str());
     }
     return isSucceed;
