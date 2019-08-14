@@ -63,7 +63,6 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.is_active = true;
-        account.services["python-test"]["k1"] = "v1";  // protected params need to be re-added during account modification
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
         for (const auto &err : AccountManager::LastErrors()) {
             WARN(err);
@@ -78,7 +77,6 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
 
         account.title = title2;
-        account.services["python-test"]["k1"] = "v1"; // protected params need to be re-added during account modification
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
         for (const auto &err : AccountManager::LastErrors()) {
             WARN(err);
