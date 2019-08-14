@@ -30,19 +30,27 @@ public:
 
     bool Set(const string &act, const string &svc, const string &key, const string &val);
 
+    bool SetAccount(const string &act, const map<string, string> &params);
+
     string Get(const string &act, const string &svc, const string &key);
+
+    map<string, string> GetAccount(const string &act);
 
     bool Remove(const string &act, const string &svc, const string &key);
 
-    bool removeAccount(const string &act);
+    bool RemoveAccount(const string &act);
 
 
 protected:
+    bool checkParam(const string &wlt, const string &app, const string &key) const;
+
     bool addParam(const string &wlt, const string &app, const string &key, const string &val) const;
 
     bool editParam(const string &wlt, const string &app, const string &key, const string &val) const;
 
-    string getParam(const string &wlt, const string &app, const string &key) const;
+    string getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance = false) const;
+
+    list<string> getParams(const string &wlt, const string &app) const;
 
     bool delParam(const string &wlt, const string &app, const string &key) const;
 

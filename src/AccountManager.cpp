@@ -78,7 +78,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 }
 
 bool AccountManager::verifyAccountService(AccountObject &act, const string &svcName) {
-    LOG_INF("verifying '%s'", svcName.c_str());
+    LOG_INF("verifying service: '%s'", svcName.c_str());
 
     if (!PluginManager::Instance().exists(svcName)) {
         addError(string("unknown service '") + svcName + string("'"));
@@ -94,11 +94,23 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         }
         return false;
     }
+
+    for (auto &param: verifyResult.params) {
+        if (param.is_protected && param.val.empty()) {
+            param.val = SecretManager::Instance().Get(act.title, svcName, param.key);
+            if (param.val.empty()) {
+                addError("protected param not found: '" + param.key + "'");
+                return false;
+            }
+            LOG_INF("protected param value loaded: %s -> %s", param.key.c_str(), param.val.c_str());
+        }
+    }
+
     LOG_INF("%s", "parameters are verified:");
     for (const auto &param : verifyResult.params) {
         LOG_INF("\t%s : %s%s%s", param.key.c_str(), param.val.c_str(),
                 (param.is_protected ? " - PROTECTED" : ""),
-                (param.is_required ? " - REQUIRED": ""));
+                (param.is_required ? " - REQUIRED" : ""));
     }
 
     curService.applyVerification(verifyResult.params);
@@ -133,7 +145,6 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             return false;
         }
     }
-
     return true;
 }
 
@@ -153,36 +164,37 @@ bool AccountManager::createAccount(AccountObject &act) {
 
 bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
 
-    if (!verifyAccount(act)) {
-        addError("Account verification failed");
+    AccountObject oldAct;
+    if (!readAccount(accountName, &oldAct)) {
+        addError("Error on reading old Account details.");
         return false;
     }
-
+    bool titleChanged = (oldAct.title != act.title);
+    map<string, string> oldActProtectedParams;
     string newName = PXUTILS::ACCOUNT::title2name(act.title);
-    if (accountName != newName) {       // title changed. -> check account title conflicts.
 
+    if (titleChanged) {
+        // check for new title existance.
         for (const auto &name : listAccounts(ProviderFilters_t(), ServiceFilters_t())) {
             if (accountName != name && newName == name) {
                 addError("account with specified 'title' already exists.");
                 return false;
             }
         }
-    }
-
-    AccountObject oldAct;
-    if (!readAccount(accountName, &oldAct)) {
-        addError("Error on reading old Account details.");
-        return false;
+        // transfer old account's protected params
+        oldActProtectedParams = SecretManager::Instance().GetAccount(oldAct.title);
+        SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
     if (!createAccount(act)) {
+        SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
 
-    if (accountName != newName) {
-        if (!deleteAccount(accountName)) {
-            return false;
-        }
+    if (titleChanged) {
+        // remove old account related data
+        return SecretManager::Instance().RemoveAccount(oldAct.title)
+               && this->deleteAccount(accountName);
     }
     return true;
 }
@@ -236,7 +248,7 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
         addError("Error on reading account file: '" + accountName + "'.");
         return false;
     }
-    return  true;
+    return true;
 }
 
 bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
