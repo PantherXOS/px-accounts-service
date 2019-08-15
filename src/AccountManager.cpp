@@ -127,7 +127,6 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
         LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
     }
 
-    LOG_INF("saving protected params:");
     for (const auto &param : verifyResult.params) {
         if (param.is_protected) {
             if (!SecretManager::Instance().Set(act.title, svcName, param.key, param.val)) {
