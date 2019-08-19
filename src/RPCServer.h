@@ -14,10 +14,19 @@
 #include "AccountUtils.h"
 
 
+/**
+ * @brief Template class for handling RPC requests
+ * @tparam HNDLR RPCHandler class type
+ */
 template<class HNDLR>
 class RPCServer {
 
 public:
+    /**
+     * @brief constructor for creating new server
+     *
+     * @param addr address that server needs to initated on
+     */
     explicit RPCServer(std::string addr) : address(std::move(addr)) {
         if (PXUTILS::PATH::isunix(address)) {
             string rpcPath = PXUTILS::PATH::unix2path(address);
@@ -27,11 +36,13 @@ public:
         }
     }
 
+    /// @brief server destructor
     virtual ~RPCServer() {
         this->stop();
     }
 
 public:
+    /// @brief start processing RPC requests
     void start() {
         if (!isRunning) {
             tServer = std::thread([](void *param) {
@@ -55,6 +66,7 @@ public:
         }
     }
 
+    /// @brief stop processing RPC requests
     void stop() {
         if (isRunning) {
             isRunning = false;
@@ -62,6 +74,7 @@ public:
         }
     }
 
+    /// @brief restart the server
     void restart() {
         stop();
         start();

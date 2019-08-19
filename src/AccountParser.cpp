@@ -14,6 +14,12 @@
 #define ACCOUNT_SERVICE_KEY  "services"
 
 
+/**
+ * @param[in] acName name of account we want to read from disk
+ * @param[in,out] ac pointer to account object we want to fill it's details
+ *
+ * @return account read status
+ */
 bool PXParser::read(const string &acName, AccountObject *ac) {
     string acPath = PXParser::fullPath(acName);
     if (!PXUTILS::FILE::exists(acPath)) {
@@ -49,6 +55,12 @@ bool PXParser::read(const string &acName, AccountObject *ac) {
     return true;
 }
 
+/**
+ * @param[in] acName name of account that we want to write to disk
+ * @param[out] ac pointer to AccountObject
+ *
+ * @return account write status
+ */
 bool PXParser::write(const string &acName, const AccountObject &ac) {
 
     YAML::Emitter emitter;
@@ -121,6 +133,11 @@ bool PXParser::write(const string &acName, const AccountObject &ac) {
     return true;
 }
 
+/**
+ * @param acName account name we want to remove from disk
+ *
+ * @return account removal status
+ */
 bool PXParser::remove(const string &acName) {
     string acPath = PXParser::fullPath(acName);
     if (PXUTILS::FILE::exists(acPath)) {
@@ -129,6 +146,9 @@ bool PXParser::remove(const string &acName) {
     return true;
 }
 
+/**
+ * @param[out] act AccountObject that we want to print
+ */
 void PXParser::print_account(const AccountObject &act) {
     cout << endl;
     cout << "Account Details: " << endl;
@@ -147,5 +167,4 @@ void PXParser::print_account(const AccountObject &act) {
         }
     }
     cout << "--------------------------------------" << endl;
-
 }

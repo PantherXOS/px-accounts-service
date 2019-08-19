@@ -23,13 +23,27 @@ using namespace std;
 
 //#define EXEC_INTERVAL 100
 
+/**
+ * @brief Template class to create an RPCClient
+ * @tparam TBase  RPC interface class
+ * @tparam TClient  RPC interface client
+ */
 template <typename TBase, typename TClient>
 class RPCClient {
 
 public:
+    /**
+     * constructs an RPCClient with specified address
+     * @param addr address that client wants to connect
+     */
     explicit RPCClient(string addr) : rpcPath(std::move(addr)) {
     }
 
+    /**
+     * function that performs a RPCRequest
+     * @param func function to run after connection
+     * @return whether the RPC connection is successfully established or not
+     */
     bool performRequest(std::function<void(kj::AsyncIoContext &ctx, TClient &client)> func) {
 //        std::cout << "request ... ";
 

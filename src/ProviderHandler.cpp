@@ -18,6 +18,12 @@ ProviderHandler::ProviderHandler() {
     init(PXUTILS::FILE::abspath(PROVIDER_USER_PATH));
 }
 
+/**
+ *
+ * @param path base path for loading provider definition files
+ *
+ * @return privider handler initiation status
+ */
 bool ProviderHandler::init(const string& path) {
 
     for (const string& providerName: PXUTILS::FILE::dirfiles(path, ".yaml")) {
@@ -28,6 +34,12 @@ bool ProviderHandler::init(const string& path) {
     return true;
 }
 
+/**
+ *
+ * @param providerPath path to provider file
+ *
+ * @return initiation status
+ */
 bool ProviderHandler::initProvider(const string &providerPath) {
 
     if (!PXUTILS::FILE::exists(providerPath)) {
@@ -67,14 +79,26 @@ ProviderHandler &ProviderHandler::Instance() {
     return instance;
 }
 
+/**
+ * @param title provider title
+ *
+ * @return refrence to  provider with specified title
+ */
 ProviderStruct &ProviderHandler::operator[](const string &title) {
     return _providers[title];
 }
 
+/**
+ * @param title provider title to search for
+ * @return whether that the provider with specified title is exists or not
+ */
 bool ProviderHandler::exists(const string &title) {
     return _providers.find(title) != _providers.end();
 }
 
+/**
+ * @return reference to all existing providers
+ */
 map<string, ProviderStruct> &ProviderHandler::providers() {
     return _providers;
 }

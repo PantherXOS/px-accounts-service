@@ -22,12 +22,11 @@ class PythonPlugin : public IPlugin {
 public:
     explicit PythonPlugin() = default;
 
-    virtual ~PythonPlugin() = default;
+    ~PythonPlugin() override = default;
 
     VerifyResult verify(const StrStrMap &params) override;
 
     AuthResult authenticate(const ServiceParamList &params) override;
-
 };
 
 
@@ -47,6 +46,5 @@ protected:
     pybind11::object _module;
     pybind11::object _plugin;
 };
-
 
 #endif //PX_ACCOUNTS_SERVICE_PLUGINCONTAINERPYTHON_H

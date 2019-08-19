@@ -15,19 +15,23 @@
 
 using namespace std;
 
-
+/// @brief Class which is responsible for publishing Events to Event Service
 class EventManager {
 
-public:
-
 protected:
+    /// @brief protected method for creating EventManager instance
     explicit EventManager();
 
+    /// @brief method for emitting events to Event Service
     void emit(const string &event, const map<string, string> &params);
 
 public:
     virtual ~EventManager();
+
+    /// @brief static method to access EventManager singleton instance
     static EventManager &Instance();
+
+    /// @brief helper method for emitting change status event
     static void EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to);
 
 private:
