@@ -8,6 +8,7 @@
 #include "PluginContainerBase.h"
 #include "DLLoader.h"
 
+/// @brief Container for loading CPP plugins
 class PluginContainerCpp : public PluginContainerBase {
 
 public:
@@ -15,10 +16,13 @@ public:
 
     ~PluginContainerCpp() override;
 
+    /// @brief get plugin title
     string getTitle() override;
 
+    /// @brief verify service params
     VerifyResult verify(const StrStrMap &params) override;
 
+    /// @brief authenticate service based on provided params
     AuthResult authenticate(const ServiceParamList &params) override;
 
 private:

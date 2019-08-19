@@ -37,10 +37,18 @@ PluginManager &PluginManager::Instance() {
     return instance;
 }
 
+/**
+ * @param title plugin title we want to get it's reference
+ * @return reference to specified plugin
+ */
 PluginContainerBase &PluginManager::operator[](const std::string &title) {
     return *_plugins[title];
 }
 
+/**
+ * @param title title of plugin we want to check if exists
+ * @return plugin existance status
+ */
 bool PluginManager::exists(const string &title) {
     return _plugins.find(title) != _plugins.end();
 }
@@ -49,6 +57,10 @@ map<string, PluginContainerBase *> &PluginManager::plugins() {
     return _plugins;
 }
 
+/**
+ * @param path path to plugin's information file
+ * @return plugin initiation status
+ */
 bool PluginManager::init(const std::string &path) {
     LOG_INF("========================================================================================================");
     LOG_INF("search for registered plugins on: %s", path.c_str());

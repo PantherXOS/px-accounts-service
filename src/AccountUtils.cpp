@@ -17,6 +17,13 @@
 #include <algorithm>
 #include <map>
 
+/**
+ * convert account title to a file-system friendly formatted one
+ *
+ * @param title account title
+ *
+ * @return file-system friendly formatted version of account title
+ */
 string PXUTILS::ACCOUNT::title2name(const string &title) {
     string result = title;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
@@ -28,6 +35,13 @@ string PXUTILS::ACCOUNT::title2name(const string &title) {
     return result;
 }
 
+/**
+ * convert a python plugin package name to python module recommended format
+ *
+ * @param title plugin's package title
+ *
+ * @return converted plugin title
+ */
 string PXUTILS::PLUGIN::package2module(const string &title) {
     string result = title;
     std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
@@ -39,6 +53,11 @@ string PXUTILS::PLUGIN::package2module(const string &title) {
     return result;
 }
 
+/**
+ * @param path relative path
+ *
+ * @return equivalent abolute path for input
+ */
 string PXUTILS::FILE::abspath(const string &path) {
     string res;
     wordexp_t w;
@@ -49,6 +68,11 @@ string PXUTILS::FILE::abspath(const string &path) {
     return res;
 }
 
+/**
+ * @param path full path
+ *
+ * @return base directory part of input path
+ */
 string PXUTILS::FILE::basedir(const string &path) {
     string dir;
     size_t lastpos = path.rfind('/');
@@ -58,6 +82,11 @@ string PXUTILS::FILE::basedir(const string &path) {
     return dir;
 }
 
+/**
+ * @param path full path for a file
+ *
+ * @return exteracted part of full path
+ */
 string PXUTILS::FILE::filename(const string &path) {
     string fname;
     size_t lastpos = path.rfind('/');
@@ -67,6 +96,12 @@ string PXUTILS::FILE::filename(const string &path) {
     return fname;
 }
 
+/**
+ * @param path path to directory
+ * @param ext filter for specific file extensions to retrieve their list
+ *
+ * @return list of directory files matching the extension filter
+ */
 vector<string> PXUTILS::FILE::dirfiles(const string &path, string ext) {
     vector<string> result;
     if (!ext.empty() && ext[0] == '.') {
@@ -91,6 +126,11 @@ vector<string> PXUTILS::FILE::dirfiles(const string &path, string ext) {
     return result;
 }
 
+/**
+ * @param fname file name to extract it's extension
+ *
+ * @return extracted extension of file
+ */
 string PXUTILS::FILE::extpart(const string &fname) {
     const char *fpointer = fname.c_str();
     const char *d = strrchr(fpointer, '.');
@@ -100,15 +140,33 @@ string PXUTILS::FILE::extpart(const string &fname) {
     return string(d + 1);
 }
 
+/**
+ * @param fpath path we want to check it's existance
+ *
+ * @return path existance status
+ */
 bool PXUTILS::FILE::exists(const string &fpath) {
     struct stat buff{};
     return (stat(fpath.c_str(), &buff) == 0);
 }
 
+/**
+ * @param path  full path for file
+ *
+ * @return file removal status
+ */
 bool PXUTILS::FILE::remove(const string &path) {
     return (::remove(path.c_str()) == 0);
 }
 
+/**
+ * @param path full path for file we want to write to
+ * @param data text-based data we want to write
+ *
+ * @return data write status
+ *
+ * @throws exception in case that base path is not exists
+ */
 bool PXUTILS::FILE::write(const string &path, const string &data) {
     ofstream of(path.c_str(), ios::out);
     of << data;
@@ -119,10 +177,24 @@ bool PXUTILS::FILE::write(const string &path, const string &data) {
 
 #define UNIX_PATH_HEADER "unix:"
 
+/**
+ * check whether a path is started with 'unix:' prefix
+ *
+ * @param path path we want to check
+ *
+ * @return boolean indicates that path is unix path or not
+ */
 bool PXUTILS::PATH::isunix(const string &path) {
     return (path.find(UNIX_PATH_HEADER) == 0);
 }
 
+/**
+ * checks if path starts with 'unix:' and remove it if so
+ *
+ * @param upath path to convert
+ *
+ * @return converted path
+ */
 string PXUTILS::PATH::unix2path(const string &upath) {
     string path = upath;
     if (isunix(upath)) {
@@ -131,6 +203,9 @@ string PXUTILS::PATH::unix2path(const string &upath) {
     return path;
 }
 
+/**
+ * @return current logged in user
+ */
 string PXUTILS::SYSTEM::current_user() {
     const size_t buffLen = 100;
     char buff[buffLen] = {0x00};
@@ -143,6 +218,16 @@ string PXUTILS::SYSTEM::current_user() {
 
 
 // ============================================================================
+
+/**
+ *
+ * @param lvl LOG_LEVEL that we want to submit
+ * @param file filename that log line located on
+ * @param func function name that log line located on
+ * @param line line of code the log is located
+ * @param format format string to write log
+ * @param ...
+ */
 void Logger::log(Logger::LOG_LEVEL lvl, const char *file, const char *func, int line, const char *format, ...) {
 
     static map<Logger::LOG_LEVEL, std::string> lvlNames;

@@ -13,6 +13,9 @@
 #define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
 
+/**
+ * constructor for EventManager
+ */
 EventManager::EventManager() {
 
     system(RPC_MKPATH_CMD);
@@ -38,6 +41,12 @@ EventManager::~EventManager() {
     }
 }
 
+/**
+ *
+ * @param event event string that we want to emit to event service
+ * @param params string-based key value map about event params
+ *
+ */
 void EventManager::emit(const string &event, const map<string, string> &params) {
 
     if (m_inited) {
@@ -68,11 +77,21 @@ void EventManager::emit(const string &event, const map<string, string> &params) 
     }
 }
 
+/**
+ *
+ * @return reference for EventManager instance
+ */
 EventManager &EventManager::Instance() {
     static EventManager instance;
     return instance;
 }
 
+/**
+ *
+ * @param act account that it's status is changed
+ * @param from old status of account
+ * @param to new status of account
+ */
 void EventManager::EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to) {
     map<string, string> params;
     params["account"] = act;

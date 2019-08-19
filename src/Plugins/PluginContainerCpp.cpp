@@ -4,17 +4,13 @@
 
 #include "PluginContainerCpp.h"
 
-PluginContainerCpp::PluginContainerCpp(const PluginInfo &info) :
-        _loader(info.path) {
-
+PluginContainerCpp::PluginContainerCpp(const PluginInfo &info) : _loader(info.path) {
     _loader.DLOpenLib();
-
     _info = info;
     _inited = true;
 }
 
 PluginContainerCpp::~PluginContainerCpp() {
-
     _loader.DLCloseLib();
 }
 

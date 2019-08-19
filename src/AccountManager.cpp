@@ -13,11 +13,17 @@ AccountManager AccountManager::_instance;
 
 AccountManager::AccountManager() = default;
 
+/**
+ * @return initiated instance of AccountManager
+ */
 AccountManager &AccountManager::Instance() {
     _instance.resetErrors();
     return _instance;
 }
 
+/**
+ * @return list of errors occurred during last operation
+ */
 vector<string> &AccountManager::LastErrors() {
     return _instance.m_errorList;
 }
@@ -26,10 +32,22 @@ void AccountManager::resetErrors() {
     m_errorList.clear();
 }
 
+/**
+ * add new message to list of current operation errors
+ * @param msg message string to add.
+ */
 void AccountManager::addError(const string &msg) {
     m_errorList.push_back(msg);
 }
 
+/**
+ * check whether provided account details and services are verified
+ * for saving to disk
+ *
+ * @param[in,out] act AccountObject to verify
+ *
+ * @return account verification status
+ */
 bool AccountManager::verifyAccount(AccountObject &act) {
 
     LOG_INF("verifying Account: (title: '%s')", act.title.c_str());
@@ -52,6 +70,13 @@ bool AccountManager::verifyAccount(AccountObject &act) {
     return verified;
 }
 
+/**
+ * update parameters need to add to account services, based on defined provider
+ *
+ * @param[in,out] act: AccountObject that needs to be updates
+ *
+ * @return Provider update status
+ */
 bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 
     if (!ProviderHandler::Instance().exists(act.provider)) {
@@ -61,7 +86,6 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
     }
 
     LOG_INF("Updating provider '%s' params:", act.provider.c_str());
-    bool verified = true;
     ProviderStruct &provider = ProviderHandler::Instance()[act.provider];
     for (const auto &plg : provider.plugins) {
         const string &plgName = plg.first;
@@ -77,6 +101,14 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
     return true;
 }
 
+/**
+ * Verify AccountObject against selected service.
+ *
+ * @param[in,out] act AccountObject we need to verify
+ * @param[in] svcName service name we want to verify
+ *
+ * @return Account service verification status
+ */
 bool AccountManager::verifyAccountService(AccountObject &act, const string &svcName) {
     LOG_INF("verifying service: '%s'", svcName.c_str());
 
@@ -147,6 +179,13 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
     return true;
 }
 
+/**
+ * Save Provided AccountObject to disk
+ *
+ * @param[in,out] act AccountObject we want to create
+ *
+ * @return Account creation status
+ */
 bool AccountManager::createAccount(AccountObject &act) {
     if (!verifyAccount(act)) {
         addError("Account verification failed");
@@ -161,6 +200,14 @@ bool AccountManager::createAccount(AccountObject &act) {
     return true;
 }
 
+/**
+ * modify existing account details
+ *
+ * @param accountName name of account we want to modify
+ * @param act AccountObject that we want to selected account to be replaced with
+ *
+ * @return account modification status
+ */
 bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
 
     AccountObject oldAct;
@@ -198,6 +245,13 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
     return true;
 }
 
+/**
+ * delete existing account from disk
+ *
+ * @param accountName name of account we want to delete
+ *
+ * @return account deletion status
+ */
 bool AccountManager::deleteAccount(const string &accountName) {
     if (!PXParser::remove(accountName)) {
         return false;
@@ -206,7 +260,15 @@ bool AccountManager::deleteAccount(const string &accountName) {
     return true;
 }
 
-vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, ServiceFilters_t serviceFilter) {
+/**
+ * search for existing account titles
+ *
+ * @param providerFilter filter list for accounts that use specific providers
+ * @param serviceFilter filter list for accounts that use specific services
+ *
+ * @return list of account titles that matched with provided filters
+ */
+vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter) {
 
     vector<string> accounts;
     auto accountFiles = PXUTILS::FILE::dirfiles(PXParser::accountsPath(), ".yaml");
@@ -242,6 +304,14 @@ vector<string> AccountManager::listAccounts(ProviderFilters_t providerFilter, Se
     return accounts;
 }
 
+/**
+ * read account details
+ *
+ * @param[in] accountName name of account we want to read
+ * @param[out] account AccountObject that we fill it's details during account read procedure
+ *
+ * @return read account status
+ */
 bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
     if (!PXParser::read(accountName, account)) {
         addError("Error on reading account file: '" + accountName + "'.");
@@ -250,6 +320,14 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
     return true;
 }
 
+/**
+ * set provided status for an account
+ *
+ * @param accountName  title of account that we want to seti it's status
+ * @param stat the status we want to set for an account
+ *
+ * @return set status result
+ */
 bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
     AccountStatus oldStat = m_statDict[accountName];
     m_statDict[accountName] = stat;
@@ -259,6 +337,13 @@ bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
     return true;
 }
 
+/**
+ * get status of specific account
+ *
+ * @param accountName title of account that we want to read it's status
+ *
+ * @return status of account
+ */
 AccountStatus AccountManager::getStatus(const string &accountName) {
     if (m_statDict.find(accountName) == m_statDict.end())
         return AC_NONE;

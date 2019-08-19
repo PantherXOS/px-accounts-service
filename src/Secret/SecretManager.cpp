@@ -22,18 +22,37 @@ SecretManager &SecretManager::Instance() {
     return instance;
 }
 
+/**
+ *
+ * @param path rpc path that secret service is listening to
+ * @return initiation status
+ */
 bool SecretManager::Init(const string &path) {
-
     Instance()._path = path;
     Instance()._rpcClient = new RPCClient<RPCSecretService, RPCSecretService::Client>(path);
     return true;
 }
 
+/**
+ *
+ * @param act account name
+ * @param svc service name
+ * @param key parameter key
+ * @return status indicates that if key is exists
+ */
 bool SecretManager::IsExists(const string &act, const string &svc, const string &key) const {
     string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
     return this->checkParam(_currentUserr, act, paramKey);
 }
 
+/**
+ *
+ * @param act account name
+ * @param svc service name
+ * @param key parameter key
+ * @param val parameter value
+ * @return set parameter status
+ */
 bool SecretManager::Set(const string &act, const string &svc, const string &key, const string &val) {
     string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
     if (this->IsExists(act, svc, key)) {
@@ -44,6 +63,12 @@ bool SecretManager::Set(const string &act, const string &svc, const string &key,
     LOG_INF("new secret saved: [%s][%s][%s]", act.c_str(), svc.c_str(), key.c_str());
 }
 
+/**
+ *
+ * @param act    account name
+ * @param params string-based mapping for parameters to set
+ * @return set status result for all account parameter
+ */
 bool SecretManager::SetAccount(const string &act, const map<string, string> &params) {
     bool result = true;
     for (const auto &kv : params) {
@@ -56,6 +81,13 @@ bool SecretManager::SetAccount(const string &act, const map<string, string> &par
     return result;
 }
 
+/**
+ *
+ * @param act account name
+ * @param svc service name
+ * @param key parameter key
+ * @return value of requested parameter
+ */
 string SecretManager::Get(const string &act, const string &svc, const string &key) {
     string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
     try {
@@ -65,6 +97,11 @@ string SecretManager::Get(const string &act, const string &svc, const string &ke
     }
 }
 
+/**
+ *
+ * @param act account name
+ * @return string-based key-value mapping about all account parameters
+ */
 map<string, string> SecretManager::GetAccount(const string &act) {
     map<string, string> result;
     try {
@@ -79,6 +116,13 @@ map<string, string> SecretManager::GetAccount(const string &act) {
     return result;
 }
 
+/**
+ *
+ * @param act account name
+ * @param svc service name
+ * @param key parameter key
+ * @return parameter removal status
+ */
 bool SecretManager::Remove(const string &act, const string &svc, const string &key) {
     bool result = true;
     if (this->IsExists(act, svc, key)) {
@@ -88,10 +132,22 @@ bool SecretManager::Remove(const string &act, const string &svc, const string &k
     return result;
 }
 
+/**
+ *
+ * @param act account name
+ * @return account removal status
+ */
 bool SecretManager::RemoveAccount(const string &act) {
     return this->delApplication(_currentUserr, act);
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @param key parameter key
+ * @return parameter existence status
+ */
 bool SecretManager::checkParam(const string &wlt, const string &app, const string &key) const {
     bool result = false;
     try {
@@ -103,6 +159,14 @@ bool SecretManager::checkParam(const string &wlt, const string &app, const strin
     return result;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @param key parameter key
+ * @param val parameter value
+ * @return add parameter result
+ */
 bool SecretManager::addParam(const string &wlt, const string &app, const string &key, const string &val) const {
     // addParam @7 (wallet : Text, application: Text, param : RPCSecretParam) -> (result: RPCSecretResult);
     LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
@@ -131,6 +195,14 @@ bool SecretManager::addParam(const string &wlt, const string &app, const string 
     return isSucceed;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @param key parameter key
+ * @param val parameter value
+ * @return parameter modification status
+ */
 bool SecretManager::editParam(const string &wlt, const string &app, const string &key, const string &val) const {
     // editParam @8 (wallet : Text, application   : Text, param : RPCSecretParam) -> (result: RPCSecretResult);
     LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
@@ -159,6 +231,14 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
     return isSucceed;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @param key parameter key
+ * @param ignoreExistance ignore writing error log if parameter is exists
+ * @return
+ */
 string SecretManager::getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance) const {
     // getParam @3 (wallet : Text, application : Text, paramKey : Text)-> (paramValue  : Text);
     LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
@@ -189,14 +269,18 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
     return paramVal;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @return list af application parameters
+ */
 list<string> SecretManager::getParams(const string &wlt, const string &app) const {
     // getParams        @2 (wallet : Text, application   : Text -> (params : List(Text));
     LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
-
     bool isSucceed = false;
     list<string> result;
     string errString;
-
     bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.getParamsRequest();
         req.setWallet(wlt);
@@ -219,6 +303,13 @@ list<string> SecretManager::getParams(const string &wlt, const string &app) cons
     return result;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @param key parameter key
+ * @return parameter deletion status
+ */
 bool SecretManager::delParam(const string &wlt, const string &app, const string &key) const {
     // delParam @6 (wallet : Text, application: Text, paramKey : Text) -> (result: RPCSecretResult);
     LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
@@ -245,6 +336,12 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
     return isSucceed;
 }
 
+/**
+ *
+ * @param wlt wallet name
+ * @param app application name
+ * @return application removal status
+ */
 bool SecretManager::delApplication(const string &wlt, const string &app) const {
     // delApplication @5 (wallet : Text, application   : Text) -> (result: RPCSecretResult);
     LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
