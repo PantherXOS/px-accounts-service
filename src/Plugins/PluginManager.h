@@ -23,10 +23,7 @@ public:
     static PluginManager &Instance();
 
     /// @brief array item access operator
-    PluginContainerBase &operator[](const std::string &);
-
-    /// @brief check whether plugin with specific title exists
-    bool exists(const string &);
+    PluginContainerBase *operator[](const std::string &);
 
     /// @brief get reference to map of registered plugins
     map<string, PluginContainerBase *> &plugins();
