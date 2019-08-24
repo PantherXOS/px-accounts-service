@@ -38,8 +38,15 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
     SECTION("Create New Account") {
         bool createResult = AccountManager::Instance().createAccount(newAccount);
-        for (const auto& err : AccountManager::LastErrors()) {
-            WARN(err);
+        if (!createResult) {
+            for (const auto &err : AccountManager::LastErrors()) {
+                WARN(err);
+            }
+        } else {
+            if (AccountManager::LastErrors().size() > 0) {
+                REQUIRE(AccountManager::LastErrors().size() == 1);
+                REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
+            }
         }
         REQUIRE(createResult);
     }
@@ -64,13 +71,20 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
         account.is_active = true;
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
-        for (const auto &err : AccountManager::LastErrors()) {
-            WARN(err);
+        if (!modifyResult) {
+            for (const auto &err : AccountManager::LastErrors()) {
+                WARN(err);
+            }
+        } else {
+            if (AccountManager::LastErrors().size() > 0) {
+                REQUIRE(AccountManager::LastErrors().size() == 1);
+                REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
+            }
         }
         REQUIRE(modifyResult);
 
         REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
-        REQUIRE(account.is_active == true);
+        REQUIRE(account.is_active);
     }
 
     SECTION("Change Account Title") {
@@ -78,8 +92,15 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
         account.title = title2;
         bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
-        for (const auto &err : AccountManager::LastErrors()) {
-            WARN(err);
+        if (!modifyResult) {
+            for (const auto &err : AccountManager::LastErrors()) {
+                WARN(err);
+            }
+        } else {
+            if (AccountManager::LastErrors().size() > 0) {
+                REQUIRE(AccountManager::LastErrors().size() == 1);
+                REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
+            }
         }
         REQUIRE(modifyResult);
 
@@ -100,8 +121,15 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         providerAccount.services["python-test"]["k2"] = "v2";
 
         bool createResult = AccountManager::Instance().createAccount(providerAccount);
-        for (const auto& err : AccountManager::LastErrors()) {
-            WARN(err);
+        if (!createResult) {
+            for (const auto &err : AccountManager::LastErrors()) {
+                WARN(err);
+            }
+        } else {
+            if (AccountManager::LastErrors().size() > 0) {
+                REQUIRE(AccountManager::LastErrors().size() == 1);
+                REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
+            }
         }
         REQUIRE(createResult);
 

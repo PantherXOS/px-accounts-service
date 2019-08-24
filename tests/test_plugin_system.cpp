@@ -57,7 +57,10 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
         auto authResult = mgr["python-test"]->authenticate(vResult.params);
         REQUIRE(authResult.authenticated);
         CAPTURE(authResult.errors);
-        REQUIRE(authResult.errors.empty());
+        if (authResult.errors.size() > 0) {
+            REQUIRE(authResult.errors.size() == 1);
+            REQUIRE(authResult.errors[0] == "sample warning");
+        }
     }
 
     SECTION("Check CPP Plugin") {

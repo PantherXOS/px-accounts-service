@@ -14,11 +14,7 @@
 
 #include "test_common.h"
 #include "SecretSimulator.h"
-
-#ifdef __linux__
-#else
-#include "PasswordSimulator.h"
-#endif
+#include "simulators/EventSimulator.h"
 
 #ifdef __linux__
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.so"
@@ -59,17 +55,24 @@ int main(int argc, char *argv[]) {
                          "python",
                          ".");
 
-    RPCServer<SecretSimulator> secretService(SECRET_SIMULATOR_PATH);
-    secretService.start();
+    RPCServer<SecretSimulator> secretSimulator(SECRET_SIMULATOR_PATH);
+    secretSimulator.start();
+
+    EventSimulator evtSimulator;
+    evtSimulator.start();
+    evtSimulator.registerChannel("account");
+
+
 
     SecretManager::Init(SECRET_SIMULATOR_PATH);
 
-    RPCServer<RPCHandler> srv(SERVER_ADDRESS);
+    RPCServer<RPCHandler> srv(MAIN_SERVER_PATH);
     srv.start();
 
     int result = Catch::Session().run(argc, argv);
 
     srv.stop();
-
+    secretSimulator.stop();
+    evtSimulator.stop();
     return result;
 }

@@ -30,8 +30,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     act.services["python-test"]["k1"] = "v1";  // protected params need to be re-added during account modification
     act.services["python-test"]["k2"] = "v2";
 
-    capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
-    auto& waitScope = rpcClient.getWaitScope();
+    capnp::EzRpcClient rpcClient(MAIN_SERVER_PATH);
+    auto &waitScope = rpcClient.getWaitScope();
 
     AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
 
@@ -50,6 +50,12 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         request.setAccount(account);
 
         auto response = request.send().wait(waitScope);
+        if (response.hasWarnings()) {
+            auto warnings = response.getWarnings();
+            if (warnings.size() > 0) {
+                REQUIRE(warnings[0] == "sample warning");
+            }
+        }
         REQUIRE(response.getResult());
 
         auto getReq = client.getRequest();
@@ -66,18 +72,9 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         REQUIRE(savedAct.settings.size() == act.settings.size());
         REQUIRE(savedAct.services.size() == act.services.size());
         REQUIRE(savedAct.services["python-test"]["k2"] == act.services["python-test"]["k2"]);
-//        for (const auto &svc : act.services) {
-//            REQUIRE(savedAct.services.find(svc.first) != savedAct.services.end());
-//            for (const auto &kv: svc.second) {
-//                cout << svc.first << " - " << kv.first << endl;
-//                REQUIRE(savedAct.services[svc.first].find(kv.first) != savedAct.services[svc.first].end());
-//                REQUIRE(savedAct.services[svc.first][kv.first] == kv.second);
-//            }
-//        }
     }
 
     SECTION("Edit Account") {
-
         auto getReq = client.getRequest();
         getReq.setTitle(PXUTILS::ACCOUNT::title2name(act.title));
         auto getRes = getReq.send().wait(waitScope);
@@ -102,7 +99,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
                             REQUIRE(resp.getResult());
                         },
                         [](kj::Exception &&ex) {
-                            std::cout << ex.getDescription().cStr() << std::endl;
+                            CAPTURE(ex.getDescription().cStr());
                             REQUIRE(false);
                         });
         response.wait(waitScope);
@@ -118,8 +115,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
 TEST_CASE("Account Reader Tests", "[RPCServer]") {
 
-    capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
-    auto& waitScope = rpcClient.getWaitScope();
+    capnp::EzRpcClient rpcClient(MAIN_SERVER_PATH);
+    auto &waitScope = rpcClient.getWaitScope();
 
     AccountReader::Client client = rpcClient.getMain<AccountReader>();
 
@@ -180,7 +177,6 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
             getReq.setTitle(title);
             getRes = getReq.send().wait(waitScope);
             REQUIRE(getRes.getStatus() == Account::Status::ONLINE);
-
         }
     }
 }

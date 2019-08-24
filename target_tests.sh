@@ -26,7 +26,8 @@ CMD="$CMD;
      make
         && echo '#####################################################################################'
         && echo 'DONE'
-#        && cd tests
+        && cd tests
+        && ./tests -d yes;
 #        && ./tests -d yes \"Account Management Tasks\";
 #        && ./secret_tester;
 #     ./src/px-accounts-service;

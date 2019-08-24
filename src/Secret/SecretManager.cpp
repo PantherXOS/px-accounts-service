@@ -61,6 +61,7 @@ bool SecretManager::Set(const string &act, const string &svc, const string &key,
         return this->addParam(_currentUserr, act, paramKey, val);
     }
     LOG_INF("new secret saved: [%s][%s][%s]", act.c_str(), svc.c_str(), key.c_str());
+    return true;
 }
 
 /**
