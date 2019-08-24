@@ -120,12 +120,19 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
     bool res = AccountManager::Instance().createAccount(account);
-    for (const auto &err : AccountManager::LastErrors()) {
-        KJ_DBG(err);
+    if (!res) {
+        for (const auto &err : AccountManager::LastErrors()) {
+            KJ_DBG(err);
+        }
+        KJ_ASSERT(res, "Create new account failed.");
+    } else {
+        auto warnings = ctx.getResults().initWarnings(AccountManager::LastErrors().size());
+        int i = 0;
+        for (const auto &wrn : AccountManager::LastErrors()) {
+            warnings.set(i++, wrn);
+        }
     }
-    KJ_ASSERT(res, "Create new account failed.");
-    ctx.getResults().setResult(true);
-
+    ctx.getResults().setResult(res);
     return kj::READY_NOW;
 }
 
@@ -140,10 +147,18 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
     bool res = AccountManager::Instance().modifyAccount(title, account);
-    for (const auto &err : AccountManager::LastErrors()) {
-        KJ_DBG(err);
+    if (!res) {
+        for (const auto &err : AccountManager::LastErrors()) {
+            KJ_DBG(err);
+        }
+        KJ_ASSERT(res, "Modify Existing Account failed.");
+    } else {
+        auto warnings = ctx.getResults().initWarnings(AccountManager::LastErrors().size());
+        int i = 0;
+        for (const auto &wrn : AccountManager::LastErrors()) {
+            warnings.set(i++, wrn);
+        }
     }
-    KJ_ASSERT(res, "Modify Existing Account failed.");
     ctx.getResults().setResult(true);
 
     return kj::READY_NOW;

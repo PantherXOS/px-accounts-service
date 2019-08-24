@@ -5,7 +5,7 @@ using AccountReader = import "AccountReader.capnp".AccountReader;
 
 interface AccountWriter extends(AccountReader) {
 
-   add @0 (account: Account) -> (result: Bool);
-   edit @1 (title: Text, account: Account) -> (result: Bool);
+   add @0 (account: Account) -> (result: Bool, warnings: List(Text));
+   edit @1 (title: Text, account: Account) -> (result: Bool, warnings: List(Text));
    remove @2 (title: Text) -> (result: Bool);
 }
