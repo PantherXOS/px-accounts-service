@@ -3,8 +3,6 @@
 //
 
 #include "AccountManager.h"
-#include "AccountUtils.h"
-#include "Plugins/PluginManager.h"
 #include "ProviderHandler.h"
 #include "Secret/SecretManager.h"
 #include "EventManager.h"
@@ -34,10 +32,16 @@ void AccountManager::resetErrors() {
 
 /**
  * add new message to list of current operation errors
- * @param msg message string to add.
+ * @param msg error message to add.
  */
 void AccountManager::addError(const string &msg) {
     m_errorList.push_back(msg);
+}
+
+void AccountManager::addErrorList(const StringList &errList) {
+    for (const auto &err: errList) {
+        addError(err);
+    }
 }
 
 /**
@@ -65,7 +69,7 @@ bool AccountManager::verifyAccount(AccountObject &act) {
 
     bool verified = true;
     for (const auto &kv : act.services) {
-        verified &= verifyAccountService(act, kv.first);
+        verified &= verifyService(act, kv.first);
     }
     return verified;
 }
@@ -109,22 +113,32 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
  *
  * @return Account service verification status
  */
-bool AccountManager::verifyAccountService(AccountObject &act, const string &svcName) {
+bool AccountManager::verifyService(AccountObject &act, const string &svcName) {
     LOG_INF("verifying service: '%s'", svcName.c_str());
 
-    if (!PluginManager::Instance().exists(svcName)) {
+    PluginContainerBase *plugin = PluginManager::Instance()[svcName];
+    if (plugin == nullptr) {
         addError(string("unknown service '") + svcName + string("'"));
         return false;
     }
-
-    AccountService &curService = act.services[svcName];
-    PluginContainerBase &svcPlugin = PluginManager::Instance()[svcName];
-    auto verifyResult = svcPlugin.verify(curService);
-    if (!verifyResult.verified) {
-        for (const auto &err : verifyResult.errors) {
-            addError(err);
-        }
+    shared_ptr<VerifyResult> verifyResult = this->performServiceParamVerification(act, svcName, plugin);
+    if (verifyResult == nullptr) {
         return false;
+    }
+    shared_ptr<AuthResult> authResult = this->performServiceAuthentication(verifyResult, plugin);
+    if (authResult == nullptr) {
+        return false;
+    }
+    return this->saveServiceProtectedParams(act, svcName, verifyResult, authResult);
+}
+
+std::shared_ptr<VerifyResult> AccountManager::performServiceParamVerification(AccountObject &act,
+                                                                              const string &svcName,
+                                                                              PluginContainerBase *plugin) {
+    auto verifyResult = plugin->verify(act.services[svcName]);
+    if (!verifyResult.verified) {
+        addErrorList(verifyResult.errors);
+        return nullptr;
     }
 
     for (auto &param: verifyResult.params) {
@@ -132,11 +146,12 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             param.val = SecretManager::Instance().Get(act.title, svcName, param.key);
             if (param.val.empty()) {
                 addError("protected param not found: '" + param.key + "'");
-                return false;
+                return nullptr;
             }
             LOG_INF("protected param value loaded: %s -> %s", param.key.c_str(), param.val.c_str());
         }
     }
+    act.services[svcName].applyVerification(verifyResult.params);
 
     LOG_INF("%s", "parameters are verified:");
     for (const auto &param : verifyResult.params) {
@@ -144,22 +159,29 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
                 (param.is_protected ? " - PROTECTED" : ""),
                 (param.is_required ? " - REQUIRED" : ""));
     }
+    return make_shared<VerifyResult>(verifyResult);
+}
 
-    curService.applyVerification(verifyResult.params);
 
-    auto authResult = svcPlugin.authenticate(verifyResult.params);
+std::shared_ptr<AuthResult> AccountManager::performServiceAuthentication(shared_ptr<VerifyResult> vResult,
+                                                                         PluginContainerBase *plugin) {
+    auto authResult = plugin->authenticate(vResult->params);
+    addErrorList(authResult.errors);
     if (!authResult.authenticated) {
-        for (const auto &err : authResult.errors) {
-            addError(err);
-        }
-        return false;
+        return nullptr;
     }
     LOG_INF("%s", "service authenticated:");
     for (const auto &token : authResult.tokens) {
         LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
     }
+    return make_shared<AuthResult>(authResult);
+}
 
-    for (const auto &param : verifyResult.params) {
+bool AccountManager::saveServiceProtectedParams(AccountObject &act,
+                                                const string &svcName,
+                                                const shared_ptr<VerifyResult> &vResult,
+                                                const shared_ptr<AuthResult> &aResult) {
+    for (const auto &param : vResult->params) {
         if (param.is_protected) {
             if (!SecretManager::Instance().Set(act.title, svcName, param.key, param.val)) {
                 LOG_ERR("saving secret failed");
@@ -168,7 +190,7 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
             }
         }
     }
-    for (const auto &token : authResult.tokens) {
+    for (const auto &token : aResult->tokens) {
         const auto &key = token.first;
         const auto &val = token.second;
         if (!SecretManager::Instance().Set(act.title, svcName, key, val)) {
@@ -183,7 +205,6 @@ bool AccountManager::verifyAccountService(AccountObject &act, const string &svcN
  * Save Provided AccountObject to disk
  *
  * @param[in,out] act AccountObject we want to create
- *
  * @return Account creation status
  */
 bool AccountManager::createAccount(AccountObject &act) {
@@ -205,7 +226,6 @@ bool AccountManager::createAccount(AccountObject &act) {
  *
  * @param accountName name of account we want to modify
  * @param act AccountObject that we want to selected account to be replaced with
- *
  * @return account modification status
  */
 bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
@@ -232,7 +252,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
-    if (!createAccount(act)) {
+    if (!this->createAccount(act)) {
         SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
@@ -249,7 +269,6 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
  * delete existing account from disk
  *
  * @param accountName name of account we want to delete
- *
  * @return account deletion status
  */
 bool AccountManager::deleteAccount(const string &accountName) {
@@ -265,7 +284,6 @@ bool AccountManager::deleteAccount(const string &accountName) {
  *
  * @param providerFilter filter list for accounts that use specific providers
  * @param serviceFilter filter list for accounts that use specific services
- *
  * @return list of account titles that matched with provided filters
  */
 vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter) {
@@ -309,7 +327,6 @@ vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFil
  *
  * @param[in] accountName name of account we want to read
  * @param[out] account AccountObject that we fill it's details during account read procedure
- *
  * @return read account status
  */
 bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
@@ -325,7 +342,6 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
  *
  * @param accountName  title of account that we want to seti it's status
  * @param stat the status we want to set for an account
- *
  * @return set status result
  */
 bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
@@ -341,7 +357,6 @@ bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
  * get status of specific account
  *
  * @param accountName title of account that we want to read it's status
- *
  * @return status of account
  */
 AccountStatus AccountManager::getStatus(const string &accountName) {

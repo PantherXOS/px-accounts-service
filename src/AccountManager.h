@@ -5,7 +5,9 @@
 #ifndef PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
 #define PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
 
+#include <memory>
 #include "AccountParser.h"
+#include "Plugins/PluginManager.h"
 
 /**
  * @brief Base Class for Managing Online Accounts
@@ -21,15 +23,17 @@ public:
     /// @brief static method in order to access AccountManager object
     static AccountManager &Instance();
 
-    /// @brief static method for accessing last occurd errors during last operation
+    /// @brief static method for accessing last occurred errors during last operation
     static vector<string> &LastErrors();
 
 protected:
     /// @brief reset previous operation errors
     void resetErrors();
 
-    /// @brief add new error to list of occured errors
+    /// @brief add new error to list of occurred errors
     void addError(const string &msg);
+
+    void addErrorList(const StringList &errList);
 
     /// @brief verify AccountObject
     bool verifyAccount(AccountObject &act);
@@ -38,7 +42,20 @@ protected:
     bool updateProviderRelatedParams(AccountObject &act);
 
     /// @brief verify Account against provided service
-    bool verifyAccountService(AccountObject &act, const string &svcName);
+    bool verifyService(AccountObject &act, const string &svcName);
+
+    std::shared_ptr<VerifyResult> performServiceParamVerification(AccountObject &act,
+                                                                  const string &svcName,
+                                                                  PluginContainerBase *plugin);
+
+
+    std::shared_ptr<AuthResult> performServiceAuthentication(shared_ptr<VerifyResult> vResult,
+                                                             PluginContainerBase *plugin);
+
+    bool saveServiceProtectedParams(AccountObject &act,
+                                    const string &svcName,
+                                    const shared_ptr<VerifyResult>& vResult,
+                                    const shared_ptr<AuthResult>& aResult);
 
 public:
     /// @brief save new account to disk
