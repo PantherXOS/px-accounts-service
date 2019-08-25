@@ -53,6 +53,9 @@ protected:
     /// @brief low-level method to check if a parameter exists for an application inside specific wallet
     bool checkParam(const string &wlt, const string &app, const string &key) const;
 
+    /// @brief low-level method to check if an application exists inside specific wallet
+    bool checkApplication(const string &wlt, const string &app) const;
+
     /// @brief low-level method to add a new parameter to an application inside specific wallet
     bool addParam(const string &wlt, const string &app, const string &key, const string &val) const;
 

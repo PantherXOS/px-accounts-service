@@ -139,7 +139,11 @@ bool SecretManager::Remove(const string &act, const string &svc, const string &k
  * @return account removal status
  */
 bool SecretManager::RemoveAccount(const string &act) {
-    return this->delApplication(_currentUserr, act);
+    bool result = true;
+    if (this->checkApplication(_currentUserr, act)) {
+        result = this->delApplication(_currentUserr, act);
+    }
+    return result;
 }
 
 /**
@@ -153,6 +157,23 @@ bool SecretManager::checkParam(const string &wlt, const string &app, const strin
     bool result = false;
     try {
         this->getParam(wlt, app, key, true);
+        result = true;
+    } catch (const std::logic_error &err) {
+        result = false;
+    }
+    return result;
+}
+
+/**
+ * check if an application is exists, using `getParam` RPC interface.
+ * @param wlt   wallet name
+ * @param app   application
+ * @return      application existence status
+ */
+bool SecretManager::checkApplication(const string &wlt, const string &app) const {
+    bool result;
+    try {
+        this->getParams(wlt, app);
         result = true;
     } catch (const std::logic_error &err) {
         result = false;
@@ -274,6 +295,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
  *
  * @param wlt wallet name
  * @param app application name
+ * @throws std::logic_error in case of RPC request failure
  * @return list af application parameters
  */
 list<string> SecretManager::getParams(const string &wlt, const string &app) const {
@@ -299,7 +321,7 @@ list<string> SecretManager::getParams(const string &wlt, const string &app) cons
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("getParams error: %s", errString.c_str());
+        throw std::logic_error(errString);
     }
     return result;
 }
@@ -332,7 +354,7 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("delParam error: %s", errString.c_str());
+        LOG_ERR("Error: %s", errString.c_str());
     }
     return isSucceed;
 }
@@ -363,7 +385,7 @@ bool SecretManager::delApplication(const string &wlt, const string &app) const {
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("delApplication failed: %s", errString.c_str());
+        LOG_ERR("Error: %s", errString.c_str());
     }
     return isSucceed;
 }

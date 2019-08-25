@@ -6,8 +6,10 @@
 
 #include <catch2/catch.hpp>
 
-#include <AccountManager.h>
 #include <iostream>
+
+#include <AccountManager.h>
+#include <AccountParser.h>
 
 
 TEST_CASE("Account Management Tasks", "[AccountManager]") {
@@ -146,5 +148,27 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(providerAccount.services["python-test"]["k3"] == "provider_val3");
 
         REQUIRE(AccountManager::Instance().deleteAccount(providerActName));
+    }
+
+    SECTION("Modify Account with Public Plugin") {
+
+        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_public_account")));
+        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("modified_public_act")));
+
+        AccountObject act;
+        act.title = "my_public_account";
+        act.services["public-test"];
+        bool createRes = AccountManager::Instance().createAccount(act);
+        (AccountManager::LastErrors());
+        REQUIRE(createRes);
+
+        AccountObject savedAct;
+        REQUIRE(AccountManager::Instance().readAccount(act.title, &savedAct));
+        REQUIRE(savedAct.services.find("public-test") != savedAct.services.end());
+        savedAct.title = "modified_public_act";
+        bool modifyRes = AccountManager::Instance().modifyAccount(act.title, savedAct);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(modifyRes);
+
     }
 }
