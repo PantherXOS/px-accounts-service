@@ -44,14 +44,16 @@ protected:
     /// @brief verify Account against provided service
     bool verifyService(AccountObject &act, const string &svcName);
 
+    /// @brief check and prepare parameters needed for a service
     std::shared_ptr<VerifyResult> performServiceParamVerification(AccountObject &act,
                                                                   const string &svcName,
                                                                   PluginContainerBase *plugin);
 
-
+    /// @brief perform authentication task for a service
     std::shared_ptr<AuthResult> performServiceAuthentication(shared_ptr<VerifyResult> vResult,
                                                              PluginContainerBase *plugin);
 
+    /// @brief save protected params to SecretManager
     bool saveServiceProtectedParams(AccountObject &act,
                                     const string &svcName,
                                     const shared_ptr<VerifyResult>& vResult,

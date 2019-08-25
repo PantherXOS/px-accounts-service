@@ -16,7 +16,7 @@ SERVER_ADDRESS="root@127.0.0.1"
 
 ssh $SERVER_ADDRESS -p 2222 "mkdir -p $TARGET_PATH"
 
-rsync -av -e "ssh -p 2222" --exclude ".git" --exclude "cmake-build-debug" --exclude ".idea" "." "$SERVER_ADDRESS:$TARGET_PATH/"
+rsync -av -e "ssh -p 2222" --exclude ".git" --exclude "cmake-build-debug" --exclude "docs/html" --exclude ".idea" "." "$SERVER_ADDRESS:$TARGET_PATH/"
 
 CMD='export GUILE_LOAD_PATH=$GUILE_LOAD_PATH:.'
 CMD="$CMD;

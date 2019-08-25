@@ -132,6 +132,15 @@ bool AccountManager::verifyService(AccountObject &act, const string &svcName) {
     return this->saveServiceProtectedParams(act, svcName, verifyResult, authResult);
 }
 
+/**
+ * Call Plugin's parameter verification method to prepare service parameters
+ * also load protected parameters needed for a service to be authenticated.
+ *
+ * @param act       AccountObject we want to verify a service from
+ * @param svcName   name of service that needs to be verified
+ * @param plugin    pointer to related plugin needs to be used for service verification
+ * @return          VerifyResult object
+ */
 std::shared_ptr<VerifyResult> AccountManager::performServiceParamVerification(AccountObject &act,
                                                                               const string &svcName,
                                                                               PluginContainerBase *plugin) {
@@ -162,7 +171,15 @@ std::shared_ptr<VerifyResult> AccountManager::performServiceParamVerification(Ac
     return make_shared<VerifyResult>(verifyResult);
 }
 
-
+/**
+ * call plugin's authenticate method to check if an account service could
+ * be authenticated or not. this method also provides list of warning
+ * messages needs to reported to remote RPC client
+ *
+ * @param vResult   VerifyResult object that provided previously by plugin
+ * @param plugin    pointer to plugin object that is responsible for service verification
+ * @return          AuthResult object that holds authentication results
+ */
 std::shared_ptr<AuthResult> AccountManager::performServiceAuthentication(shared_ptr<VerifyResult> vResult,
                                                                          PluginContainerBase *plugin) {
     auto authResult = plugin->authenticate(vResult->params);
@@ -177,6 +194,15 @@ std::shared_ptr<AuthResult> AccountManager::performServiceAuthentication(shared_
     return make_shared<AuthResult>(authResult);
 }
 
+/**
+ * save protected parameters and generated tokens to SecretManager
+ *
+ * @param act       AccountObject that we want to save it's protected params
+ * @param svcName   name of service
+ * @param vResult   pointer to plugin's `verify` method results
+ * @param aResult   pointer to plugins's `authenticate` method results
+ * @return          result of saving protected methods
+ */
 bool AccountManager::saveServiceProtectedParams(AccountObject &act,
                                                 const string &svcName,
                                                 const shared_ptr<VerifyResult> &vResult,
