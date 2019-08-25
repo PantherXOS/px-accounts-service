@@ -8,8 +8,12 @@
 #include "Plugins/PluginManager.h"
 #include "AccountUtils.h"
 
-#define RPC_SERVER_PATH         "~/.userdata/rpc/accounts"
-#define RPC_CLIENT_SECRET_PATH  "~/.userdata/rpc/secret"
+#define RPC_DIR "~/.userdata/rpc"
+#define RPC_SERVER_PATH         RPC_DIR "/accounts"
+#define RPC_CLIENT_SECRET_PATH  RPC_DIR "/secret"
+
+#define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
+
 
 void IntHandler(int dummy) {
     puts("Server Terminated.");
@@ -21,6 +25,7 @@ int main(int argc, char *argv[]) {
 
     setvbuf(stdout, nullptr, _IONBF, 0);
     signal(SIGINT, IntHandler);
+    system(RPC_MKPATH_CMD);
 
     bool isDebug = false;
     string pass = "123";

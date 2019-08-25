@@ -67,6 +67,7 @@ void EventSimulator::stop() {
 
 void EventSimulator::registerChannel(const string &topic) {
     if (m_publisherSockets.find(topic) == m_publisherSockets.end()) {
+        system("mkdir -p " EVENT_CHANNEL_BASE_PATH);
         string channelPath = "ipc://" + PXUTILS::FILE::abspath(EVENT_CHANNEL_BASE_PATH) + topic;
         int ret;
         m_publisherSockets[topic];
