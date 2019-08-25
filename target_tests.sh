@@ -22,8 +22,8 @@ CMD='export GUILE_LOAD_PATH=$GUILE_LOAD_PATH:.'
 CMD="$CMD;
      cd $TARGET_PATH;
      mkdir -p build && cd build ;
-     cmake ..;
-     make
+     cmake .. &&
+        make
         && echo '#####################################################################################'
         && echo 'DONE'
         && cd tests
