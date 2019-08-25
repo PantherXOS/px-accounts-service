@@ -62,4 +62,5 @@ if pkgutil.find_loader('PluginFramework') is not None:
             # token['t1'] = 'token_value1'
             result.tokens['t1'] = 'token_value1'
             result.authenticated = True
+            result.errors.append('sample warning')
             return result

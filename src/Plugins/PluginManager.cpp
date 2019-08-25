@@ -41,16 +41,11 @@ PluginManager &PluginManager::Instance() {
  * @param title plugin title we want to get it's reference
  * @return reference to specified plugin
  */
-PluginContainerBase &PluginManager::operator[](const std::string &title) {
-    return *_plugins[title];
-}
-
-/**
- * @param title title of plugin we want to check if exists
- * @return plugin existance status
- */
-bool PluginManager::exists(const string &title) {
-    return _plugins.find(title) != _plugins.end();
+PluginContainerBase *PluginManager::operator[](const std::string &title) {
+    if (_plugins.find(title) == _plugins.end()) {
+        return nullptr;
+    }
+    return _plugins[title];
 }
 
 map<string, PluginContainerBase *> &PluginManager::plugins() {

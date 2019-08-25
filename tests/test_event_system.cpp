@@ -37,7 +37,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
     }
 
     SECTION("Create Test Account") {
-        capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
+        capnp::EzRpcClient rpcClient(MAIN_SERVER_PATH);
         kj::WaitScope &waitScope = rpcClient.getWaitScope();
         AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
 
@@ -66,7 +66,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
 
         std::thread statThread = std::thread([&]() {
             INFO("Client Thread");
-            capnp::EzRpcClient rpcClient(SERVER_ADDRESS);
+            capnp::EzRpcClient rpcClient(MAIN_SERVER_PATH);
             kj::WaitScope &waitScope = rpcClient.getWaitScope();
             AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
 

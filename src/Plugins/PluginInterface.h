@@ -56,7 +56,7 @@ public:
     /**
      * @brief abstract method for service parameters verification
      *
-     * @param String based key-value mapping for
+     * @param  params String based key-value mapping for
      * @return VerifyResult structure as result of plugin's verify method
      */
     virtual VerifyResult verify(const StrStrMap &params) = 0;
