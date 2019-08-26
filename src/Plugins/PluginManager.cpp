@@ -62,7 +62,7 @@ bool PluginManager::init(const std::string &path) {
     for (const string &pluginFile: PXUTILS::FILE::dirfiles(path, ".yaml")) {
         PluginContainerBase *plugin = PluginContainerBase::CreateContainer(path + "/" + pluginFile);
         if (plugin != nullptr && plugin->isInited()) {
-            LOG_INF("   - new plugin loaded: [%s]: %s",
+            LOG_INF("   - new plugin loaded: [%s]\t: %s",
                     PluginTypesStr[plugin->getType()].c_str(),
                     plugin->getTitle().c_str());
             _plugins[plugin->getTitle()] = plugin;
