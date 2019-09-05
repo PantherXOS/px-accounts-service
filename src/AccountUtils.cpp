@@ -218,35 +218,3 @@ string PXUTILS::SYSTEM::current_user() {
 
 
 // ============================================================================
-
-/**
- *
- * @param lvl LOG_LEVEL that we want to submit
- * @param file filename that log line located on
- * @param func function name that log line located on
- * @param line line of code the log is located
- * @param format format string to write log
- * @param ...
- */
-void Logger::log(Logger::LOG_LEVEL lvl, const char *file, const char *func, int line, const char *format, ...) {
-
-    static map<Logger::LOG_LEVEL, std::string> lvlNames;
-    lvlNames[Logger::LVL_ERR] = "ERR";
-    lvlNames[Logger::LVL_WRN] = "WRN";
-    lvlNames[Logger::LVL_INF] = "INF";
-
-    if (lvl <= m_logLevel) {
-        char buffer[1024];
-        va_list args;
-        va_start (args, format);
-        vsprintf(buffer, format, args);
-        va_end (args);
-
-        string fname = PXUTILS::FILE::filename(file);
-        std::cout << "[" << lvlNames[lvl] << "] - " << "[" << fname << "][" << func << "](" << line << "): "
-                  << buffer << std::endl;
-    }
-}
-
-Logger gLogger;
-// ============================================================================

@@ -54,7 +54,7 @@ void AccountManager::addErrorList(const StringList &errList) {
  */
 bool AccountManager::verifyAccount(AccountObject &act) {
 
-    LOG_INF("verifying Account: (title: '%s')", act.title.c_str());
+    GLOG_INF("verifying Account: (title: '", act.title, "')");
     if (act.title.empty()) {
         addError("'title' is required");
         return false;
@@ -85,11 +85,11 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
 
     if (!ProviderHandler::Instance().exists(act.provider)) {
         addError(string("unknown provider: '") + act.provider + string("'"));
-        LOG_ERR("unknown provider: %s", act.provider.c_str());
+        GLOG_ERR("unknown provider: ", act.provider);
         return false;
     }
 
-    LOG_INF("Updating provider '%s' params:", act.provider.c_str());
+    GLOG_INF("Updating provider '", act.provider, "' params:");
     ProviderStruct &provider = ProviderHandler::Instance()[act.provider];
     for (const auto &plg : provider.plugins) {
         const string &plgName = plg.first;
@@ -99,7 +99,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
             const auto &pkey = prm.first;
             const auto &pval = prm.second;
             act.services[plgName][pkey] = pval;
-            LOG_INF("\t[%s][%s] = %s", plgName.c_str(), pkey.c_str(), pval.c_str());
+            GLOG_INF("\t[", plgName, "][", pkey, "] = ", pval);
         }
     }
     return true;
@@ -114,7 +114,7 @@ bool AccountManager::updateProviderRelatedParams(AccountObject &act) {
  * @return Account service verification status
  */
 bool AccountManager::verifyService(AccountObject &act, const string &svcName) {
-    LOG_INF("verifying service: '%s'", svcName.c_str());
+    GLOG_INF("verifying service: '", svcName,"'");
 
     PluginContainerBase *plugin = PluginManager::Instance()[svcName];
     if (plugin == nullptr) {
@@ -157,16 +157,16 @@ std::shared_ptr<VerifyResult> AccountManager::performServiceParamVerification(Ac
                 addError("protected param not found: '" + param.key + "'");
                 return nullptr;
             }
-            LOG_INF("protected param value loaded: %s -> %s", param.key.c_str(), param.val.c_str());
+            GLOG_INF("protected param value loaded: ", param.key, " -> ", param.val);
         }
     }
     act.services[svcName].applyVerification(verifyResult.params);
 
-    LOG_INF("%s", "parameters are verified:");
+    GLOG_INF("parameters are verified:");
     for (const auto &param : verifyResult.params) {
-        LOG_INF("\t%s : %s%s%s", param.key.c_str(), param.val.c_str(),
-                (param.is_protected ? " - PROTECTED" : ""),
-                (param.is_required ? " - REQUIRED" : ""));
+        GLOG_INF("\t", param.key, " : ", param.val,
+                 (param.is_protected ? " - PROTECTED" : ""),
+                 (param.is_required ? " - REQUIRED" : ""));
     }
     return make_shared<VerifyResult>(verifyResult);
 }
@@ -187,9 +187,9 @@ std::shared_ptr<AuthResult> AccountManager::performServiceAuthentication(shared_
     if (!authResult.authenticated) {
         return nullptr;
     }
-    LOG_INF("%s", "service authenticated:");
+    GLOG_INF("service authenticated:");
     for (const auto &token : authResult.tokens) {
-        LOG_INF("\t%s : %s", token.first.c_str(), token.second.c_str());
+        GLOG_INF("\t", token.first, " : ", token.second);
     }
     return make_shared<AuthResult>(authResult);
 }
@@ -210,8 +210,8 @@ bool AccountManager::saveServiceProtectedParams(AccountObject &act,
     for (const auto &param : vResult->params) {
         if (param.is_protected) {
             if (!SecretManager::Instance().Set(act.title, svcName, param.key, param.val)) {
-                LOG_ERR("saving secret failed");
-                addError("unable to sat protected params.");
+                GLOG_ERR("saving secret failed");
+                addError("unable to set protected params.");
                 return false;
             }
         }
@@ -220,7 +220,8 @@ bool AccountManager::saveServiceProtectedParams(AccountObject &act,
         const auto &key = token.first;
         const auto &val = token.second;
         if (!SecretManager::Instance().Set(act.title, svcName, key, val)) {
-            LOG_ERR("saving secret failed");
+            GLOG_ERR("saving secret failed");
+            addError("unable to set protected tokens.");
             return false;
         }
     }

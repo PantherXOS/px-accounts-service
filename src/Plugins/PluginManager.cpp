@@ -57,14 +57,12 @@ map<string, PluginContainerBase *> &PluginManager::plugins() {
  * @return plugin initiation status
  */
 bool PluginManager::init(const std::string &path) {
-    LOG_INF("========================================================================================================");
-    LOG_INF("search for registered plugins on: %s", path.c_str());
+    GLOG_INF("===============================================================================");
+    GLOG_INF("search for registered plugins on: ", path);
     for (const string &pluginFile: PXUTILS::FILE::dirfiles(path, ".yaml")) {
         PluginContainerBase *plugin = PluginContainerBase::CreateContainer(path + "/" + pluginFile);
         if (plugin != nullptr && plugin->isInited()) {
-            LOG_INF("   - new plugin loaded: [%s]\t: %s",
-                    PluginTypesStr[plugin->getType()].c_str(),
-                    plugin->getTitle().c_str());
+            GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle());
             _plugins[plugin->getTitle()] = plugin;
         }
     }

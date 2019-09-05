@@ -46,12 +46,12 @@ PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginIn
                     result = new PluginContainerCpp(inf);
 
                 } else {
-                    LOG_ERR("Invalid Plugin Type: %s", inf.typeStr.c_str());
+                    GLOG_ERR("Invalid Plugin Type: ", inf.typeStr);
                 }
             }
         }
         catch (YAML::Exception &ex) {
-            LOG_ERR("Plugin load Error: %s", ex.what());
+            GLOG_ERR("Plugin load Error: ", ex.what());
         }
     }
     return result;

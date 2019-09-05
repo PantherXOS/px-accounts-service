@@ -60,7 +60,7 @@ bool SecretManager::Set(const string &act, const string &svc, const string &key,
     } else {
         return this->addParam(_currentUserr, act, paramKey, val);
     }
-    LOG_INF("new secret saved: [%s][%s][%s]", act.c_str(), svc.c_str(), key.c_str());
+    GLOG_INF("new secret saved: [", act, "][", svc, "][", key, "]");
     return true;
 }
 
@@ -191,7 +191,7 @@ bool SecretManager::checkApplication(const string &wlt, const string &app) const
  */
 bool SecretManager::addParam(const string &wlt, const string &app, const string &key, const string &val) const {
     // addParam @7 (wallet : Text, application: Text, param : RPCSecretParam) -> (result: RPCSecretResult);
-    LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key, " - val: ", val);
     bool isSucceed = false;
     string errString;
     bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
@@ -212,7 +212,7 @@ bool SecretManager::addParam(const string &wlt, const string &app, const string 
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("request failed: %s", errString.c_str());
+        GLOG_ERR("request failed: ", errString);
     }
     return isSucceed;
 }
@@ -227,7 +227,7 @@ bool SecretManager::addParam(const string &wlt, const string &app, const string 
  */
 bool SecretManager::editParam(const string &wlt, const string &app, const string &key, const string &val) const {
     // editParam @8 (wallet : Text, application   : Text, param : RPCSecretParam) -> (result: RPCSecretResult);
-    LOG_INF("wlt: %s - app: %s - key: %s - val: %s", wlt.c_str(), app.c_str(), key.c_str(), val.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key, " - val: ", val);
     bool isSucceed = false;
     string errString;
     bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
@@ -248,7 +248,7 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("editParam failed: %s", errString.c_str());
+        GLOG_ERR("editParam failed: ", errString);
     }
     return isSucceed;
 }
@@ -263,7 +263,7 @@ bool SecretManager::editParam(const string &wlt, const string &app, const string
  */
 string SecretManager::getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance) const {
     // getParam @3 (wallet : Text, application : Text, paramKey : Text)-> (paramValue  : Text);
-    LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key);
     bool isSucceed = false;
     string paramVal;
     string errString;
@@ -279,7 +279,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
                 }, [&](kj::Exception &&err) {
                     isSucceed = false;
                     if (!ignoreExistance) {
-                        LOG_ERR("getParam failed: %s", err.getDescription().cStr());
+                        GLOG_ERR("getParam failed: %s", err.getDescription().cStr()); // NOLINT(bugprone-lambda-function-name)
                     }
                     errString = err.getDescription().cStr();
                 })
@@ -300,7 +300,7 @@ string SecretManager::getParam(const string &wlt, const string &app, const strin
  */
 list<string> SecretManager::getParams(const string &wlt, const string &app) const {
     // getParams        @2 (wallet : Text, application   : Text -> (params : List(Text));
-    LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app);
     bool isSucceed = false;
     list<string> result;
     string errString;
@@ -335,7 +335,7 @@ list<string> SecretManager::getParams(const string &wlt, const string &app) cons
  */
 bool SecretManager::delParam(const string &wlt, const string &app, const string &key) const {
     // delParam @6 (wallet : Text, application: Text, paramKey : Text) -> (result: RPCSecretResult);
-    LOG_INF("wlt: %s - app: %s - key: %s", wlt.c_str(), app.c_str(), key.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key);
     bool isSucceed = false;
     string errString;
     bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
@@ -354,7 +354,7 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("Error: %s", errString.c_str());
+        GLOG_ERR("Error: ", errString);
     }
     return isSucceed;
 }
@@ -367,7 +367,7 @@ bool SecretManager::delParam(const string &wlt, const string &app, const string 
  */
 bool SecretManager::delApplication(const string &wlt, const string &app) const {
     // delApplication @5 (wallet : Text, application   : Text) -> (result: RPCSecretResult);
-    LOG_INF("wlt: %s - app: %s", wlt.c_str(), app.c_str());
+    GLOG_INF("wlt: ", wlt, " - app: ", app);
     bool isSucceed = false;
     string errString;
     bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
@@ -385,7 +385,7 @@ bool SecretManager::delApplication(const string &wlt, const string &app) const {
                 .wait(ctx.waitScope);
     });
     if (!requestSucceed || !isSucceed) {
-        LOG_ERR("Error: %s", errString.c_str());
+        GLOG_ERR("Error: ", errString);
     }
     return isSucceed;
 }

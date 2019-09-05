@@ -47,6 +47,7 @@ add_library(${LIB_NAME}
         Plugins/PluginContainerPython.cpp
         Plugins/PluginContainerCpp.cpp
         Plugins/PluginManager.cpp
+        Utils/Logger.cpp
         ProviderHandler.cpp
         Secret/SecretManager.cpp
         EventManager.cpp)

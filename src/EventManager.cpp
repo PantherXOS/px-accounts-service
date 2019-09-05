@@ -22,13 +22,13 @@ EventManager::EventManager() {
 
     int rv;
     if ((rv = nng_push0_open(&m_sock)) != 0) {
-        LOG_ERR("unable to open socket", rv);
+        GLOG_ERR("unable to open socket: ", rv);
         exit(EXIT_FAILURE);
     }
 
     string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(RPC_PATH);
     if ((rv = nng_dial(m_sock, ipcSock.c_str(), nullptr, 0)) != 0) {
-        LOG_ERR("connect error", rv);
+        GLOG_ERR("connect error: ", rv);
         exit(EXIT_FAILURE);
     }
     m_inited = true;
@@ -72,7 +72,7 @@ void EventManager::emit(const string &event, const map<string, string> &params) 
         kj::ArrayPtr<kj::byte> data = words.asBytes();
         int ret;
         if ((ret = nng_send(m_sock, data.begin(), data.size(), 0)) != 0) {
-            LOG_WRN("send error", ret);
+            GLOG_WRN("send error: ", ret);
         }
     }
 }

@@ -8,11 +8,12 @@
 #include <interface/Secret.capnp.h>
 #include <capnp/ez-rpc.h>
 
+Logger gLogger("secret-tester");
 
 int main() {
 
     setvbuf(stdout, nullptr, _IONBF, 0);
-    gLogger.setLevel(Logger::LVL_INF);
+    GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
 
     string serverPath = "unix:/root/.userdata/rpc/secret";
 

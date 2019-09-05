@@ -22,6 +22,8 @@
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.dylib"
 #endif
 
+Logger gLogger("account-tests");
+
 
 void register_test_plugin(const string &name, const string &version, const string &type, const string &path) {
     mkdir("./plugins", S_IRWXU | S_IRWXG | S_IRWXO);
@@ -43,8 +45,8 @@ void register_test_plugin(const string &name, const string &version, const strin
 int main(int argc, char *argv[]) {
 
     setvbuf( stdout, nullptr, _IONBF, 0 );
+    GLOG_INIT(LogTarget::SYSLOG, LogLevel::INF);
 
-//    gLogger.setLevel(Logger::LVL_INF);
 
     register_test_plugin("px-accounts-service-plugin-cpp-test",
                          "0.0.1",

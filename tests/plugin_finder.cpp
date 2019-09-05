@@ -7,8 +7,12 @@ using namespace std;
 
 #include <Plugins/PluginManager.h>
 
+Logger gLogger("plugin-finder");
+
 int main()
 {
+    GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
+
     for (auto &kv : PluginManager::Instance().plugins()) {
         auto &plugin = kv.second;
         cout << kv.first << endl;

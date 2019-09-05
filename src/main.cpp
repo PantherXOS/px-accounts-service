@@ -14,6 +14,7 @@
 
 #define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
+Logger gLogger("accounts");
 
 void IntHandler(int dummy) {
     puts("Server Terminated.");
@@ -31,25 +32,37 @@ int main(int argc, char *argv[]) {
     string pass = "123";
     string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
     string rpcSecretPath = string("unix:") + PXUTILS::FILE::abspath((RPC_CLIENT_SECRET_PATH));
+    LogTarget logTarget = LogTarget::SYSLOG;
+
+    std::vector<std::pair<std::string, LogTarget> > logTargetMapping = {
+            {"syslog", LogTarget::SYSLOG},
+            {"console", LogTarget::CONSOLE}
+    };
+
 
     CLI::App app{"px-accounts-service: Online Accounts Management Service"};
     app.add_flag("-d,--debug", isDebug, "Run px-accounts-service in debug mode");
     app.add_option("-p,--password", pass, "px-accounts-pass related password");
     app.add_option("--secret-path", rpcSecretPath, "modify px-secret-service rpc path");
+    app.add_option("-t,--log-target", logTarget, "Target for application logs to publish")
+            ->transform(CLI::CheckedTransformer(logTargetMapping, CLI::ignore_case));
+
 
     CLI11_PARSE(app, argc, argv);
 
-    if (isDebug) {
-        gLogger.setLevel(Logger::LVL_INF);
-        LOG_INF("=== DEBUG MODE ===");
-    }
+    LogLevel logLevel = (isDebug ? LogLevel::INF : LogLevel::WRN);
+    GLOG_INIT(logTarget, logLevel);
+
 
     SecretManager::Init(rpcSecretPath);
     PluginManager::Instance();
 
     RPCServer<RPCHandler> srv(rpcActPath);
     srv.start();
-    std::cout << "Server started" << std::endl;
+    GLOG_INF_FORCE("px-accounts-service started.");
+    GLOG_INF("debug mode enabled");
+    GLOG_INF("log target: [", (logTarget == LogTarget::SYSLOG ? "syslog" : "console"), "]");
+
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"

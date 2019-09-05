@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <string>
+#include "Utils/Logger.h"
+
 
 using namespace std;
 
@@ -70,39 +72,5 @@ namespace PXUTILS {
         string current_user();
     }
 }
-
-/// @brief Simple Logger to format Account service logs
-class Logger {
-
-public:
-    /// @brief Log level enumerations
-    enum LOG_LEVEL {
-        LVL_ERR = 0,    ///< Error logs
-        LVL_WRN = 1,    ///< Warning logs
-        LVL_INF = 2     ///< Information logs
-    };
-
-public:
-    explicit Logger() = default;
-
-    /// @brief write a new log line in console
-    void log(LOG_LEVEL lvl, const char* file, const char* func, int line, const char* format, ...);
-
-    /**
-     * @brief set visiblity level for logs to write
-     * @details default level is WARNING
-     */
-    void setLevel(LOG_LEVEL lvl) { m_logLevel = lvl; }
-
-private:
-    LOG_LEVEL m_logLevel = LVL_WRN;
-};
-
-extern Logger gLogger;
-
-#define LOG_ERR(fmt, ...) gLogger.log(Logger::LVL_ERR, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_WRN(fmt, ...) gLogger.log(Logger::LVL_WRN, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_INF(fmt, ...) gLogger.log(Logger::LVL_INF, __FILE__, __FUNCTION__, __LINE__, fmt, ##__VA_ARGS__)
-
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTUTILS_H

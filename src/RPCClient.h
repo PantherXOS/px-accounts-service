@@ -67,7 +67,7 @@ public:
                 _isSucceed = true;
             }
             catch (kj::Exception &ex) {
-                LOG_ERR("Error: %s", ex.getDescription().cStr());
+                GLOG_ERR("Error: ", ex.getDescription().cStr());
             }
         });
         thClient.join();
