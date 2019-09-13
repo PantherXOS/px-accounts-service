@@ -7,7 +7,7 @@
 #include <capnp/ez-rpc.h>
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
-#include <AccountParser.h>
+#include <Accounts/AccountParser.h>
 #include <iostream>
 
 #include <RPCServer.h>

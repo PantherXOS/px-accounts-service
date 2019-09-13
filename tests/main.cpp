@@ -9,7 +9,7 @@
 
 #include <RPCServer.h>
 #include <RPCHandler.h>
-#include <AccountUtils.h>
+#include <Accounts/AccountUtils.h>
 #include <Secret/SecretManager.h>
 
 #include "test_common.h"

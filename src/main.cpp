@@ -6,7 +6,7 @@
 #include "RPCHandler.h"
 #include "Secret/SecretManager.h"
 #include "Plugins/PluginManager.h"
-#include "AccountUtils.h"
+#include "Accounts/AccountUtils.h"
 
 #define RPC_DIR "~/.userdata/rpc"
 #define RPC_SERVER_PATH         RPC_DIR "/accounts"

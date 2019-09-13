@@ -9,7 +9,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <AccountUtils.h>
+#include <Accounts/AccountUtils.h>
 
 
 TEST_CASE("Plugin Management Tasks", "[PluginManager]") {

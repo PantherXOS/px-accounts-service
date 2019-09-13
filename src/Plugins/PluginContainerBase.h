@@ -5,8 +5,8 @@
 #ifndef PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
 #define PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
 
-#include "../AccountDefinitions.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountDefinitions.h"
+#include "../Accounts/AccountUtils.h"
 #include "PluginInterface.h"
 
 /// @brief enumeration for Plugin Types

@@ -13,7 +13,7 @@
 #include <nng/protocol/pipeline0/pull.h>
 #include <nng/protocol/pubsub0/pub.h>
 
-#include <AccountUtils.h>
+#include <Accounts/AccountUtils.h>
 
 #define EVENT_CHANNEL_BASE_PATH   "~/.userdata/event/channels/"
 #define EVENT_RPC_PATH            "~/.userdata/rpc/events"

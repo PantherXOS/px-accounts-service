@@ -7,7 +7,7 @@
 
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
-#include "AccountParser.h"
+#include "Accounts/AccountParser.h"
 
 /// @brief Handler class for receive RPC requests
 class RPCHandler final: public AccountWriter::Server {

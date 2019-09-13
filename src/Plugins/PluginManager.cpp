@@ -4,7 +4,7 @@
 
 
 #include "PluginManager.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 #include <pybind11/embed.h>
 

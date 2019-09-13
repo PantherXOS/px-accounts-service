@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(LIB_NAME _${PROJECT_NAME})
 set(EXE_NAME ${PROJECT_NAME})
 
+include_directories(src)
 
 add_subdirectory(src)
 add_subdirectory(tests)

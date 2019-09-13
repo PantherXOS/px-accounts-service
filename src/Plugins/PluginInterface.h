@@ -5,16 +5,9 @@
 #ifndef PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H
 #define PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H
 
-#include <string>
-#include <vector>
-#include <map>
+#include <Utils/Utils.h>
+#include <memory>
 
-using namespace std;
-
-typedef vector<string> StringList;
-
-/// @brief definition for string based key-value map
-typedef map<string, string> StrStrMap;
 
 /// @brief structure for holding a service parameter on a plugin
 struct ServiceParam {
@@ -35,6 +28,7 @@ struct VerifyResult {
     VerifyResult() : verified(false) {
     }
 };
+typedef std::shared_ptr<VerifyResult> VerifyResultPtr;
 
 /// @brief result structure for plugin's authenticate method
 struct AuthResult {
@@ -42,6 +36,7 @@ struct AuthResult {
     StrStrMap tokens;       ///< @brief list of generated tokens during plugin authentication
     StringList errors;      ///< @brief list of plugin error messages
 };
+typedef std::shared_ptr<AuthResult> AuthResultPtr;
 
 
 /// @brief Interface class that all plugins are inherited from

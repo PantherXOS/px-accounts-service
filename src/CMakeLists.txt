@@ -38,10 +38,12 @@ add_library(${LIB_NAME}
         RPCServer.cpp
         RPCClient.cpp
         RPCHandler.cpp
-        AccountDefinitions.cpp
-        AccountManager.cpp
-        AccountUtils.cpp
-        AccountParser.cpp
+        Accounts/AccountManager.cpp
+        Accounts/AccountUtils.cpp
+        Accounts/AccountParser.cpp
+        Accounts/AccountService.cpp
+        Accounts/AccountObject.cpp
+        Accounts/AccountDefinitions.cpp
         Plugins/DLLoader.h
         Plugins/PluginContainerBase.cpp
         Plugins/PluginContainerPython.cpp

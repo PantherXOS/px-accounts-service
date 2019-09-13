@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <RPCServer.h>
 #include <capnp/ez-rpc.h>
-#include <AccountParser.h>
+#include <Accounts/AccountParser.h>
 #include <interface/AccountReader.capnp.h>
 
 #define SERVER_ADDRESS "~/.userdata/rpc/accounts"

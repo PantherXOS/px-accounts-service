@@ -11,8 +11,8 @@
 #include <nng/nng.h>
 #include <nng/protocol/pubsub0/sub.h>
 
-#include <AccountDefinitions.h>
-#include <AccountParser.h>
+#include <Accounts/AccountDefinitions.h>
+#include <Accounts/AccountParser.h>
 #include <interface/AccountWriter.capnp.h>
 #include <interface/event.capnp.h>
 #include <RPCServer.h>

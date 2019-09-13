@@ -3,7 +3,7 @@
 //
 
 #include "SecretManager.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 
 SecretManager::SecretManager() {

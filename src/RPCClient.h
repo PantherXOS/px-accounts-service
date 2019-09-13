@@ -19,7 +19,7 @@ using namespace std;
 #include <kj/async-io.h>
 #include <capnp/rpc-twoparty.h>
 
-#include "AccountUtils.h"
+#include "Accounts/AccountUtils.h"
 
 //#define EXEC_INTERVAL 100
 

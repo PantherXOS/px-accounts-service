@@ -8,8 +8,8 @@
 
 #include <iostream>
 
-#include <AccountManager.h>
-#include <AccountParser.h>
+#include <Accounts/AccountManager.h>
+#include <Accounts/AccountParser.h>
 
 
 TEST_CASE("Account Management Tasks", "[AccountManager]") {
@@ -26,6 +26,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     newAccount.settings["first key"] = "first value";
     newAccount.settings["second key"] = "second value";
 
+    newAccount.services["python-test"].init(&newAccount, "python-test");
     newAccount.services["python-test"]["k1"] = "v1";
     newAccount.services["python-test"]["k2"] = "v2";
 
@@ -120,6 +121,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         AccountObject providerAccount;
         providerAccount.title = title3;
         providerAccount.provider = "test_provider";
+        providerAccount.services["python-test"].init(&providerAccount, "python-test");
         providerAccount.services["python-test"]["k2"] = "v2";
 
         bool createResult = AccountManager::Instance().createAccount(providerAccount);

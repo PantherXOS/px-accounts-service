@@ -4,7 +4,7 @@
 
 
 #include <Secret/SecretManager.h>
-#include <AccountUtils.h>
+#include <Accounts/AccountUtils.h>
 #include <interface/Secret.capnp.h>
 #include <capnp/ez-rpc.h>
 

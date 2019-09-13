@@ -3,7 +3,7 @@
 //
 
 #include "PluginContainerPython.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 // ===PLUGIN DEFINITION MACRO =================================================
 

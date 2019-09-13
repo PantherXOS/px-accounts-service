@@ -6,7 +6,7 @@
 #define PX_ACCOUNTS_SERVICE_PROVIDERHANDLER_H
 
 
-#include "AccountDefinitions.h"
+#include "Accounts/AccountDefinitions.h"
 
 #define PROVIDER_APP_PATH    "./providers"
 #define PROVIDER_USER_PATH   BASE_USER_PATH   "/etc/px/accounts/providers"
