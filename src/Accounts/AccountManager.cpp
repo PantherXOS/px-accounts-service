@@ -31,6 +31,7 @@ StringList &AccountManager::LastErrors() {
  */
 bool AccountManager::createAccount(AccountObject &act) {
     if (!act.verify()) {
+        addErrorList(act.getErrors());
         addError("Account verification failed");
         return false;
     }
