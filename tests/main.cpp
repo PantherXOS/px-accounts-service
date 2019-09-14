@@ -60,6 +60,10 @@ int main(int argc, char *argv[]) {
                          "0.0.1",
                          "python",
                          ".");
+    register_test_plugin("px-accounts-service-plugin-python-json",
+                         "0.0.1",
+                         "python",
+                         ".");
 
     RPCServer<SecretSimulator> secretSimulator(SECRET_SIMULATOR_PATH);
     secretSimulator.start();

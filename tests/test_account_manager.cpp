@@ -159,7 +159,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
         AccountObject act;
         act.title = "my_public_account";
-        act.services["public-test"];
+        act.services["public-test"].init(&act, "public-test");
         bool createRes = AccountManager::Instance().createAccount(act);
         (AccountManager::LastErrors());
         REQUIRE(createRes);
@@ -172,5 +172,31 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(modifyRes);
 
+    }
+
+    SECTION("Python plugin with custom read-write") {
+        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_json_account")));
+
+        AccountObject act;
+        act.title = "my json account";
+        act.services["python-json"].init(&act, "python-json");
+        act.services["python-json"]["k1"] = "pv1";
+        act.services["python-json"]["k2"] = "v2";
+        bool createRes = AccountManager::Instance().createAccount(act);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(createRes);
+
+        string actName = PXUTILS::ACCOUNT::title2name(act.title);
+
+        AccountObject receivedAct;
+        REQUIRE(AccountManager::Instance().readAccount(actName, &receivedAct));
+
+        REQUIRE(receivedAct.services.size() == 1);
+        REQUIRE(receivedAct.services.find("python-json") != receivedAct.services.end());
+
+        REQUIRE(receivedAct.services["python-json"]["k1"] == "pv1");
+        REQUIRE(receivedAct.services["python-json"]["k2"] == "v2");
+        REQUIRE(receivedAct.services["python-json"].find("o1") != receivedAct.services["python-json"].end());
+        REQUIRE(receivedAct.services["python-json"].find("o2") != receivedAct.services["python-json"].end());
     }
 }
