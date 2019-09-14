@@ -102,3 +102,21 @@ AuthResult PluginContainerPython::authenticate(const ServiceParamList &params) {
     auto res = _plugin.attr("authenticate")(params);
     return res.cast<AuthResult>();
 }
+
+StrStrMap PluginContainerPython::read(const string &id) {
+    if (py::hasattr(_plugin, "read")) {
+        auto res = _plugin.attr("read")(id);
+        return res.cast<StrStrMap>();
+    } else {
+        throw std::logic_error("read not found");
+    }
+}
+
+string PluginContainerPython::write(const ServiceParamList &params) {
+    if (py::hasattr(_plugin, "write")) {
+        auto res = _plugin.attr("write")(params);
+        return res.cast<string>();
+    } else {
+        throw std::logic_error("write not found");
+    }
+}

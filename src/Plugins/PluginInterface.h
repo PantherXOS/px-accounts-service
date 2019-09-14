@@ -64,6 +64,14 @@ public:
      */
     virtual AuthResult authenticate(const ServiceParamList &params) = 0;
 
+    virtual StrStrMap read(const string &id) {
+        throw std::logic_error("not implemented");
+    }
+
+    virtual string write(const ServiceParamList &params) {
+        throw std::logic_error("not implemented");
+    }
+
 public:
     string title;
 };

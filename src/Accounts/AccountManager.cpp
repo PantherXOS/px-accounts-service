@@ -158,6 +158,9 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
         addError("Error on reading account file: '" + accountName + "'.");
         return false;
     }
+    for (auto &kv : account->services) {
+        kv.second.performCustomRead();
+    }
     return true;
 }
 

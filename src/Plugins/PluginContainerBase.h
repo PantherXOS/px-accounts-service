@@ -46,6 +46,10 @@ public:
     /// @brief pure virtual method to call plugin's authenticate method
     virtual AuthResult authenticate(const ServiceParamList &params) = 0;
 
+    virtual StrStrMap read(const string &id) = 0;
+
+    virtual string write(const ServiceParamList &params) = 0;
+
 public:
     /// @brief static method used to initiate a new PluginContainer based on provided path
     static PluginContainerBase *CreateContainer(const string &pluginInfoPath);

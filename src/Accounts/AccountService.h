@@ -35,14 +35,20 @@ public:
     /// @brief pointer to plugin which is related to service
     PluginContainerBase* plugin();
 
-    /// @brief set plugin pointer for service
-    void setPlugin(PluginContainerBase* plugin);
-
     /// @brief verify Account against provided service
     bool verify();
 
     /// getter to check if service is verified
     bool verified() { return _inited && _verified; }
+
+    void clearService() {
+        this->clear();
+        this->_protectedDict.clear();
+        this->_requiredDict.clear();
+    }
+    bool performCustomRead();
+
+
 
 protected:
     /// @brief check and prepare parameters needed for a service

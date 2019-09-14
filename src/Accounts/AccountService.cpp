@@ -3,13 +3,16 @@
 //
 
 #include "../Accounts/AccountDefinitions.h"
-#include "../Plugins/PluginContainerBase.h"
+#include "../Plugins/PluginManager.h"
 #include "../Secret/SecretManager.h"
 #include "AccountService.h"
+
+#define PLUGIN_ID_PARAM "PLUGIN_ID"
 
 bool AccountService::init(AccountObject *act, const string &name) {
     this->_name = name;
     this->_account = act;
+    this->_plugin = PluginManager::Instance()[name];
     this->_inited = true;
     return this->_inited;
 }
@@ -63,10 +66,6 @@ PluginContainerBase *AccountService::plugin() {
     return _plugin;
 }
 
-void AccountService::setPlugin(PluginContainerBase *plugin) {
-    _plugin = plugin;
-}
-
 /**
  * Verify AccountService, this method.
  * tasks need to perform during service verification:
@@ -87,7 +86,19 @@ bool AccountService::verify() {
     if (authResult == nullptr) {
         return false;
     }
-    return this->_saveProtectedParams(verifyResult, authResult);
+    if (!this->_saveProtectedParams(verifyResult, authResult)) {
+        return false;
+    }
+
+    try {
+        string pluginId = this->plugin()->write(verifyResult->params);
+        this->clearService();
+        this->operator[](PLUGIN_ID_PARAM) = pluginId;
+    }
+    catch (std::exception &ex) {
+        GLOG_WRN(ex.what());
+    }
+    return true;
 }
 
 /**
@@ -170,6 +181,26 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
             this->addError("unable to set protected tokens.");
             return false;
         }
+    }
+    return true;
+}
+
+
+bool AccountService::performCustomRead() {
+
+    if (this->find(PLUGIN_ID_PARAM) == this->end()) {
+        return false; // plugin id parameter id not found.
+    }
+    try {
+        auto params = this->plugin()->read(this->operator[](PLUGIN_ID_PARAM));
+        this->clearService();
+        for (const auto &kv : params) {
+            this->operator[](kv.first) = kv.second;
+        }
+    }
+    catch (std::exception &ex) {
+        GLOG_ERR(ex.what());
+        return false;
     }
     return true;
 }

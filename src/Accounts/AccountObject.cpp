@@ -33,7 +33,6 @@ bool AccountObject::verify() {
             addError(string("unknown service '") + svcName + string("'"));
             verified = false;
         }
-        kv.second.setPlugin(plugin);
         bool svcVerified = kv.second.verify();
         if (!svcVerified) {
             this->addErrorList(kv.second.getErrors());
