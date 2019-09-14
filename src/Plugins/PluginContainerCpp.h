@@ -27,7 +27,7 @@ public:
 
     StrStrMap read(const string &id) override;
 
-    string write(const ServiceParamList &params) override;
+    string write(VerifyResult &vResult, AuthResult &aResult) override;
 
 private:
     DLLoader<IPlugin> _loader;

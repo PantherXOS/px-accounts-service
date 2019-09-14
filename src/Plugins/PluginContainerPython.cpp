@@ -112,9 +112,9 @@ StrStrMap PluginContainerPython::read(const string &id) {
     }
 }
 
-string PluginContainerPython::write(const ServiceParamList &params) {
+string PluginContainerPython::write(VerifyResult &vResult, AuthResult &aResult) {
     if (py::hasattr(_plugin, "write")) {
-        auto res = _plugin.attr("write")(params);
+        auto res = _plugin.attr("write")(vResult, aResult);
         return res.cast<string>();
     } else {
         throw std::logic_error("write not found");

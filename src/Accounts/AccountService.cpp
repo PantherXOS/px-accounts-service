@@ -91,7 +91,7 @@ bool AccountService::verify() {
     }
 
     try {
-        string pluginId = this->plugin()->write(verifyResult->params);
+        string pluginId = this->plugin()->write(*(verifyResult.get()), *(authResult.get()));
         this->clearService();
         this->operator[](PLUGIN_ID_PARAM) = pluginId;
     }

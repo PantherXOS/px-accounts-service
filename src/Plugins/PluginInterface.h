@@ -68,7 +68,7 @@ public:
         throw std::logic_error("not implemented");
     }
 
-    virtual string write(const ServiceParamList &params) {
+    virtual string write(VerifyResult &vResult, AuthResult &aResult) {
         throw std::logic_error("not implemented");
     }
 

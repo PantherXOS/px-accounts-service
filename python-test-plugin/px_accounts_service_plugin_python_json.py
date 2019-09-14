@@ -76,10 +76,10 @@ if pkgutil.find_loader('PluginFramework') is not None:
                     result[key] = data[key]
             return result
 
-        def write(self, params):
+        def write(self, vResult, aResult):
             id = str(uuid.uuid4())
             data = {}
-            for param in params:
+            for param in vResult.params:
                 data[param.key] = param.val
             with open('{}.json'.format(id), 'w') as plugin_file:
                 json.dump(data, plugin_file)

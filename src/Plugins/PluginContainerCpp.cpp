@@ -34,7 +34,7 @@ StrStrMap PluginContainerCpp::read(const string &id) {
     return  plugin->read(id);
 }
 
-string PluginContainerCpp::write(const ServiceParamList &params) {
+string PluginContainerCpp::write(VerifyResult &vResult, AuthResult &aResult) {
     auto plugin = _loader.DLGetInstance();
-    return  plugin->write(params);
+    return  plugin->write(vResult, aResult);
 }
