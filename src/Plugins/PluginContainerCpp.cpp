@@ -38,3 +38,8 @@ string PluginContainerCpp::write(VerifyResult &vResult, AuthResult &aResult) {
     auto plugin = _loader.DLGetInstance();
     return  plugin->write(vResult, aResult);
 }
+
+bool PluginContainerCpp::remove(const string &id) {
+    auto plugin = _loader.DLGetInstance();
+    return plugin->remove(id);
+}

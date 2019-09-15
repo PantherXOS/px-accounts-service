@@ -120,3 +120,12 @@ string PluginContainerPython::write(VerifyResult &vResult, AuthResult &aResult) 
         throw std::logic_error("write not found");
     }
 }
+
+bool PluginContainerPython::remove(const string &id) {
+    if (py::hasattr(_plugin, "remove")) {
+        auto res = _plugin.attr("remove")(id);
+        return res.cast<bool>();
+    } else {
+        throw std::logic_error("remove not found");
+    }
+}

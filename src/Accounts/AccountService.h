@@ -46,8 +46,10 @@ public:
         this->_protectedDict.clear();
         this->_requiredDict.clear();
     }
+
     bool performCustomRead();
 
+    bool performServiceCustomRemoval();
 
 
 protected:

@@ -42,6 +42,16 @@ bool AccountObject::verify() {
     return verified;
 }
 
+bool AccountObject::performAccountCustomRemoval() {
+    for (auto &kv : this->services) {
+        if (!kv.second.performServiceCustomRemoval()) {
+            this->addErrorList(kv.second.getErrors());
+            return false;
+        }
+    }
+    return true;
+}
+
 /**
  * update parameters need to add to account services, based on defined provider
  *

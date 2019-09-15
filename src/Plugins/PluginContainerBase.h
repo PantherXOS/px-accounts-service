@@ -50,6 +50,8 @@ public:
 
     virtual string write(VerifyResult &vResult, AuthResult &aResult) = 0;
 
+    virtual bool remove(const string &id) = 0;
+
 public:
     /// @brief static method used to initiate a new PluginContainer based on provided path
     static PluginContainerBase *CreateContainer(const string &pluginInfoPath);

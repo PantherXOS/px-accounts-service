@@ -46,6 +46,8 @@ public:
 
     string write(VerifyResult &vResult, AuthResult &aResult) override;
 
+    bool remove(const string &id) override;
+
 protected:
     pybind11::object _module;
     pybind11::object _plugin;

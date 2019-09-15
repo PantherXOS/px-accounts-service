@@ -72,6 +72,10 @@ public:
         throw std::logic_error("not implemented");
     }
 
+    virtual bool remove(const string &id) {
+        throw std::logic_error("not implemented");
+    }
+
 public:
     string title;
 };

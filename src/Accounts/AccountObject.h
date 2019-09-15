@@ -17,6 +17,8 @@ public:
     /// @brief verify Account
     bool verify();
 
+    bool performAccountCustomRemoval();
+
 protected:
     /// @brief update params related to defined provider for AccountObject
     bool _appendProviderParams();

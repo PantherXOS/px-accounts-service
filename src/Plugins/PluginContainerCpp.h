@@ -29,6 +29,8 @@ public:
 
     string write(VerifyResult &vResult, AuthResult &aResult) override;
 
+    bool remove(const string &id) override;
+
 private:
     DLLoader<IPlugin> _loader;
 };

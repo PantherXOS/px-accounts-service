@@ -204,3 +204,17 @@ bool AccountService::performCustomRead() {
     }
     return true;
 }
+
+
+bool AccountService::performServiceCustomRemoval() {
+    if (this->find(PLUGIN_ID_PARAM) == this->end()) {
+        return true;
+    }
+    try {
+        auto pluginId = this->operator[](PLUGIN_ID_PARAM);
+        return this->plugin()->remove(pluginId);
+    } catch (std::exception &ex) {
+        GLOG_WRN(ex.what());
+    }
+    return true;
+}
