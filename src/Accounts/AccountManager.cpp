@@ -96,7 +96,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
  */
 bool AccountManager::deleteAccount(const string &accountName) {
     AccountObject act;
-    if (!this->readAccount(accountName, &act)) {
+    if (!PXParser::read(accountName, &act)) {
         addError("Account deletion failed");
         return false;
     }
