@@ -85,7 +85,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
                 json.dump(data, plugin_file)
             return id
 
-        def delete(self, id):
+        def remove(self, id):
             plugin_file_name = '{}.json'.format(id)
             if os.path.exists(plugin_file_name):
                 os.remove(plugin_file_name)
