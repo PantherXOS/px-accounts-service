@@ -20,7 +20,9 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
 
         REQUIRE(mgr.plugins().size() > 0);
         REQUIRE(mgr["python-test"] != nullptr);
+        REQUIRE(mgr["python-json"] != nullptr);
         REQUIRE(mgr["cpp-test"] != nullptr);
+        REQUIRE(mgr["cpp-custom"] != nullptr);
     }
 
     SECTION("Check Python Plugin - verify Method") {
@@ -73,5 +75,65 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
         auto vResult = mgr["cpp-test"]->verify(params);
         REQUIRE(vResult.verified);
         REQUIRE(vResult.params.size() == 4);
+    }
+
+    SECTION("Check Python Plugin - custom read/write/delete methods") {
+        PluginContainerBase *plugin = mgr["python-json"];
+        REQUIRE(plugin != nullptr);
+
+        StrStrMap params;
+        params["k1"] = "v1";
+        params["k2"] = "v2";
+
+        auto vResult = plugin->verify(params);
+        CAPTURE(vResult.errors);
+        REQUIRE(vResult.verified);
+
+        auto aResult = plugin->authenticate(vResult.params);
+        CAPTURE(aResult.errors);
+        REQUIRE(aResult.authenticated);
+        string writeID = plugin->write(vResult, aResult);
+        REQUIRE_FALSE(writeID.empty());
+
+
+        StrStrMap rResult = plugin->read(writeID);
+        REQUIRE(rResult.size() == 4);
+        CHECK(rResult["k1"] == "v1");
+        CHECK(rResult["k2"] == "v2");
+        CHECK(rResult["o1"] == "ov1");
+        CHECK(rResult["o2"] == "ov2");
+
+
+        bool dResult = plugin->remove(writeID);
+        REQUIRE(dResult);
+    }
+
+    SECTION("Check C++ Plugin - custom read/write/delete methods") {
+        PluginContainerBase *plugin = mgr["cpp-custom"];
+        REQUIRE(plugin != nullptr);
+
+        StrStrMap params;
+        params["k1"] = "v1";
+        params["k2"] = "v2";
+
+        auto vResult = plugin->verify(params);
+        CAPTURE(vResult.errors);
+        REQUIRE(vResult.verified);
+
+        auto aResult = plugin->authenticate(vResult.params);
+        CAPTURE(aResult.errors);
+        REQUIRE(aResult.authenticated);
+        string writeID = plugin->write(vResult, aResult);
+        REQUIRE_FALSE(writeID.empty());
+
+
+        StrStrMap rResult = plugin->read(writeID);
+        REQUIRE(rResult.size() == 2);
+        CHECK(rResult["k1"] == "v1");
+        CHECK(rResult["k2"] == "v2");
+
+
+        bool dResult = plugin->remove(writeID);
+        REQUIRE(dResult);
     }
 }

@@ -46,7 +46,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
                 WARN(err);
             }
         } else {
-            if (AccountManager::LastErrors().size() > 0) {
+            if (!AccountManager::LastErrors().empty()) {
                 REQUIRE(AccountManager::LastErrors().size() == 1);
                 REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
             }
@@ -79,7 +79,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
                 WARN(err);
             }
         } else {
-            if (AccountManager::LastErrors().size() > 0) {
+            if (!AccountManager::LastErrors().empty()) {
                 REQUIRE(AccountManager::LastErrors().size() == 1);
                 REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
             }
@@ -100,7 +100,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
                 WARN(err);
             }
         } else {
-            if (AccountManager::LastErrors().size() > 0) {
+            if (!AccountManager::LastErrors().empty()) {
                 REQUIRE(AccountManager::LastErrors().size() == 1);
                 REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
             }
@@ -130,7 +130,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
                 WARN(err);
             }
         } else {
-            if (AccountManager::LastErrors().size() > 0) {
+            if (!AccountManager::LastErrors().empty()) {
                 REQUIRE(AccountManager::LastErrors().size() == 1);
                 REQUIRE(AccountManager::LastErrors()[0] == "sample warning");
             }
@@ -174,7 +174,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
     }
 
-    SECTION("Python plugin with custom read-write") {
+    SECTION("Python plugin with custom read/write") {
         REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_json_account")));
 
         AccountObject act;
@@ -200,6 +200,38 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(receivedAct.services["python-json"]["k2"] == "v2");
         REQUIRE(receivedAct.services["python-json"].find("o1") != receivedAct.services["python-json"].end());
         REQUIRE(receivedAct.services["python-json"].find("o2") != receivedAct.services["python-json"].end());
+
+
+        auto removeResult = AccountManager::Instance().deleteAccount(actName);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(removeResult);
+    }
+
+    SECTION("CPP Plugin with custom read/write") {
+        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_custom_cpp_account")));
+
+        AccountObject act;
+        act.title = "my custom cpp account";
+        act.services["cpp-custom"].init(&act, "cpp-custom");
+        act.services["cpp-custom"]["k1"] = "v1";
+        act.services["cpp-custom"]["k2"] = "v2";
+        bool createRes = AccountManager::Instance().createAccount(act);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(createRes);
+
+        string actName = PXUTILS::ACCOUNT::title2name(act.title);
+
+        AccountObject receivedAct;
+        bool readResult = AccountManager::Instance().readAccount(actName, &receivedAct);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(readResult);
+
+        REQUIRE(receivedAct.services.size() == 1);
+        REQUIRE(receivedAct.services.find("cpp-custom") != receivedAct.services.end());
+
+        REQUIRE(receivedAct.services["cpp-custom"].find("k1") != receivedAct.services["cpp-custom"].end());
+        CHECK(receivedAct.services["cpp-custom"]["k1"] == "v1");
+        CHECK(receivedAct.services["cpp-custom"]["k2"] == "v2");
 
 
         auto removeResult = AccountManager::Instance().deleteAccount(actName);
