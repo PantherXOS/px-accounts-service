@@ -9,6 +9,13 @@
 
 #define PLUGIN_ID_PARAM "PLUGIN_ID"
 
+/**
+ * initiate service parameters, assign related plugin, set _inited flag to true
+ *
+ * @param act pointer to related account
+ * @param name service name
+ * @return service initiation status
+ */
 bool AccountService::init(AccountObject *act, const string &name) {
     this->_name = name;
     this->_account = act;
@@ -24,8 +31,7 @@ bool AccountService::init(AccountObject *act, const string &name) {
  */
 void AccountService::applyVerification(const ServiceParamList &params) {
     _verified = false;
-    _requiredDict.clear();
-    _protectedDict.clear();
+    this->clearService();
     for (const auto &param : params) {
         this->operator[](param.key) = param.val;
         _requiredDict[param.key] = param.is_required;

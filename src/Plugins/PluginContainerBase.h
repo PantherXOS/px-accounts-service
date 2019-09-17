@@ -46,10 +46,13 @@ public:
     /// @brief pure virtual method to call plugin's authenticate method
     virtual AuthResult authenticate(const ServiceParamList &params) = 0;
 
+    /// @brief virtual method to read plugin params
     virtual StrStrMap read(const string &id) = 0;
 
+    /// @brief virtual method to write plugin params
     virtual string write(VerifyResult &vResult, AuthResult &aResult) = 0;
 
+    /// @brief virtual method to delete plugin saved details
     virtual bool remove(const string &id) = 0;
 
 public:

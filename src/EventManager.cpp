@@ -14,7 +14,7 @@
 
 
 /**
- * constructor for EventManager
+ * Initiates NNG socket and connect to Event Service
  */
 EventManager::EventManager() {
 
@@ -34,6 +34,9 @@ EventManager::EventManager() {
     m_inited = true;
 }
 
+/**
+ * close nng socket which was initiated for communication with Event Service
+ */
 EventManager::~EventManager() {
     if (m_inited) {
         nng_close(m_sock);
@@ -42,10 +45,11 @@ EventManager::~EventManager() {
 }
 
 /**
+ * Create and serialize a CapnProto message and send it to Event Service
+ * using initiated NNG socket
  *
  * @param event event string that we want to emit to event service
  * @param params string-based key value map about event params
- *
  */
 void EventManager::emit(const string &event, const map<string, string> &params) {
 
@@ -78,7 +82,6 @@ void EventManager::emit(const string &event, const map<string, string> &params) 
 }
 
 /**
- *
  * @return reference for EventManager instance
  */
 EventManager &EventManager::Instance() {
@@ -87,6 +90,8 @@ EventManager &EventManager::Instance() {
 }
 
 /**
+ * initiate list of parameters that needs to emit a status-change event
+ * to Event Service
  *
  * @param act account that it's status is changed
  * @param from old status of account

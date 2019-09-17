@@ -65,8 +65,8 @@ bool AccountObject::_appendProviderParams() {
     }
 
     GLOG_INF("Updating provider '", this->provider, "' params:");
-    ProviderStruct &provider = ProviderHandler::Instance()[this->provider];
-    for (const auto &plg : provider.plugins) {
+    ProviderStruct &curProvider = ProviderHandler::Instance()[this->provider];
+    for (const auto &plg : curProvider.plugins) {
         const string &plgName = plg.first;
         const auto &plgParams = plg.second;
 

@@ -12,20 +12,16 @@
 
 
 ProviderHandler::ProviderHandler() {
-
     init(PXUTILS::FILE::abspath(PROVIDER_SYSTEM_PATH));
     init(PXUTILS::FILE::abspath(PROVIDER_APP_PATH));
     init(PXUTILS::FILE::abspath(PROVIDER_USER_PATH));
 }
 
 /**
- *
  * @param path base path for loading provider definition files
- *
  * @return privider handler initiation status
  */
 bool ProviderHandler::init(const string& path) {
-
     for (const string& providerName: PXUTILS::FILE::dirfiles(path, ".yaml")) {
         if (!initProvider(string(path).append("/").append(providerName))) {
             return false;
@@ -35,13 +31,14 @@ bool ProviderHandler::init(const string& path) {
 }
 
 /**
+ * read list of provider configuration files in YAML format
+ * and prepare ProviderStruct for each file and save them to
+ * _providers mapping.
  *
  * @param providerPath path to provider file
- *
  * @return initiation status
  */
 bool ProviderHandler::initProvider(const string &providerPath) {
-
     if (!PXUTILS::FILE::exists(providerPath)) {
         addError(string("Provider file not found: ") + providerPath );
         return false;
@@ -49,10 +46,8 @@ bool ProviderHandler::initProvider(const string &providerPath) {
 
     try {
         ProviderStruct provider;
-
         YAML::Node root = YAML::LoadFile(providerPath);
         provider.title = root[PROVIDER_KEY][PROVIDER_KEY_TITLE].as<string>();
-
         for (const auto &it : root[PROVIDER_KEY][PROVIDER_KEY_PLUGINS]) {
             for (const auto &svc : it) {
                 string svcName = svc.first.as<string>();
@@ -81,14 +76,16 @@ ProviderHandler &ProviderHandler::Instance() {
 
 /**
  * @param title provider title
- *
- * @return refrence to  provider with specified title
+ * @return reference to  provider with specified title
  */
 ProviderStruct &ProviderHandler::operator[](const string &title) {
     return _providers[title];
 }
 
 /**
+ * checks whether provided title is exists in _providers mapping
+ * or not.
+ *
  * @param title provider title to search for
  * @return whether that the provider with specified title is exists or not
  */
