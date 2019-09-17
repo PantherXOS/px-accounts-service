@@ -7,7 +7,7 @@
 
 #include "PluginContainerPython.h"
 #include "PluginContainerCpp.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 
 #define PLUGIN_KEY "plugin"

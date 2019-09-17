@@ -7,7 +7,7 @@
 #include <capnp/ez-rpc.h>
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
-#include <AccountParser.h>
+#include <Accounts/AccountParser.h>
 #include <iostream>
 
 #include <RPCServer.h>
@@ -27,6 +27,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     act.settings["first key"] = "first value";
     act.settings["second key"] = "second value";
 
+    act.services["python-test"].init(&act, "python-test");
     act.services["python-test"]["k1"] = "v1";  // protected params need to be re-added during account modification
     act.services["python-test"]["k2"] = "v2";
 

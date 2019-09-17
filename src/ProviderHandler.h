@@ -6,7 +6,8 @@
 #define PX_ACCOUNTS_SERVICE_PROVIDERHANDLER_H
 
 
-#include "AccountDefinitions.h"
+#include "Accounts/AccountDefinitions.h"
+#include <Utils/ErrorReporter.h>
 
 #define PROVIDER_APP_PATH    "./providers"
 #define PROVIDER_USER_PATH   BASE_USER_PATH   "/etc/px/accounts/providers"
@@ -21,13 +22,14 @@ struct ProviderStruct {
 
 
 /// @brief Responsible for managing Provider related tasks
-class ProviderHandler {
+class ProviderHandler : public ErrorReporter {
 
 protected:
+    /// @brief protected constructor for provider handler
     explicit ProviderHandler();
 
     /// @brief init default location for reading provider details
-    bool init(const string& path);
+    bool init(const string &path);
 
     /// @brief init specific provider based on it's definition file
     bool initProvider(const string &providerPath);
@@ -42,20 +44,15 @@ public:
     /// @brief check if provider with specific title is exists
     bool exists(const string &title);
 
+    /// @brief reference to list of existing providers
     map<string, ProviderStruct> &providers();
 
-
 protected:
-    map<string, ProviderStruct> _providers;
-    StringList _errorList;
-
-protected:
-    inline void addError(string err) { _errorList.push_back(err); }
-
-    inline void resetErrors() { _errorList.clear(); }
+    map<string, ProviderStruct> _providers;  ///< @brief mapping of existing providers
 
 public:
-    inline static StringList &LastErrors() { return ProviderHandler::Instance()._errorList; }
+    /// @brief static method reports list of last occurred errors
+    inline static StringList &LastErrors() { return ProviderHandler::Instance().getErrors(); }
 
 };
 

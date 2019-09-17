@@ -5,8 +5,8 @@
 #ifndef PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
 #define PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
 
-#include "../AccountDefinitions.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountDefinitions.h"
+#include "../Accounts/AccountUtils.h"
 #include "PluginInterface.h"
 
 /// @brief enumeration for Plugin Types
@@ -45,6 +45,15 @@ public:
 
     /// @brief pure virtual method to call plugin's authenticate method
     virtual AuthResult authenticate(const ServiceParamList &params) = 0;
+
+    /// @brief virtual method to read plugin params
+    virtual StrStrMap read(const string &id) = 0;
+
+    /// @brief virtual method to write plugin params
+    virtual string write(VerifyResult &vResult, AuthResult &aResult) = 0;
+
+    /// @brief virtual method to delete plugin saved details
+    virtual bool remove(const string &id) = 0;
 
 public:
     /// @brief static method used to initiate a new PluginContainer based on provided path

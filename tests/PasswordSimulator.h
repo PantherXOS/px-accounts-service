@@ -11,7 +11,7 @@
 using namespace std;
 
 #include <interface/password/interface.capnp.h>
-#include <AccountDefinitions.h>
+#include <Accounts/AccountDefinitions.h>
 
 
 

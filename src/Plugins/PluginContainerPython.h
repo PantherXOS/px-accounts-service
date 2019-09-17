@@ -42,6 +42,12 @@ public:
 
     AuthResult authenticate(const ServiceParamList &params) override;
 
+    StrStrMap read(const string &id) override;
+
+    string write(VerifyResult &vResult, AuthResult &aResult) override;
+
+    bool remove(const string &id) override;
+
 protected:
     pybind11::object _module;
     pybind11::object _plugin;

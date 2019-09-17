@@ -28,3 +28,18 @@ AuthResult PluginContainerCpp::authenticate(const ServiceParamList &params) {
     auto plugin = _loader.DLGetInstance();
     return plugin->authenticate(params);
 }
+
+StrStrMap PluginContainerCpp::read(const string &id) {
+    auto plugin = _loader.DLGetInstance();
+    return  plugin->read(id);
+}
+
+string PluginContainerCpp::write(VerifyResult &vResult, AuthResult &aResult) {
+    auto plugin = _loader.DLGetInstance();
+    return  plugin->write(vResult, aResult);
+}
+
+bool PluginContainerCpp::remove(const string &id) {
+    auto plugin = _loader.DLGetInstance();
+    return plugin->remove(id);
+}

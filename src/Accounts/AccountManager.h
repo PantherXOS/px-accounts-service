@@ -6,6 +6,9 @@
 #define PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
 
 #include <memory>
+#include <Utils/ErrorReporter.h>
+#include <Utils/Utils.h>
+
 #include "AccountParser.h"
 #include "Plugins/PluginManager.h"
 
@@ -14,7 +17,7 @@
  * @details AccountManager is a Singleton class that is responsible for managing
  *          Online Accounts for PantherX.
  */
-class AccountManager {
+class AccountManager : public ErrorReporter {
 public:
     typedef vector<string> ProviderFilters_t;
     typedef vector<string> ServiceFilters_t;
@@ -24,40 +27,7 @@ public:
     static AccountManager &Instance();
 
     /// @brief static method for accessing last occurred errors during last operation
-    static vector<string> &LastErrors();
-
-protected:
-    /// @brief reset previous operation errors
-    void resetErrors();
-
-    /// @brief add new error to list of occurred errors
-    void addError(const string &msg);
-
-    void addErrorList(const StringList &errList);
-
-    /// @brief verify AccountObject
-    bool verifyAccount(AccountObject &act);
-
-    /// @brief update params related to defined provider for AccountObject
-    bool updateProviderRelatedParams(AccountObject &act);
-
-    /// @brief verify Account against provided service
-    bool verifyService(AccountObject &act, const string &svcName);
-
-    /// @brief check and prepare parameters needed for a service
-    std::shared_ptr<VerifyResult> performServiceParamVerification(AccountObject &act,
-                                                                  const string &svcName,
-                                                                  PluginContainerBase *plugin);
-
-    /// @brief perform authentication task for a service
-    std::shared_ptr<AuthResult> performServiceAuthentication(shared_ptr<VerifyResult> vResult,
-                                                             PluginContainerBase *plugin);
-
-    /// @brief save protected params to SecretManager
-    bool saveServiceProtectedParams(AccountObject &act,
-                                    const string &svcName,
-                                    const shared_ptr<VerifyResult>& vResult,
-                                    const shared_ptr<AuthResult>& aResult);
+    static StringList &LastErrors();
 
 public:
     /// @brief save new account to disk
@@ -82,13 +52,12 @@ public:
     AccountStatus getStatus(const string &accountName);
 
 private:
-    explicit AccountManager();
+    explicit AccountManager() = default;
 
 protected:
     static AccountManager _instance;
 
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status
-    vector<string> m_errorList;             ///< @brief vector that hold last operation's errors
 };
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H

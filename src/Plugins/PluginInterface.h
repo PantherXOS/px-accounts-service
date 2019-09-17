@@ -5,16 +5,9 @@
 #ifndef PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H
 #define PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H
 
-#include <string>
-#include <vector>
-#include <map>
+#include <Utils/Utils.h>
+#include <memory>
 
-using namespace std;
-
-typedef vector<string> StringList;
-
-/// @brief definition for string based key-value map
-typedef map<string, string> StrStrMap;
 
 /// @brief structure for holding a service parameter on a plugin
 struct ServiceParam {
@@ -35,6 +28,7 @@ struct VerifyResult {
     VerifyResult() : verified(false) {
     }
 };
+typedef std::shared_ptr<VerifyResult> VerifyResultPtr;
 
 /// @brief result structure for plugin's authenticate method
 struct AuthResult {
@@ -42,6 +36,7 @@ struct AuthResult {
     StrStrMap tokens;       ///< @brief list of generated tokens during plugin authentication
     StringList errors;      ///< @brief list of plugin error messages
 };
+typedef std::shared_ptr<AuthResult> AuthResultPtr;
 
 
 /// @brief Interface class that all plugins are inherited from
@@ -69,8 +64,40 @@ public:
      */
     virtual AuthResult authenticate(const ServiceParamList &params) = 0;
 
+    /**
+     * virtual method for a plugin to read it's parameters from a custom source
+     * with it's custom format.
+     *
+     * @param id unique identifier that plugin previously generated during `write` procedure
+     * @return string based key-value map of plugin parameters
+     */
+    virtual StrStrMap read(const string &id) {
+        throw std::logic_error("not implemented");
+    }
+
+    /**
+     * virtual method for plugin to allow it to write plugin data in it's custom format.
+     *
+     * @param vResult result of plugin's verify method.
+     * @param aResult result of plugin's authenticate method.
+     * @return unique identifier about current write that used to allow us to access this write details
+     */
+    virtual string write(VerifyResult &vResult, AuthResult &aResult) {
+        throw std::logic_error("not implemented");
+    }
+
+    /**
+     * virtual method that calls during account removal, to cleanup plugin generated data
+     *
+     * @param id unique identifier to referenced pluign details that needs to be removed
+     * @return plugin removal status
+     */
+    virtual bool remove(const string &id) {
+        throw std::logic_error("not implemented");
+    }
+
 public:
-    string title;
+    string title;   ///< @brief plugin's title
 };
 
 #endif //PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H

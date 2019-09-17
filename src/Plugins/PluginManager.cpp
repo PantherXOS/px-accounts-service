@@ -4,7 +4,7 @@
 
 
 #include "PluginManager.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 #include <pybind11/embed.h>
 
@@ -15,7 +15,10 @@ namespace py = pybind11;
 #define USER_PLUGIN_PATH "~/.guix-profile/etc/px/accounts/plugins"
 #define SYSTEM_PLUGIN_PATH "/run/current-system/profile/etc/px/accounts/plugins"
 
-
+/**
+ * init python plugins interpreter, and init manager
+ * for different paths of plugins
+ */
 PluginManager::PluginManager() {
     py::initialize_interpreter();
 
@@ -24,6 +27,10 @@ PluginManager::PluginManager() {
     init(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
 }
 
+/**
+ * delete allocated plugins and clear plugin list.
+ * close python plugins interpreter
+ */
 PluginManager::~PluginManager() {
     for (const auto &plugin : _plugins) {
         delete plugin.second;
@@ -38,6 +45,9 @@ PluginManager &PluginManager::Instance() {
 }
 
 /**
+ * check if a plugin with specified title exists and return pointer to it.
+ * otherwise returns nullptr.
+ *
  * @param title plugin title we want to get it's reference
  * @return reference to specified plugin
  */
@@ -48,6 +58,9 @@ PluginContainerBase *PluginManager::operator[](const std::string &title) {
     return _plugins[title];
 }
 
+/**
+ * @return reference to list of registered plugins
+ */
 map<string, PluginContainerBase *> &PluginManager::plugins() {
     return _plugins;
 }
@@ -60,7 +73,7 @@ bool PluginManager::init(const std::string &path) {
     GLOG_INF("===============================================================================");
     GLOG_INF("search for registered plugins on: ", path);
     for (const string &pluginFile: PXUTILS::FILE::dirfiles(path, ".yaml")) {
-        PluginContainerBase *plugin = PluginContainerBase::CreateContainer(path + "/" + pluginFile);
+        PluginContainerBase *plugin = PluginContainerBase::CreateContainer(path + "/" + pluginFile); // NOLINT(performance-inefficient-string-concatenation)
         if (plugin != nullptr && plugin->isInited()) {
             GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle());
             _plugins[plugin->getTitle()] = plugin;

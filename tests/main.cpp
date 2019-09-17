@@ -9,7 +9,7 @@
 
 #include <RPCServer.h>
 #include <RPCHandler.h>
-#include <AccountUtils.h>
+#include <Accounts/AccountUtils.h>
 #include <Secret/SecretManager.h>
 
 #include "test_common.h"
@@ -18,8 +18,11 @@
 
 #ifdef __linux__
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.so"
+#define CPP_CUSTOM_PLUGIN_PATH "../cpp-custom-plugin/libpx-accounts-service-plugin-cpp-custom.so"
 #else
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.dylib"
+#define CPP_CUSTOM_PLUGIN_PATH "../cpp-custom-plugin/libpx-accounts-service-plugin-cpp-custom.dylib"
+
 #endif
 
 Logger gLogger("account-tests");
@@ -52,11 +55,19 @@ int main(int argc, char *argv[]) {
                          "0.0.1",
                          "cpp",
                          CPP_PLUGIN_PATH);
+    register_test_plugin("px-accounts-service-plugin-cpp-custom",
+                         "0.0.1",
+                         "cpp",
+                         CPP_CUSTOM_PLUGIN_PATH);
     register_test_plugin("px-accounts-service-plugin-python-test",
                          "0.0.1",
                          "python",
                          ".");
     register_test_plugin("px-accounts-service-plugin-test-public-service",
+                         "0.0.1",
+                         "python",
+                         ".");
+    register_test_plugin("px-accounts-service-plugin-python-json",
                          "0.0.1",
                          "python",
                          ".");

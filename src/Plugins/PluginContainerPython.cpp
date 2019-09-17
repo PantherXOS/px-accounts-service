@@ -3,7 +3,7 @@
 //
 
 #include "PluginContainerPython.h"
-#include "../AccountUtils.h"
+#include "../Accounts/AccountUtils.h"
 
 // ===PLUGIN DEFINITION MACRO =================================================
 
@@ -101,4 +101,31 @@ VerifyResult PluginContainerPython::verify(const StrStrMap &params) {
 AuthResult PluginContainerPython::authenticate(const ServiceParamList &params) {
     auto res = _plugin.attr("authenticate")(params);
     return res.cast<AuthResult>();
+}
+
+StrStrMap PluginContainerPython::read(const string &id) {
+    if (py::hasattr(_plugin, "read")) {
+        auto res = _plugin.attr("read")(id);
+        return res.cast<StrStrMap>();
+    } else {
+        throw std::logic_error("read not found");
+    }
+}
+
+string PluginContainerPython::write(VerifyResult &vResult, AuthResult &aResult) {
+    if (py::hasattr(_plugin, "write")) {
+        auto res = _plugin.attr("write")(vResult, aResult);
+        return res.cast<string>();
+    } else {
+        throw std::logic_error("write not found");
+    }
+}
+
+bool PluginContainerPython::remove(const string &id) {
+    if (py::hasattr(_plugin, "remove")) {
+        auto res = _plugin.attr("remove")(id);
+        return res.cast<bool>();
+    } else {
+        throw std::logic_error("remove not found");
+    }
 }

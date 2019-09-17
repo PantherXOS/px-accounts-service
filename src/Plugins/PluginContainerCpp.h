@@ -25,6 +25,12 @@ public:
     /// @brief authenticate service based on provided params
     AuthResult authenticate(const ServiceParamList &params) override;
 
+    StrStrMap read(const string &id) override;
+
+    string write(VerifyResult &vResult, AuthResult &aResult) override;
+
+    bool remove(const string &id) override;
+
 private:
     DLLoader<IPlugin> _loader;
 };

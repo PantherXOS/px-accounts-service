@@ -7,7 +7,7 @@
 #include <string>
 #include <kj/debug.h>
 
-#include "AccountManager.h"
+#include "Accounts/AccountManager.h"
 
 using namespace std;
 
@@ -87,7 +87,7 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    auto stat = (AccountStatus)ctx.getParams().getStat();
+    auto stat = (AccountStatus) ctx.getParams().getStat();
     bool res = AccountManager::Instance().setStatus(title, stat);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
@@ -104,8 +104,8 @@ kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    AccountStatus  stat = AccountManager::Instance().getStatus(title);
-    ctx.getResults().setStatus((Account::Status)stat);
+    AccountStatus stat = AccountManager::Instance().getStatus(title);
+    ctx.getResults().setStatus((Account::Status) stat);
 
     return kj::READY_NOW;
 }
@@ -177,7 +177,7 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
     KJ_ASSERT(res, "Remove Account Failed");
     ctx.getResults().setResult(true);
 
-    return  kj::READY_NOW;
+    return kj::READY_NOW;
 }
 
 bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
@@ -190,8 +190,15 @@ bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
     }
 
     for (const auto &svc : rpc.getServices()) {
+        string svcName = svc.getName().cStr();
+        act.services[svcName].init(&act, svcName);
+        if (!act.services[svcName].inited()) {
+            return false;
+        }
         for (const auto &p : svc.getParams()) {
-            act.services[svc.getName().cStr()][p.getKey().cStr()] = p.getValue().cStr();
+            string key = p.getKey().cStr();
+            string val = p.getValue().cStr();
+            act.services[svcName][key] = val;
         }
     }
     return true;
