@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-TARGET_PATH="/root/projects/px-accounts-service"
-SERVER_ADDRESS="root@127.0.0.1"
+# REQUIRED PACKAGES:
+# guix package -i cmake make pkg-config gcc-toolchain util-linux capnproto yaml-cpp python pybind11 nng
+
+TARGET_PATH="/home/panther/projects/px-accounts-service"
+SERVER_ADDRESS="panther@127.0.0.1"
 
 # temp commands
 #ssh $SERVER_ADDRESS -p 2222 'for pid in $(ps aux | grep px-secret | grep -v grep | awk '"'"'{ print $2}'"'"'); do echo "killing $pid"; done;';
@@ -39,4 +42,4 @@ CMD="$CMD;
 #     ./px-accounts-service ;
      "
 
-ssh root@127.0.0.1 -p 2222 $CMD
+ssh $SERVER_ADDRESS -p 2222 $CMD
