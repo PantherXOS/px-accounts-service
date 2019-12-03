@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <stdarg.h>
 #include <unistd.h>
+#include <pwd.h>
 
 #include <iostream>
 #include <fstream>
@@ -207,11 +208,10 @@ string PXUTILS::PATH::unix2path(const string &upath) {
  * @return current logged in user
  */
 string PXUTILS::SYSTEM::current_user() {
-    const size_t buffLen = 100;
-    char buff[buffLen] = {0x00};
-    int res = getlogin_r(buff, buffLen);
-    if (res == 0) {
-        return string(buff);
+    uid_t uid = geteuid();
+    struct passwd *pwd = getpwuid(uid);
+    if (pwd) {
+        return string(pwd->pw_name);
     }
     return string();
 }
