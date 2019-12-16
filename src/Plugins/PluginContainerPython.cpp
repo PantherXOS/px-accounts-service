@@ -59,7 +59,8 @@ PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
     }
     py::exec(R"(
 import sys
-sys.path.append(module_path)
+if module_path not in sys.path:
+   sys.path.append(module_path)
 # for p in sys.path:
 #    print(p)
 
