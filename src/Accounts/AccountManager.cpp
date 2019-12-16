@@ -176,7 +176,7 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
 /**
  * set provided status for an account
  *
- * @param accountName  title of account that we want to seti it's status
+ * @param accountName  title of account that we want to set it's status
  * @param stat the status we want to set for an account
  * @return set status result
  */
