@@ -19,6 +19,8 @@ add_dependencies(tests
 
 file(COPY providers DESTINATION ${CMAKE_BINARY_DIR}/src/)
 file(COPY providers DESTINATION ${CMAKE_BINARY_DIR}/tests/)
+file(COPY python-test-plugin/px_accounts_service_plugin_protected_params.py DESTINATION ${CMAKE_BINARY_DIR}/src/)
+file(COPY python-test-plugin/px_accounts_service_plugin_protected_params.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
 file(COPY python-test-plugin/px_accounts_service_plugin_python_test.py DESTINATION ${CMAKE_BINARY_DIR}/src/)
 file(COPY python-test-plugin/px_accounts_service_plugin_python_test.py DESTINATION ${CMAKE_BINARY_DIR}/tests/)
 file(COPY python-test-plugin/px_accounts_service_plugin_test_public_service.py DESTINATION ${CMAKE_BINARY_DIR}/src/)

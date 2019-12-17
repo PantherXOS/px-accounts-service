@@ -20,7 +20,7 @@ bool AccountService::init(AccountObject *act, const string &name) {
     this->_name = name;
     this->_account = act;
     this->_plugin = PluginManager::Instance()[name];
-    this->_inited = true;
+    this->_inited = (this->_plugin != nullptr);
     return this->_inited;
 }
 

@@ -238,4 +238,28 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(removeResult);
     }
+
+    SECTION("retrieve account only with protected params") {
+
+        AccountObject act;
+        act.title = "my protected account";
+        REQUIRE(act.services["protected-test"].init(&act, "protected-test"));
+        act.services["protected-test"]["param1"] = "value1";
+        act.services["protected-test"]["param2"] = "value2";
+
+        string actName = PXUTILS::ACCOUNT::title2name(act.title);
+        REQUIRE(PXParser::remove(actName));
+
+        bool createResult = AccountManager::Instance().createAccount(act);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(createResult);
+
+        AccountObject receivedAct;
+        bool readResult = AccountManager::Instance().readAccount(actName, &receivedAct);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE(readResult);
+
+        REQUIRE(receivedAct.services.size() == 1);
+        REQUIRE(receivedAct.services.find("protected-test") != receivedAct.services.end());
+    }
 }

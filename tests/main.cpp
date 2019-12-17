@@ -4,6 +4,7 @@
 
 
 #define CATCH_CONFIG_RUNNER
+
 #include <catch2/catch.hpp>
 #include <sys/stat.h>
 
@@ -44,10 +45,9 @@ void register_test_plugin(const string &name, const string &version, const strin
 }
 
 
-
 int main(int argc, char *argv[]) {
 
-    setvbuf( stdout, nullptr, _IONBF, 0 );
+    setvbuf(stdout, nullptr, _IONBF, 0);
     GLOG_INIT(LogTarget::SYSLOG, LogLevel::INF);
 
 
@@ -59,6 +59,10 @@ int main(int argc, char *argv[]) {
                          "0.0.1",
                          "cpp",
                          CPP_CUSTOM_PLUGIN_PATH);
+    register_test_plugin("px-accounts-service-plugin-protected-params",
+                         "0.0.1",
+                         "python",
+                         ".");
     register_test_plugin("px-accounts-service-plugin-python-test",
                          "0.0.1",
                          "python",
@@ -78,7 +82,6 @@ int main(int argc, char *argv[]) {
     EventSimulator evtSimulator;
     evtSimulator.start();
     evtSimulator.registerChannel("account");
-
 
 
     SecretManager::Init(SECRET_SIMULATOR_PATH);
