@@ -29,7 +29,7 @@ StringList &AccountManager::LastErrors() {
  * @param[in,out] act AccountObject we want to create
  * @return Account creation status
  */
-bool AccountManager::createAccount(AccountObject &act) {
+bool AccountManager::createAccount(AccountObject &act, bool emitCreateEvent) {
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
@@ -39,6 +39,9 @@ bool AccountManager::createAccount(AccountObject &act) {
     if (!PXParser::write(accountName, act)) {
         addError("Error on saving account file");
         return false;
+    }
+    if (emitCreateEvent) {
+        EventManager::EMIT_CREATE_ACCOUNT(accountName);
     }
     setStatus(accountName, AC_NONE);
     return true;
@@ -75,7 +78,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
-    if (!this->createAccount(act)) {
+    if (!this->createAccount(act, false)) {
         SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
