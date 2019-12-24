@@ -113,6 +113,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         return false;
     }
     m_statDict.erase(accountName);
+    EventManager::EMIT_DELETE_ACCOUNT(accountName);
     return true;
 }
 
