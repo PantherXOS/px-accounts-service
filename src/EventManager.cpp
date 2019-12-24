@@ -12,6 +12,10 @@
 #define RPC_PATH RPC_DIR "/events"
 #define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
+#define ACCOUNT_STATUS_CHANGE_EVENT "account_status_change"
+#define ACCOUNT_CREATE_EVENT        "account_create"
+#define ACCOUNT_MODIFY_EVENT        "account_modify"
+#define ACCOUNT_DELETE_EVENT        "account_delete"
 
 /**
  * Initiates NNG socket and connect to Event Service
@@ -93,14 +97,35 @@ EventManager &EventManager::Instance() {
  * initiate list of parameters that needs to emit a status-change event
  * to Event Service
  *
- * @param act account that it's status is changed
+ * @param actName account that it's status is changed
  * @param from old status of account
  * @param to new status of account
  */
-void EventManager::EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to) {
+void EventManager::EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["account"] = act;
+    params["account"] = actName;
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
-    EventManager::Instance().emit("account_status_change", params);
+    EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
+}
+
+void EventManager::EMIT_CREATE_ACCOUNT(const string &actName) {
+    map<string, string> params;
+    params["account"] = actName;
+    EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
+}
+
+void EventManager::EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName) {
+    map<string, string> params;
+    params["account"] = actName;
+    if (!newName.empty()) {
+        params["new_title"] = newName;
+    }
+    EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
+}
+
+void EventManager::EMIT_DELETE_ACCOUNT(const string &actName) {
+    map<string, string> params;
+    params["account"] = actName;
+    EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
 }

@@ -29,7 +29,7 @@ StringList &AccountManager::LastErrors() {
  * @param[in,out] act AccountObject we want to create
  * @return Account creation status
  */
-bool AccountManager::createAccount(AccountObject &act) {
+bool AccountManager::createAccount(AccountObject &act, bool emitCreateEvent) {
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
@@ -39,6 +39,9 @@ bool AccountManager::createAccount(AccountObject &act) {
     if (!PXParser::write(accountName, act)) {
         addError("Error on saving account file");
         return false;
+    }
+    if (emitCreateEvent) {
+        EventManager::EMIT_CREATE_ACCOUNT(accountName);
     }
     setStatus(accountName, AC_NONE);
     return true;
@@ -60,6 +63,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
     }
     bool titleChanged = (oldAct.title != act.title);
     map<string, string> oldActProtectedParams;
+    string oldName = PXUTILS::ACCOUNT::title2name(oldAct.title);
     string newName = PXUTILS::ACCOUNT::title2name(act.title);
 
     if (titleChanged) {
@@ -75,7 +79,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
-    if (!this->createAccount(act)) {
+    if (!this->createAccount(act, false)) {
         SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
@@ -85,6 +89,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         return SecretManager::Instance().RemoveAccount(oldAct.title)
                && this->deleteAccount(accountName);
     }
+    EventManager::EMIT_MODIFY_ACCOUNT(oldName, (titleChanged ? newName : ""));
     return true;
 }
 
@@ -108,6 +113,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         return false;
     }
     m_statDict.erase(accountName);
+    EventManager::EMIT_DELETE_ACCOUNT(accountName);
     return true;
 }
 

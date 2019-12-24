@@ -30,7 +30,10 @@ public:
     static EventManager &Instance();
 
     /// @brief helper method for emitting change status event
-    static void EMIT_STATUS_CHANGE(const string &act, AccountStatus from, AccountStatus to);
+    static void EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to);
+    static void EMIT_CREATE_ACCOUNT(const string &actName);
+    static void EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName = "");
+    static void EMIT_DELETE_ACCOUNT(const string &actName);
 
 private:
     nng_socket m_sock;      ///< @brief socket that EventManager use to connect to Event Service
