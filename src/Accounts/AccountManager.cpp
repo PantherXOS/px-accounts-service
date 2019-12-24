@@ -63,6 +63,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
     }
     bool titleChanged = (oldAct.title != act.title);
     map<string, string> oldActProtectedParams;
+    string oldName = PXUTILS::ACCOUNT::title2name(oldAct.title);
     string newName = PXUTILS::ACCOUNT::title2name(act.title);
 
     if (titleChanged) {
@@ -88,6 +89,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         return SecretManager::Instance().RemoveAccount(oldAct.title)
                && this->deleteAccount(accountName);
     }
+    EventManager::EMIT_MODIFY_ACCOUNT(oldName, (titleChanged ? newName : ""));
     return true;
 }
 
