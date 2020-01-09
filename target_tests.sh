@@ -30,7 +30,8 @@ CMD="$CMD;
         && echo '#####################################################################################'
         && echo 'DONE'
         && cd tests
-        && ./tests -d yes;
+        && ./tests -r console -d yes --order lex \"Account Writer Tests\";
+#        && ./tests -d yes;
 #        && ./tests -d yes \"Account Management Tasks\";
 #        && ./secret_tester;
 #     ./src/px-accounts-service;

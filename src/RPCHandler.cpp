@@ -44,8 +44,9 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
+    auto actName = PXUTILS::ACCOUNT::title2name(title);
     AccountObject actObj;
-    bool res = AccountManager::Instance().readAccount(title, &actObj);
+    bool res = AccountManager::Instance().readAccount(actName, &actObj);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }
@@ -143,10 +144,11 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
 
     auto title = ctx.getParams().getTitle().cStr();
+    auto actName = PXUTILS::ACCOUNT::title2name(title);
     auto rpcAccount = ctx.getParams().getAccount();
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
-    bool res = AccountManager::Instance().modifyAccount(title, account);
+    bool res = AccountManager::Instance().modifyAccount(actName, account);
     if (!res) {
         for (const auto &err : AccountManager::LastErrors()) {
             KJ_DBG(err);
@@ -170,7 +172,8 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    bool res = AccountManager::Instance().deleteAccount(title);
+    auto actName = PXUTILS::ACCOUNT::title2name(title);
+    bool res = AccountManager::Instance().deleteAccount(actName);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }

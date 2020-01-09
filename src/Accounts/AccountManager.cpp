@@ -102,7 +102,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
 bool AccountManager::deleteAccount(const string &accountName) {
     AccountObject act;
     if (!PXParser::read(accountName, &act)) {
-        addError("Account deletion failed");
+        addError("unable to read account before delete");
         return false;
     }
     if (!act.performAccountCustomRemoval()) {
@@ -110,6 +110,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         return false;
     }
     if (!PXParser::remove(accountName)) {
+        addError("unable to remove account file");
         return false;
     }
     m_statDict.erase(accountName);
