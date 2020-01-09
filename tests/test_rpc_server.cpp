@@ -60,7 +60,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         REQUIRE(response.getResult());
 
         auto getReq = client.getRequest();
-        getReq.setTitle(PXUTILS::ACCOUNT::title2name(act.title));
+        getReq.setTitle(act.title);
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
@@ -77,7 +77,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     SECTION("Edit Account") {
         auto getReq = client.getRequest();
-        getReq.setTitle(PXUTILS::ACCOUNT::title2name(act.title));
+        getReq.setTitle(act.title);
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
@@ -91,7 +91,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         RPCHandler::ACT2RPC(testAct, account);
 
         auto editReq = client.editRequest();
-        editReq.setTitle(PXUTILS::ACCOUNT::title2name(title1));
+        editReq.setTitle(title1);
         editReq.setAccount(account);
 
         auto response = editReq.send()
@@ -108,7 +108,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     SECTION("Delete Account") {
         auto rmReq = client.removeRequest();
-        rmReq.setTitle(PXUTILS::ACCOUNT::title2name(title2));
+        rmReq.setTitle(title2);
         auto rmRes = rmReq.send().wait(waitScope);
         REQUIRE(rmRes.getResult());
     }
