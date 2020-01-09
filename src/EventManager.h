@@ -19,21 +19,25 @@ protected:
     /// @brief protected method for creating EventManager instance
     explicit EventManager();
 
+    bool init();
+
     /// @brief general method for emitting events to Event Service
-    void emit(const string &event, const map<string, string> &params);
+    bool emit(const string &event, const map<string, string> &params);
 
 public:
     /// @brief EventManager destructor
     virtual ~EventManager();
 
+    inline bool inited() const { return m_inited; }
+
     /// @brief static method to access EventManager singleton instance
     static EventManager &Instance();
 
     /// @brief helper method for emitting change status event
-    static void EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to);
-    static void EMIT_CREATE_ACCOUNT(const string &actName);
-    static void EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName = "");
-    static void EMIT_DELETE_ACCOUNT(const string &actName);
+    static bool EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to);
+    static bool EMIT_CREATE_ACCOUNT(const string &actName);
+    static bool EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName = "");
+    static bool EMIT_DELETE_ACCOUNT(const string &actName);
 
 private:
     nng_socket m_sock;      ///< @brief socket that EventManager use to connect to Event Service
