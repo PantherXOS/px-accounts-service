@@ -23,19 +23,24 @@
 EventManager::EventManager() {
 
     system(RPC_MKPATH_CMD);
+    this->init();
+}
 
+bool EventManager::init() {
+    m_inited = false;
     int rv;
     if ((rv = nng_push0_open(&m_sock)) != 0) {
         GLOG_ERR("unable to open socket: ", rv);
-        exit(EXIT_FAILURE);
+        return false;
     }
 
     string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(RPC_PATH);
     if ((rv = nng_dial(m_sock, ipcSock.c_str(), nullptr, 0)) != 0) {
         GLOG_ERR("connect error: ", rv);
-        exit(EXIT_FAILURE);
+        return false;
     }
     m_inited = true;
+    return false;
 }
 
 /**
@@ -55,34 +60,39 @@ EventManager::~EventManager() {
  * @param event event string that we want to emit to event service
  * @param params string-based key value map about event params
  */
-void EventManager::emit(const string &event, const map<string, string> &params) {
+bool EventManager::emit(const string &event, const map<string, string> &params) {
 
-    if (m_inited) {
-        uint64_t now_secs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()
-        ).count());
-
-        capnp::MallocMessageBuilder message;
-        EventData::Builder evt = message.initRoot<EventData>();
-        evt.setTopic("account");
-        evt.setSource("px-accounts-service");
-        evt.setTime(now_secs);
-        evt.setEvent(event);
-
-        auto evParams = evt.initParams(static_cast<unsigned int>(params.size()));
-        int i = 0;
-        for (const auto &kv : params) {
-            evParams[i].setKey(kv.first);
-            evParams[i].setValue(kv.second);
-            i++;
-        }
-        kj::Array<capnp::word> words = capnp::messageToFlatArray(message);
-        kj::ArrayPtr<kj::byte> data = words.asBytes();
-        int ret;
-        if ((ret = nng_send(m_sock, data.begin(), data.size(), 0)) != 0) {
-            GLOG_WRN("send error: ", ret);
-        }
+    if (!m_inited) {
+        GLOG_WRN("EventManager is not inited.");
+        return false;
     }
+    uint64_t now_secs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+    ).count());
+
+    capnp::MallocMessageBuilder message;
+    EventData::Builder evt = message.initRoot<EventData>();
+    evt.setTopic("account");
+    evt.setSource("px-accounts-service");
+    evt.setTime(now_secs);
+    evt.setEvent(event);
+
+    auto evParams = evt.initParams(static_cast<unsigned int>(params.size()));
+    int i = 0;
+    for (const auto &kv : params) {
+        evParams[i].setKey(kv.first);
+        evParams[i].setValue(kv.second);
+        i++;
+    }
+    kj::Array<capnp::word> words = capnp::messageToFlatArray(message);
+    kj::ArrayPtr<kj::byte> data = words.asBytes();
+    int ret;
+    if ((ret = nng_send(m_sock, data.begin(), data.size(), 0)) != 0) {
+        GLOG_WRN("send error: ", ret);
+        return false;
+    }
+    GLOG_INF("new event sent: ", event);
+    return true;
 }
 
 /**
@@ -90,6 +100,9 @@ void EventManager::emit(const string &event, const map<string, string> &params) 
  */
 EventManager &EventManager::Instance() {
     static EventManager instance;
+    if (!instance.inited()) {
+        instance.init();
+    }
     return instance;
 }
 
@@ -101,31 +114,31 @@ EventManager &EventManager::Instance() {
  * @param from old status of account
  * @param to new status of account
  */
-void EventManager::EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to) {
+bool EventManager::EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to) {
     map<string, string> params;
     params["account"] = actName;
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
-    EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
+    return EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
 }
 
-void EventManager::EMIT_CREATE_ACCOUNT(const string &actName) {
+bool EventManager::EMIT_CREATE_ACCOUNT(const string &actName) {
     map<string, string> params;
     params["account"] = actName;
-    EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
+    return EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
 }
 
-void EventManager::EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName) {
+bool EventManager::EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName) {
     map<string, string> params;
     params["account"] = actName;
     if (!newName.empty()) {
         params["new_title"] = newName;
     }
-    EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
+    return EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
 }
 
-void EventManager::EMIT_DELETE_ACCOUNT(const string &actName) {
+bool EventManager::EMIT_DELETE_ACCOUNT(const string &actName) {
     map<string, string> params;
     params["account"] = actName;
-    EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
+    return EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
 }
