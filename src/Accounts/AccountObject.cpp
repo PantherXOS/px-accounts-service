@@ -5,6 +5,7 @@
 #include "AccountObject.h"
 #include <Plugins/PluginManager.h>
 #include <ProviderHandler.h>
+#include <Secret/SecretManager.h>
 
 
 /**
@@ -42,12 +43,16 @@ bool AccountObject::verify() {
     return verified;
 }
 
-bool AccountObject::performAccountCustomRemoval() {
+bool AccountObject::performAccountRemoval() {
     for (auto &kv : this->services) {
         if (!kv.second.performServiceCustomRemoval()) {
             this->addErrorList(kv.second.getErrors());
             return false;
         }
+    }
+    SecretManager::Instance().RemoveAccount(this->title);
+    if (!SecretManager::Instance().RemoveAccount(this->title)) {
+        addError("Error on removing account secrets");
     }
     return true;
 }

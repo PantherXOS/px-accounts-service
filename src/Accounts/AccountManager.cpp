@@ -105,7 +105,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         addError("unable to read account before delete");
         return false;
     }
-    if (!act.performAccountCustomRemoval()) {
+    if (!act.performAccountRemoval()) {
         addErrorList(act.getErrors());
         return false;
     }
