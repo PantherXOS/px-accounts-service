@@ -110,35 +110,35 @@ EventManager &EventManager::Instance() {
  * initiate list of parameters that needs to emit a status-change event
  * to Event Service
  *
- * @param actName account that it's status is changed
+ * @param accountTitle account that it's status is changed
  * @param from old status of account
  * @param to new status of account
  */
-bool EventManager::EMIT_STATUS_CHANGE(const string &actName, AccountStatus from, AccountStatus to) {
+bool EventManager::EMIT_STATUS_CHANGE(const string &accountTitle, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["account"] = actName;
+    params["account"] = accountTitle;
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
     return EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
 }
 
-bool EventManager::EMIT_CREATE_ACCOUNT(const string &actName) {
+bool EventManager::EMIT_CREATE_ACCOUNT(const string &accountTitle) {
     map<string, string> params;
-    params["account"] = actName;
+    params["account"] = accountTitle;
     return EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
 }
 
-bool EventManager::EMIT_MODIFY_ACCOUNT(const string &actName, const string &newName) {
+bool EventManager::EMIT_MODIFY_ACCOUNT(const string &accountTitle, const string &newTitle) {
     map<string, string> params;
-    params["account"] = actName;
-    if (!newName.empty()) {
-        params["new_title"] = newName;
+    params["account"] = accountTitle;
+    if (!newTitle.empty()) {
+        params["new_title"] = newTitle;
     }
     return EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
 }
 
-bool EventManager::EMIT_DELETE_ACCOUNT(const string &actName) {
+bool EventManager::EMIT_DELETE_ACCOUNT(const string &accountTitle) {
     map<string, string> params;
-    params["account"] = actName;
+    params["account"] = accountTitle;
     return EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
 }

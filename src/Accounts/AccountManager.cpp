@@ -41,7 +41,7 @@ bool AccountManager::createAccount(AccountObject &act, bool emitCreateEvent) {
         return false;
     }
     if (emitCreateEvent) {
-        EventManager::EMIT_CREATE_ACCOUNT(accountName);
+        EventManager::EMIT_CREATE_ACCOUNT(act.title);
     }
     setStatus(accountName, AC_NONE);
     return true;
@@ -89,7 +89,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         return SecretManager::Instance().RemoveAccount(oldAct.title)
                && this->deleteAccount(accountName);
     }
-    EventManager::EMIT_MODIFY_ACCOUNT(oldName, (titleChanged ? newName : ""));
+    EventManager::EMIT_MODIFY_ACCOUNT(oldAct.title, (titleChanged ? act.title : ""));
     return true;
 }
 
@@ -114,7 +114,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         return false;
     }
     m_statDict.erase(accountName);
-    EventManager::EMIT_DELETE_ACCOUNT(accountName);
+    EventManager::EMIT_DELETE_ACCOUNT(act.title);
     return true;
 }
 
@@ -188,10 +188,16 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
  * @return set status result
  */
 bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
+    // Pre-check to determine if account exists before setting the status
+    AccountObject act;
+    if (!readAccount(accountName, &act)) {
+        return false;
+    }
+
     AccountStatus oldStat = m_statDict[accountName];
     m_statDict[accountName] = stat;
     if (oldStat != stat) {
-        EventManager::EMIT_STATUS_CHANGE(accountName, oldStat, stat);
+        EventManager::EMIT_STATUS_CHANGE(act.title, oldStat, stat);
     }
     return true;
 }
