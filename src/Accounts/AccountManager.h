@@ -31,7 +31,7 @@ public:
 
 public:
     /// @brief save new account to disk
-    bool createAccount(AccountObject &act, bool emitCreateEvent = true);
+    bool createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent);
 
     /// @brief modify existing account details
     bool modifyAccount(const string &accountName, AccountObject &act);
@@ -40,7 +40,8 @@ public:
     bool deleteAccount(const string &accountName);
 
     /// @brief get list of saved accounts
-    vector<string> listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter);
+    vector<string> listAccounts(const ProviderFilters_t &providerFilter = ProviderFilters_t(),
+                                const ServiceFilters_t &serviceFilter = ServiceFilters_t());
 
     /// @brief read account details
     bool readAccount(const string &accountName, AccountObject *account);

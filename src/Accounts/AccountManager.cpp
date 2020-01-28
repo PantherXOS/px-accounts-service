@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "Secret/SecretManager.h"
 #include "EventManager.h"
+#include <algorithm>
 
 AccountManager AccountManager::_instance; // NOLINT(cert-err58-cpp)
 
@@ -29,11 +30,20 @@ StringList &AccountManager::LastErrors() {
  * @param[in,out] act AccountObject we want to create
  * @return Account creation status
  */
-bool AccountManager::createAccount(AccountObject &act, bool emitCreateEvent) {
+bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent) {
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
         return false;
+    }
+    if (existenceCheck) {
+        auto accountList = listAccounts();
+        if (std::find(accountList.begin(), accountList.end(), act.title) != accountList.end()) {
+            string err = "account with title='" + act.title + "' already exists.";
+            GLOG_ERR(err);
+            addError(err);
+            return false;
+        }
     }
     string accountName = PXUTILS::ACCOUNT::title2name(act.title);
     if (!PXParser::write(accountName, act)) {
@@ -79,7 +89,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
-    if (!this->createAccount(act, false)) {
+    if (!this->createAccount(act, false, false)) {
         SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
@@ -128,38 +138,36 @@ bool AccountManager::deleteAccount(const string &accountName) {
 vector<string>
 AccountManager::listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter) {
 
-    vector<string> accounts;
+    vector<string> accountList;
     auto accountFiles = PXUTILS::FILE::dirfiles(PXParser::accountsPath(), ".yaml");
 
     for (const string &fname : accountFiles) {
-        auto actName = fname.substr(0, fname.find(".yaml"));
+        auto accountName = fname.substr(0, fname.find(".yaml"));
 
-        bool accepted = providerFilter.empty() && serviceFilter.empty();
-        if (!accepted) {
-            AccountObject act;
-            if (PXParser::read(actName, &act)) {
-
-                for (const auto &provider : providerFilter) {
-                    if (act.provider == provider) {
+        AccountObject account;
+        bool accepted = PXParser::read(accountName, &account);
+        if (accepted && (!providerFilter.empty() || !serviceFilter.empty())) {
+            accepted = false;
+            for (const auto &provider : providerFilter) {
+                if (account.provider == provider) {
+                    accepted = true;
+                    break;
+                }
+            }
+            for (const auto &svcName : serviceFilter) {
+                for (const auto &kv : account.services) {
+                    if (svcName == kv.first) {
                         accepted = true;
                         break;
-                    }
-                }
-                for (const auto &service : serviceFilter) {
-                    for (const auto &kv : act.services) {
-                        if (service == kv.first) {
-                            accepted = true;
-                            break;
-                        }
                     }
                 }
             }
         }
         if (accepted) {
-            accounts.push_back(actName);
+            accountList.push_back(account.title);
         }
     }
-    return accounts;
+    return accountList;
 }
 
 /**
