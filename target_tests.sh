@@ -29,8 +29,8 @@ CMD="$CMD;
         make
         && echo '#####################################################################################'
         && echo 'DONE'
-        && cd tests
-        && ./tests -r console -d yes --order lex \"Account Writer Tests\";
+#        && cd tests
+#        && ./tests -r console -d yes --order lex \"Account Writer Tests\";
 #        && ./tests -d yes;
 #        && ./tests -d yes \"Account Management Tasks\";
 #        && ./secret_tester;

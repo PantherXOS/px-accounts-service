@@ -88,8 +88,9 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
+    auto accountName = PXUTILS::ACCOUNT::title2name(title);
     auto stat = (AccountStatus) ctx.getParams().getStat();
-    bool res = AccountManager::Instance().setStatus(title, stat);
+    bool res = AccountManager::Instance().setStatus(accountName, stat);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }
@@ -105,7 +106,8 @@ kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext 
     KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
 
     auto title = ctx.getParams().getTitle().cStr();
-    AccountStatus stat = AccountManager::Instance().getStatus(title);
+    auto accountName = PXUTILS::ACCOUNT::title2name(title);
+    AccountStatus stat = AccountManager::Instance().getStatus(accountName);
     ctx.getResults().setStatus((Account::Status) stat);
 
     return kj::READY_NOW;
