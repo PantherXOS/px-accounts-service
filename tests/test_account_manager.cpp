@@ -40,7 +40,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Create New Account") {
-        bool createResult = AccountManager::Instance().createAccount(newAccount);
+        bool createResult = AccountManager::Instance().createAccount(newAccount, true, true);
         if (!createResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -124,7 +124,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         providerAccount.services["python-test"].init(&providerAccount, "python-test");
         providerAccount.services["python-test"]["k2"] = "v2";
 
-        bool createResult = AccountManager::Instance().createAccount(providerAccount);
+        bool createResult = AccountManager::Instance().createAccount(providerAccount, true, true);
         if (!createResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -160,7 +160,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         AccountObject act;
         act.title = "my_public_account";
         act.services["public-test"].init(&act, "public-test");
-        bool createRes = AccountManager::Instance().createAccount(act);
+        bool createRes = AccountManager::Instance().createAccount(act, true, true);
         (AccountManager::LastErrors());
         REQUIRE(createRes);
 
@@ -182,7 +182,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["python-json"].init(&act, "python-json");
         act.services["python-json"]["k1"] = "pv1";
         act.services["python-json"]["k2"] = "v2";
-        bool createRes = AccountManager::Instance().createAccount(act);
+        bool createRes = AccountManager::Instance().createAccount(act, true, true);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createRes);
 
@@ -215,7 +215,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["cpp-custom"].init(&act, "cpp-custom");
         act.services["cpp-custom"]["k1"] = "v1";
         act.services["cpp-custom"]["k2"] = "v2";
-        bool createRes = AccountManager::Instance().createAccount(act);
+        bool createRes = AccountManager::Instance().createAccount(act, true, true);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createRes);
 
@@ -250,7 +250,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         string actName = PXUTILS::ACCOUNT::title2name(act.title);
         REQUIRE(PXParser::remove(actName));
 
-        bool createResult = AccountManager::Instance().createAccount(act);
+        bool createResult = AccountManager::Instance().createAccount(act, true, true);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createResult);
 
