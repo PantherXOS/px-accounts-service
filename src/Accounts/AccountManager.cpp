@@ -128,38 +128,36 @@ bool AccountManager::deleteAccount(const string &accountName) {
 vector<string>
 AccountManager::listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter) {
 
-    vector<string> accounts;
+    vector<string> accountList;
     auto accountFiles = PXUTILS::FILE::dirfiles(PXParser::accountsPath(), ".yaml");
 
     for (const string &fname : accountFiles) {
-        auto actName = fname.substr(0, fname.find(".yaml"));
+        auto accountName = fname.substr(0, fname.find(".yaml"));
 
-        bool accepted = providerFilter.empty() && serviceFilter.empty();
-        if (!accepted) {
-            AccountObject act;
-            if (PXParser::read(actName, &act)) {
-
-                for (const auto &provider : providerFilter) {
-                    if (act.provider == provider) {
+        AccountObject account;
+        bool accepted = PXParser::read(accountName, &account);
+        if (accepted && (!providerFilter.empty() || !serviceFilter.empty())) {
+            accepted = false;
+            for (const auto &provider : providerFilter) {
+                if (account.provider == provider) {
+                    accepted = true;
+                    break;
+                }
+            }
+            for (const auto &svcName : serviceFilter) {
+                for (const auto &kv : account.services) {
+                    if (svcName == kv.first) {
                         accepted = true;
                         break;
-                    }
-                }
-                for (const auto &service : serviceFilter) {
-                    for (const auto &kv : act.services) {
-                        if (service == kv.first) {
-                            accepted = true;
-                            break;
-                        }
                     }
                 }
             }
         }
         if (accepted) {
-            accounts.push_back(actName);
+            accountList.push_back(account.title);
         }
     }
-    return accounts;
+    return accountList;
 }
 
 /**
