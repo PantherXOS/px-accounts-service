@@ -40,7 +40,8 @@ public:
     bool deleteAccount(const string &accountName);
 
     /// @brief get list of saved accounts
-    vector<string> listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter);
+    vector<string> listAccounts(const ProviderFilters_t &providerFilter = ProviderFilters_t(),
+                                const ServiceFilters_t &serviceFilter = ServiceFilters_t());
 
     /// @brief read account details
     bool readAccount(const string &accountName, AccountObject *account);
