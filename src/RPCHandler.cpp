@@ -122,12 +122,13 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
-    bool res = AccountManager::Instance().createAccount(account);
+    bool res = AccountManager::Instance().createAccount(account, true, true);
     if (!res) {
+        string errMessage = "Create new account failed:\n";
         for (const auto &err : AccountManager::LastErrors()) {
-            KJ_DBG(err);
+            errMessage += "\t- " + err + "\n";
         }
-        KJ_ASSERT(res, "Create new account failed.");
+        KJ_ASSERT(res, errMessage);
     } else {
         auto warnings = ctx.getResults().initWarnings(AccountManager::LastErrors().size());
         int i = 0;

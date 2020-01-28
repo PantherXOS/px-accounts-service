@@ -31,7 +31,7 @@ public:
 
 public:
     /// @brief save new account to disk
-    bool createAccount(AccountObject &act, bool emitCreateEvent = true);
+    bool createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent);
 
     /// @brief modify existing account details
     bool modifyAccount(const string &accountName, AccountObject &act);

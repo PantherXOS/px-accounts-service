@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "Secret/SecretManager.h"
 #include "EventManager.h"
+#include <algorithm>
 
 AccountManager AccountManager::_instance; // NOLINT(cert-err58-cpp)
 
@@ -29,11 +30,20 @@ StringList &AccountManager::LastErrors() {
  * @param[in,out] act AccountObject we want to create
  * @return Account creation status
  */
-bool AccountManager::createAccount(AccountObject &act, bool emitCreateEvent) {
+bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent) {
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
         return false;
+    }
+    if (existenceCheck) {
+        auto accountList = listAccounts();
+        if (std::find(accountList.begin(), accountList.end(), act.title) != accountList.end()) {
+            string err = "account with title='" + act.title + "' already exists.";
+            GLOG_ERR(err);
+            addError(err);
+            return false;
+        }
     }
     string accountName = PXUTILS::ACCOUNT::title2name(act.title);
     if (!PXParser::write(accountName, act)) {
@@ -79,7 +89,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
         SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
     }
 
-    if (!this->createAccount(act, false)) {
+    if (!this->createAccount(act, false, false)) {
         SecretManager::Instance().RemoveAccount(act.title);
         return false;
     }
