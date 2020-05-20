@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 cmake-build-debug/
+build/
 __pycache__/
 docs/html
 docs/latex
