@@ -28,6 +28,8 @@ StringList &AccountManager::LastErrors() {
  * Save Provided AccountObject to disk
  *
  * @param[in,out] act AccountObject we want to create
+ * @param existenceCheck   check whether account is already exists during account creation
+ * @param emitCreateEvent  configure event emission during account creation
  * @return Account creation status
  */
 bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent) {

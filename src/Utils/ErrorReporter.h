@@ -29,7 +29,7 @@ protected:
     }
 
 protected:
-    StringList _errorList;  ///< #brief list of reported error messages
+    StringList _errorList; ///< @brief list of reported error messages
 
 };
 
