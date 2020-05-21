@@ -49,6 +49,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         request.setAccount(rpcAct);
         auto response = request.send().wait(waitScope);
         REQUIRE(response.getResult());
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     SECTION("Test Subscriber") {
@@ -89,6 +90,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         capnp::InputStreamMessageReader reader(strm);
         EventData::Reader evtData = reader.getRoot<EventData>();
 
+        CAPTURE(evtData.getEvent());
         REQUIRE(evtData.getTopic() == "account");
         REQUIRE(evtData.getSource() == "px-accounts-service");
         REQUIRE(evtData.getEvent() == "account_status_change");
