@@ -31,9 +31,10 @@ interface RPCSecretService {
     delParam         @6 (wallet : Text, application   : Text, paramKey : Text)       -> (result      : RPCSecretResult);
 
     addParam         @7 (wallet : Text, application   : Text, param : RPCSecretParam)-> (result      : RPCSecretResult);
-    editParam        @8 (wallet : Text, application   : Text, param : RPCSecretParam)-> (result      : RPCSecretResult);
+    addParams        @8 (wallet : Text, application   : Text, params: List(RPCSecretParam))-> (result: RPCSecretResult);
+    editParam        @9 (wallet : Text, application   : Text, param : RPCSecretParam)-> (result      : RPCSecretResult);
 
-    allowAccess      @9 (wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
-    disallowAccess   @10(wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
-    getAccessList    @11(wallet : Text, application   : Text)                        -> (thirdParties: List(Text));
+    allowAccess      @10(wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
+    disallowAccess   @11(wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
+    getAccessList    @12(wallet : Text, application   : Text)                        -> (thirdParties: List(Text));
 }

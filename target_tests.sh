@@ -3,8 +3,8 @@
 # REQUIRED PACKAGES:
 # guix package -i cmake make pkg-config gcc-toolchain util-linux capnproto yaml-cpp python pybind11 nng
 
-TARGET_PATH="/home/panther/projects/px-accounts-service"
-SERVER_ADDRESS="panther@127.0.0.1"
+TARGET_PATH="/root/projects/px-accounts-service"
+SERVER_ADDRESS="root@127.0.0.1"
 
 # temp commands
 #ssh $SERVER_ADDRESS -p 2222 'for pid in $(ps aux | grep px-secret | grep -v grep | awk '"'"'{ print $2}'"'"'); do echo "killing $pid"; done;';
@@ -19,16 +19,17 @@ SERVER_ADDRESS="panther@127.0.0.1"
 
 ssh $SERVER_ADDRESS -p 2222 "mkdir -p $TARGET_PATH"
 
-rsync -av -e "ssh -p 2222" --exclude ".git" --exclude "cmake-build-debug" --exclude "docs/html" --exclude ".idea" "." "$SERVER_ADDRESS:$TARGET_PATH/"
+rsync -av -e "ssh -p 2222" --exclude ".git" --exclude "cmake-build-debug" --exclude "build" --exclude "docs/html" --exclude ".idea" "." "$SERVER_ADDRESS:$TARGET_PATH/"
 
 CMD='export GUILE_LOAD_PATH=$GUILE_LOAD_PATH:.'
 CMD="$CMD;
      cd $TARGET_PATH;
      mkdir -p build && cd build ;
-     cmake .. &&
-        make
-        && echo '#####################################################################################'
-        && echo 'DONE'
+     guix environment px-accounts-service -- cmake ..;
+     guix environment px-accounts-service -- make;
+     cd tests;
+     ./tests -d yes;
+
 #        && cd tests
 #        && ./tests -r console -d yes --order lex \"Account Writer Tests\";
 #        && ./tests -d yes;
