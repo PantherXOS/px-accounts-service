@@ -5,9 +5,8 @@
 #include "PluginContainerCpp.h"
 
 PluginContainerCpp::PluginContainerCpp(const PluginInfo &info) : _loader(info.path) {
-    _loader.DLOpenLib();
     _info = info;
-    _inited = true;
+    _inited = _loader.DLOpenLib();
 }
 
 PluginContainerCpp::~PluginContainerCpp() {

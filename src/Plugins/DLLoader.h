@@ -17,7 +17,7 @@ class IDLLoader {
 public:
     virtual ~IDLLoader() = default;
 
-    virtual void DLOpenLib() = 0;
+    virtual bool DLOpenLib() = 0;
 
     virtual void DLCloseLib() = 0;
 
@@ -46,10 +46,12 @@ public:
             _allocClassSumbol(allocSymbol),
             _deleteClassSymbol(deleteSymbol) {}
 
-    void DLOpenLib() override {
+    bool DLOpenLib() override {
         if (!(_handle = dlopen(_libPath.c_str(), RTLD_NOW | RTLD_LAZY))) {
             GLOG_ERR("plugin open failed: ", dlerror());
+            return false;
         }
+        return true;
     }
 
     void DLCloseLib() override {
