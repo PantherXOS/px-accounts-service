@@ -51,13 +51,13 @@ AuthResult PythonPlugin::authenticate(const ServiceParamList &params) {
 
 
 PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
-
-    py::dict locals;
-    locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(info.name));
-    if (!info.path.empty()) {
-        locals["module_path"] = py::cast(info.path);
-    }
-    py::exec(R"(
+    try {
+        py::dict locals;
+        locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(info.name));
+        if (!info.path.empty()) {
+            locals["module_path"] = py::cast(info.path);
+        }
+        py::exec(R"(
 import sys
 if module_path not in sys.path:
    sys.path.append(module_path)
@@ -81,13 +81,17 @@ new_module = importlib.import_module(module_name)
 #      import importlib.machinery
 #      new_module = importlib.machinery.SourceFileLoader(module_name, path).load_module()
 )",
-             py::globals(), locals);
+                 py::globals(), locals);
 
-    _info = info;
-    _module = locals["new_module"];
-    py::object PluginClass = _module.attr("Plugin");
-    _plugin = PluginClass();
-    _inited = true;
+        _info = info;
+        _module = locals["new_module"];
+        py::object PluginClass = _module.attr("Plugin");
+        _plugin = PluginClass();
+        _inited = true;
+    } catch (const std::exception &e) {
+        GLOG_ERR(e.what());
+        _inited = false;
+    }
 }
 
 string PluginContainerPython::getTitle() {
