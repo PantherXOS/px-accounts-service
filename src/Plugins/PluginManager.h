@@ -14,7 +14,7 @@ protected:
     explicit PluginManager();
 
     /// @brief init a plugin based on it's path
-    bool init(const std::string &path);
+    bool initPlugins(const std::string &path);
 
 public:
     virtual ~PluginManager();

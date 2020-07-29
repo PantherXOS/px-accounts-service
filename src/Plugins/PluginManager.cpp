@@ -22,9 +22,9 @@ namespace py = pybind11;
 PluginManager::PluginManager() {
     py::initialize_interpreter();
 
-    init(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
-    init(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
-    init(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
+    initPlugins(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
+    initPlugins(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
+    initPlugins(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
 }
 
 /**
@@ -69,7 +69,7 @@ map<string, PluginContainerBase *> &PluginManager::plugins() {
  * @param path path to plugin's information file
  * @return plugin initiation status
  */
-bool PluginManager::init(const std::string &path) {
+bool PluginManager::initPlugins(const std::string &path) {
     GLOG_INF("===============================================================================");
     GLOG_INF("search for registered plugins on: ", path);
     for (const string &pluginFile: PXUTILS::FILE::dirfiles(path, ".yaml")) {
@@ -77,6 +77,8 @@ bool PluginManager::init(const std::string &path) {
         if (plugin != nullptr && plugin->isInited()) {
             GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle());
             _plugins[plugin->getTitle()] = plugin;
+        } else {
+            GLOG_ERR("Unable to load Plugin: ", pluginFile, "\nfrom path: ", path);
         }
     }
     return true;
