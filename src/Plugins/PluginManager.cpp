@@ -25,19 +25,19 @@ PluginManager::PluginManager() {
     py::initialize_interpreter();
 
     auto pluginPaths = std::vector<std::string>();
-    pluginPaths.push_back(SYSTEM_PLUGIN_PATH);
-    pluginPaths.push_back(USER_PLUGIN_PATH);
-    pluginPaths.push_back(APP_PLUGIN_PATH);
+    pluginPaths.push_back(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
+    pluginPaths.push_back(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
+    pluginPaths.push_back(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
 
     const char *customPaths = std::getenv("PLUGIN_PATH");
     if (customPaths) {
         auto token = std::string(customPaths);
         size_t pos = 0;
         while ((pos = token.find(":")) != std::string::npos) {
-            pluginPaths.push_back(token.substr(0, pos));
+            pluginPaths.push_back(PXUTILS::FILE::abspath(token.substr(0, pos)));
             token.erase(0, pos + 1);
         }
-        pluginPaths.push_back(token);
+        pluginPaths.push_back(PXUTILS::FILE::abspath(token));
     }
     for (const auto &plugin : pluginPaths) {
         initPlugins(plugin);
