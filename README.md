@@ -15,6 +15,27 @@
 - Save credentials with `px-pass-service`
 - Keep track of account status
 
+## Usage
+
+run service:
+
+```bash
+$ px-accounts-service
+```
+
+run service in debug mode
+
+```bash
+$ px-accounts-service -d -t console
+```
+
+add custom path to load plugin files:
+
+```bash
+$ export PLUGIN_PATH=/path/to/plugin/definition/files/
+$ px-accounts-service
+```
+
 ## Implementation
 
 ```mermaid

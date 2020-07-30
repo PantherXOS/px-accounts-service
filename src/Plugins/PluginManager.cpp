@@ -6,6 +6,8 @@
 #include "PluginManager.h"
 #include "../Accounts/AccountUtils.h"
 
+#include <iostream>
+#include <cstdlib>
 #include <pybind11/embed.h>
 
 namespace py = pybind11;
@@ -22,9 +24,24 @@ namespace py = pybind11;
 PluginManager::PluginManager() {
     py::initialize_interpreter();
 
-    initPlugins(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
-    initPlugins(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
-    initPlugins(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
+    auto pluginPaths = std::vector<std::string>();
+    pluginPaths.push_back(SYSTEM_PLUGIN_PATH);
+    pluginPaths.push_back(USER_PLUGIN_PATH);
+    pluginPaths.push_back(APP_PLUGIN_PATH);
+
+    const char *customPaths = std::getenv("PLUGIN_PATH");
+    if (customPaths) {
+        auto token = std::string(customPaths);
+        size_t pos = 0;
+        while ((pos = token.find(":")) != std::string::npos) {
+            pluginPaths.push_back(token.substr(0, pos));
+            token.erase(0, pos + 1);
+        }
+        pluginPaths.push_back(token);
+    }
+    for (const auto &plugin : pluginPaths) {
+        initPlugins(plugin);
+    }
 }
 
 /**

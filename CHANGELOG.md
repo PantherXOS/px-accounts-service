@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- load custom plugin definitions using `PLUGIN_PATH`
+
 ## [0.2.10]
 
 ### Fixed
