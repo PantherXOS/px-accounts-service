@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.12]
+
+### Fixed
+
+- plugin load issue for relative paths fixed
+
 ## [0.2.11]
 
 ### Added
