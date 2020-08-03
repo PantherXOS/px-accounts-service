@@ -59,6 +59,10 @@ int main(int argc, char *argv[]) {
 
     RPCServer<RPCHandler> srv(rpcActPath);
     srv.start();
+
+    GLOG_INF("User Accounts Path:", ACCOUNT_PATHS);
+    GLOG_INF("Readonly Accounts Path:", READONLY_ACCOUNT_PATHS);
+
     GLOG_INF_FORCE("px-accounts-service started.");
     GLOG_INF("debug mode enabled");
     GLOG_INF("log target: [", (logTarget == LogTarget::SYSLOG ? "syslog" : "console"), "]");

@@ -13,6 +13,45 @@
 #define ACCOUNT_SETTING_KEY  "settings"
 #define ACCOUNT_SERVICE_KEY  "services"
 
+map<string, bool> getPaths(bool onlyWritables = false) {
+    map<string, bool> pathMap;
+    // user paths
+    auto userPaths = PXUTILS::PATH::extract_path_str(std::string(ACCOUNT_PATHS));
+    for (const auto &userPath : userPaths) {
+        if (PXUTILS::FILE::exists(userPath)) {
+            pathMap[userPath] = false;
+        } else {
+            GLOG_WRN("User Path not exists: ", userPath);
+        }
+    }
+    // readonly paths (organisation paths)
+    auto readonlyPathsStr = std::string(READONLY_ACCOUNT_PATHS);
+    if (!onlyWritables && !readonlyPathsStr.empty()) {
+        auto readonlyPaths = PXUTILS::PATH::extract_path_str(readonlyPathsStr);
+        for (const auto &readonlyPath : readonlyPaths) {
+            if (PXUTILS::FILE::exists(readonlyPath)) {
+                pathMap[readonlyPath] = true;
+            } else {
+                GLOG_WRN("Readonly Path not exists: ", readonlyPath);
+            }
+        }
+    }
+    return pathMap;
+}
+
+std::tuple<string, bool> getAccountPath(const string &actName) {
+    auto actPath = string();
+    for (const auto &kv : getPaths()) {
+        string path = kv.first;
+        bool isReadonly = kv.second;
+        auto currentPath = path + actName + ".yaml";
+        if (PXUTILS::FILE::exists(currentPath)) {
+            actPath = currentPath;
+            break;
+        }
+    }
+    return std::make_tuple(actPath, false);
+}
 
 /**
  * @param[in] acName name of account we want to read from disk
@@ -21,12 +60,13 @@
  * @return account read status
  */
 bool PXParser::read(const string &acName, AccountObject *ac) {
-    string acPath = PXParser::fullPath(acName);
-    if (!PXUTILS::FILE::exists(acPath)) {
+    std::tie(ac->path, ac->is_readonly) = getAccountPath(acName);
+    if (ac->path.empty()) {           // account not found
+        GLOG_WRN("Account not found: ", ac->title);
         return false;
     }
     try {
-        YAML::Node cfg = YAML::LoadFile(acPath);
+        YAML::Node cfg = YAML::LoadFile(ac->path);
         if (cfg[ACCOUNT_KEY]) {
             ac->title = cfg[ACCOUNT_KEY][ACCOUNT_TITLE_KEY].as<string>();
             ac->provider = cfg[ACCOUNT_KEY][ACCOUNT_PROVIDER_KEY].as<string>();
@@ -39,16 +79,15 @@ bool PXParser::read(const string &acName, AccountObject *ac) {
             for (const auto &it : cfg[ACCOUNT_KEY][ACCOUNT_SERVICE_KEY]) {
                 for (const auto &service : it) {
                     auto serviceName = service.first.as<string>();
-                    const YAML::Node& params = service.second;
+                    const YAML::Node &params = service.second;
                     ac->services[serviceName].init(ac, serviceName);
-                    for (const auto& p : params) {
+                    for (const auto &p : params) {
                         ac->services[serviceName][p.first.as<string>()] = p.second.as<string>();
                     }
                 }
             }
         }
-    }
-    catch (const YAML::Exception &ex) {
+    } catch (const YAML::Exception &ex) {
         cout << ex.what() << endl;
         return false;
     }
@@ -125,7 +164,22 @@ bool PXParser::write(const string &acName, const AccountObject &ac) {
         }
         emitter << YAML::EndDoc;
 
-        PXUTILS::FILE::write(PXParser::fullPath(acName), emitter.c_str());
+        string actPath;
+        auto isReadonly = false;
+        std::tie(actPath, isReadonly) = getAccountPath(acName);
+        if (actPath.empty()) {  // new account
+            auto availablePaths = getPaths(true);
+            if (availablePaths.size() == 0) {
+                GLOG_WRN("no path to write account data");
+                return false;
+            }
+            actPath = availablePaths.begin()->first + acName + ".yaml";
+        } else if (isReadonly) {
+            GLOG_WRN("Account is readonly");
+            return false;
+        }
+        GLOG_INF("Write account details in:", actPath);
+        PXUTILS::FILE::write(actPath, emitter.c_str());
     }
     catch (YAML::Exception &ex) {
         return false;
@@ -139,11 +193,37 @@ bool PXParser::write(const string &acName, const AccountObject &ac) {
  * @return account removal status
  */
 bool PXParser::remove(const string &acName) {
-    string acPath = PXParser::fullPath(acName);
-    if (PXUTILS::FILE::exists(acPath)) {
+    auto isReadonly = false;
+    string acPath;
+    std::tie(acPath, isReadonly) = getAccountPath(acName);
+    if (acPath.empty()) {
+        GLOG_WRN("account not found");
+        return true;
+    } else if (isReadonly) {
+        GLOG_WRN("account is readonly");
+        return false;
+    } else {
         return PXUTILS::FILE::remove(acPath);
     }
-    return true;
+    return false;
+}
+
+vector<AccountObject> PXParser::list() {
+    vector<AccountObject> actList;
+    auto pathMap = getPaths();
+    for (const auto &kv : pathMap) {
+        GLOG_INF("List accounts for:", kv.first);
+        for (const auto &actFile : PXUTILS::FILE::dirfiles(kv.first, ".yaml")) {
+            auto actName = actFile.substr(0, actFile.find(".yaml"));
+            GLOG_INF("   actName:", actName);
+            AccountObject act;
+            auto accepted = PXParser::read(actName, &act);
+            if (accepted) {
+                actList.push_back(act);
+            }
+        }
+    }
+    return actList;
 }
 
 /**

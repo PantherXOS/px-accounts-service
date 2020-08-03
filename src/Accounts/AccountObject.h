@@ -30,6 +30,9 @@ public:
     bool is_active; ///< @brief shows whether the account is active or not
     StrStrMap settings; ///< @brief Key-Value Map of settings related to an account
     map<string, AccountService> services; ///< @brief Map of Services defined inside an account
+    
+    bool is_readonly;
+    string path;
 };
 
 

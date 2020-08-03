@@ -63,6 +63,8 @@ namespace PXUTILS {
 
         /// @brief convert a unix path to file-system path
         string unix2path(const string &upath);
+
+        vector<string> extract_path_str(const string &pathStr);
     }
 
     /// @brief operating system related helper functions

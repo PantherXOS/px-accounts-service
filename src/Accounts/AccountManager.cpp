@@ -137,39 +137,30 @@ bool AccountManager::deleteAccount(const string &accountName) {
  * @param serviceFilter filter list for accounts that use specific services
  * @return list of account titles that matched with provided filters
  */
-vector<string>
-AccountManager::listAccounts(const ProviderFilters_t &providerFilter, const ServiceFilters_t &serviceFilter) {
-
-    vector<string> accountList;
-    auto accountFiles = PXUTILS::FILE::dirfiles(PXParser::accountsPath(), ".yaml");
-
-    for (const string &fname : accountFiles) {
-        auto accountName = fname.substr(0, fname.find(".yaml"));
-
-        AccountObject account;
-        bool accepted = PXParser::read(accountName, &account);
-        if (accepted && (!providerFilter.empty() || !serviceFilter.empty())) {
-            accepted = false;
-            for (const auto &provider : providerFilter) {
-                if (account.provider == provider) {
+vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFilter,
+                                            const ServiceFilters_t &serviceFilter) {
+    vector<string> titles;
+    vector<AccountObject> accounts = PXParser::list();
+    for (const auto &act : accounts) {
+        auto accepted = providerFilter.empty() && serviceFilter.empty();
+        for (const auto &provider : providerFilter) {
+            if (act.provider == provider) {
+                accepted = true;
+            }
+        }
+        for (const auto service : serviceFilter) {
+            for (const auto &kv : act.services) {
+                if (service == kv.first) {
                     accepted = true;
                     break;
                 }
             }
-            for (const auto &svcName : serviceFilter) {
-                for (const auto &kv : account.services) {
-                    if (svcName == kv.first) {
-                        accepted = true;
-                        break;
-                    }
-                }
-            }
         }
         if (accepted) {
-            accountList.push_back(account.title);
+            titles.push_back(act.title);
         }
     }
-    return accountList;
+    return titles;
 }
 
 /**

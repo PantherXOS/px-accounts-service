@@ -17,7 +17,8 @@ using namespace std;
 enum class LogLevel {
     ERR = 0,    ///< Error log messages
     WRN = 1,    ///< Warning log messages
-    INF = 2     ///< Information log messages
+    INF = 2,    ///< Information log messages
+    MRK = 3
 };
 
 /**
@@ -151,9 +152,13 @@ public:
         lvlDict[LogLevel::ERR] = "ERR";
         lvlDict[LogLevel::WRN] = "WRN";
         lvlDict[LogLevel::INF] = "INF";
+        lvlDict[LogLevel::MRK] = "MRK";
 
         if (force || lvl <= m_logLevel) {
             stringstream sstream;
+            if (lvl == LogLevel::MRK) {
+                sstream << "--->";
+            }
             sstream << "[" << lvlDict[lvl]
                     << "][" << Logger::ExtractFileName(file)
                     << "][" << func
@@ -191,6 +196,8 @@ extern Logger gLogger;
 #define GLOG_ERR_FORCE(...) (gLogger.log(true, LogLevel::ERR, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define GLOG_WRN_FORCE(...) (gLogger.log(true, LogLevel::WRN, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define GLOG_INF_FORCE(...) (gLogger.log(true, LogLevel::INF, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+
+#define GLOG_MARK(...) (gLogger.log(true, LogLevel::MRK, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 
 
 #endif //PX_EVENTS_SERVICE_LOGGER_H

@@ -204,6 +204,18 @@ string PXUTILS::PATH::unix2path(const string &upath) {
     return path;
 }
 
+vector<string> PXUTILS::PATH::extract_path_str(const string &pathStr) {
+    vector<string> pathList;
+    auto token = pathStr;
+    size_t pos = 0;
+    while ((pos = token.find(":")) != std::string::npos) {
+        pathList.push_back(PXUTILS::FILE::abspath(token.substr(0, pos)));
+        token.erase(0, pos + 1);
+    }
+    pathList.push_back(PXUTILS::FILE::abspath(token));
+    return pathList;
+}
+
 /**
  * @return current logged in user
  */

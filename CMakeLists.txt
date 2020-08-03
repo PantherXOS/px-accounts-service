@@ -3,6 +3,16 @@ project(px-accounts-service)
 
 set(CMAKE_CXX_STANDARD 14)
 
+option(ACCOUNT_PATHS "custom account definitions path" OFF)
+if (ACCOUNT_PATHS)
+    add_definitions(-DACCOUNT_PATHS="${ACCOUNT_PATHS}")
+endif()
+
+option(READONLY_ACCOUNT_PATHS "path for readonly account definitions" OFF)
+if (READONLY_ACCOUNT_PATHS)
+    add_definitions(-DREADONLY_ACCOUNT_PATHS="${READONLY_ACCOUNT_PATHS}")
+endif()
+
 set(LIB_NAME _${PROJECT_NAME})
 set(EXE_NAME ${PROJECT_NAME})
 
