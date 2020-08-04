@@ -3,11 +3,44 @@
 //
 
 #include "AccountManager.h"
-#include "Secret/SecretManager.h"
-#include "EventManager.h"
+
 #include <algorithm>
 
-AccountManager AccountManager::_instance; // NOLINT(cert-err58-cpp)
+#include "EventManager.h"
+#include "Secret/SecretManager.h"
+
+AccountManager AccountManager::_instance;  // NOLINT(cert-err58-cpp)
+
+AccountManager::AccountManager() {
+    auto userPaths = PXUTILS::PATH::extract_path_str(std::string(ACCOUNT_PATHS));
+    for (const auto &path : userPaths) {
+        if (PXUTILS::FILE::exists(path)) {
+            auto *parser = new AccountParser(path, false);
+            m_parsers.push_back(parser);
+        } else {
+            GLOG_WRN("invalid user path provided:", path);
+        }
+    }
+    if (!std::string(READONLY_ACCOUNT_PATHS).empty()) {
+        auto readonlyPaths = PXUTILS::PATH::extract_path_str(std::string(READONLY_ACCOUNT_PATHS));
+        for (const auto &path : readonlyPaths) {
+            if (PXUTILS::FILE::exists(path)) {
+                auto *parser = new AccountParser(path, true);
+                m_parsers.push_back(parser);
+            } else {
+                GLOG_WRN("invalid readonly path provided:", path);
+            }
+        }
+    }
+}
+
+AccountManager::~AccountManager() {
+    for (const auto *parser : m_parsers) {
+        if (parser) {
+            delete parser;
+        }
+    }
+}
 
 /**
  * @return initiated instance of AccountManager
@@ -20,9 +53,7 @@ AccountManager &AccountManager::Instance() {
 /**
  * @return list of errors occurred during last operation
  */
-StringList &AccountManager::LastErrors() {
-    return _instance.getErrors();
-}
+StringList &AccountManager::LastErrors() { return _instance.getErrors(); }
 
 /**
  * Save Provided AccountObject to disk
@@ -48,7 +79,15 @@ bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool
         }
     }
     string accountName = PXUTILS::ACCOUNT::title2name(act.title);
-    if (!PXParser::write(accountName, act)) {
+    auto *parser = this->findParser(accountName, true);
+    if (!parser) {
+        parser = this->findParser(string(), true);  // get parser for new accounts
+        if (!parser) {
+            addError("there is no writable parser found!");
+            return false;
+        }
+    }
+    if (!parser->write(accountName, act)) {
         addError("Error on saving account file");
         return false;
     }
@@ -67,7 +106,6 @@ bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool
  * @return account modification status
  */
 bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
-
     AccountObject oldAct;
     if (!readAccount(accountName, &oldAct)) {
         addError("Error on reading old Account details.");
@@ -98,8 +136,7 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
 
     if (titleChanged) {
         // remove old account related data
-        return SecretManager::Instance().RemoveAccount(oldAct.title)
-               && this->deleteAccount(accountName);
+        return SecretManager::Instance().RemoveAccount(oldAct.title) && this->deleteAccount(accountName);
     }
     EventManager::EMIT_MODIFY_ACCOUNT(oldAct.title, (titleChanged ? act.title : ""));
     return true;
@@ -112,8 +149,13 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
  * @return account deletion status
  */
 bool AccountManager::deleteAccount(const string &accountName) {
+    auto *parser = this->findParser(accountName, true);
+    if (!parser) {
+        addError("Account Parser not found");
+        return false;
+    }
     AccountObject act;
-    if (!PXParser::read(accountName, &act)) {
+    if (!parser->read(accountName, act)) {
         addError("unable to read account before delete");
         return false;
     }
@@ -121,7 +163,7 @@ bool AccountManager::deleteAccount(const string &accountName) {
         addErrorList(act.getErrors());
         return false;
     }
-    if (!PXParser::remove(accountName)) {
+    if (!parser->remove(accountName)) {
         addError("unable to remove account file");
         return false;
     }
@@ -140,24 +182,25 @@ bool AccountManager::deleteAccount(const string &accountName) {
 vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFilter,
                                             const ServiceFilters_t &serviceFilter) {
     vector<string> titles;
-    vector<AccountObject> accounts = PXParser::list();
-    for (const auto &act : accounts) {
-        auto accepted = providerFilter.empty() && serviceFilter.empty();
-        for (const auto &provider : providerFilter) {
-            if (act.provider == provider) {
-                accepted = true;
-            }
-        }
-        for (const auto service : serviceFilter) {
-            for (const auto &kv : act.services) {
-                if (service == kv.first) {
+    for (auto *parser : m_parsers) {
+        for (const auto &act : parser->list()) {
+            bool accepted = providerFilter.empty() && serviceFilter.empty();
+            for (const auto &provider : providerFilter) {
+                if (act.provider == provider) {
                     accepted = true;
-                    break;
                 }
             }
-        }
-        if (accepted) {
-            titles.push_back(act.title);
+            for (const auto service : serviceFilter) {
+                for (const auto &kv : act.services) {
+                    if (service == kv.first) {
+                        accepted = true;
+                        break;
+                    }
+                }
+            }
+            if (accepted) {
+                titles.push_back(act.title);
+            }
         }
     }
     return titles;
@@ -171,7 +214,12 @@ vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFil
  * @return read account status
  */
 bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
-    if (!PXParser::read(accountName, account)) {
+    auto *parser = this->findParser(accountName, false);
+    if (!parser) {
+        addError("Can't find suitable parser");
+        return false;
+    }
+    if (!parser->read(accountName, *account)) {
         addError("Error on reading account file: '" + accountName + "'.");
         return false;
     }
@@ -210,7 +258,19 @@ bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
  * @return status of account
  */
 AccountStatus AccountManager::getStatus(const string &accountName) {
-    if (m_statDict.find(accountName) == m_statDict.end())
+    if (m_statDict.find(accountName) == m_statDict.end()) {
         return AC_NONE;
+    }
     return m_statDict[accountName];
+}
+
+AccountParser *AccountManager::findParser(const string &actName, bool onlyWritables) {
+    for (auto *parser : m_parsers) {
+        if (!onlyWritables || !parser->isReadonly()) {
+            if (parser->hasAccount(actName) || actName.empty()) {
+                return parser;
+            }
+        }
+    }
+    return nullptr;
 }

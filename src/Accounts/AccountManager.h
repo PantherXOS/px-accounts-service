@@ -22,6 +22,10 @@ public:
     typedef vector<string> ProviderFilters_t;
     typedef vector<string> ServiceFilters_t;
 
+private:
+    explicit AccountManager();
+    virtual ~AccountManager();
+
 public:
     /// @brief static method in order to access AccountManager object
     static AccountManager &Instance();
@@ -52,13 +56,13 @@ public:
     /// @brief get status of an account
     AccountStatus getStatus(const string &accountName);
 
-private:
-    explicit AccountManager() = default;
+    AccountParser* findParser(const string &actName, bool onlyWritables);
 
 protected:
     static AccountManager _instance;
 
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status
+    list<AccountParser*> m_parsers;
 };
 
 #endif //PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H

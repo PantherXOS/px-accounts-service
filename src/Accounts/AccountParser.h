@@ -12,28 +12,31 @@
 #define READONLY_ACCOUNT_PATHS ""
 #endif
 
+#include <list>
 
 #include "AccountDefinitions.h"
 #include "AccountUtils.h"
-#include <tuple>
 
-/// @brief namespace used for low-level operations on account files
-namespace PXParser {
+class AccountParser : public ErrorReporter {
+   public:
+    explicit AccountParser(const string &path, bool isReadonly);
 
-    /// @brief low-level function to read an account from disk
-    bool read(const string &acName, AccountObject *ac);
+   public:
+    bool read(const string &actName, AccountObject &account);
+    std::list<AccountObject> list();
+    bool write(const string &actName, const AccountObject &account);
+    bool remove(const string &actName);
 
-    /// @brief low-level function for write an account to disk
-    bool write(const string &acName, const AccountObject &ac);
+    bool hasAccount(const string &actName);
+    inline bool isReadonly() { return m_readonly; }
+    inline string path() { return m_path; }
 
-    /// @brief low-level delete an account from disk
-    bool remove(const string &acName);
+   protected:
+    inline string accountPath(const string &actName) { return m_path + actName + ".yaml"; }
 
+   private:
+    string m_path;
+    bool m_readonly;
+};
 
-    vector<AccountObject> list();
-
-    /// @brief helper function to print an account details
-    void print_account(const AccountObject &act);
-}
-
-#endif //PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
+#endif  // PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
