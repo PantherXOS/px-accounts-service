@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include <Accounts/AccountManager.h>
-#include <Accounts/AccountParser.h>
+#include "test_common.h"
 
 
 TEST_CASE("Account Management Tasks", "[AccountManager]") {
@@ -34,9 +34,9 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     string accountName = PXUTILS::ACCOUNT::title2name(newAccount.title);
 
     SECTION("Cleanup Old Test files") {
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title1)));
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title2)));
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title3)));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title1));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title2));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title3));
     }
 
     SECTION("Create New Account") {
@@ -153,9 +153,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Modify Account with Public Plugin") {
-
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_public_account")));
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("modified_public_act")));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_public_account"));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("modified_public_act"));
 
         AccountObject act;
         act.title = "my_public_account";
@@ -175,7 +174,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Python plugin with custom read/write") {
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_json_account")));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_json_account"));
 
         AccountObject act;
         act.title = "my json account";
@@ -208,7 +207,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("CPP Plugin with custom read/write") {
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name("my_custom_cpp_account")));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_custom_cpp_account"));
 
         AccountObject act;
         act.title = "my custom cpp account";
@@ -247,9 +246,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["protected-test"]["param1"] = "value1";
         act.services["protected-test"]["param2"] = "value2";
 
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(act.title));
         string actName = PXUTILS::ACCOUNT::title2name(act.title);
-        REQUIRE(PXParser::remove(actName));
-
         bool createResult = AccountManager::Instance().createAccount(act, true, true);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createResult);

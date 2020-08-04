@@ -12,7 +12,6 @@
 #include <nng/protocol/pubsub0/sub.h>
 
 #include <Accounts/AccountDefinitions.h>
-#include <Accounts/AccountParser.h>
 #include <interface/AccountWriter.capnp.h>
 #include <interface/event.capnp.h>
 #include <RPCServer.h>
@@ -33,7 +32,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
 
 
     SECTION("Cleanup old test files") {
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(act.title)));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(act.title));
     }
 
     SECTION("Create Test Account") {

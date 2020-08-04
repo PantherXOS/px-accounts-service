@@ -7,7 +7,6 @@
 #include <capnp/ez-rpc.h>
 #include <interface/AccountReader.capnp.h>
 #include <interface/AccountWriter.capnp.h>
-#include <Accounts/AccountParser.h>
 #include <iostream>
 
 #include <RPCServer.h>
@@ -37,8 +36,8 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
 
     SECTION("Cleanup Old Test files") {
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title1)));
-        REQUIRE(PXParser::remove(PXUTILS::ACCOUNT::title2name(title2)));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title1));
+        REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title2));
     }
 
     SECTION("Create Account") {

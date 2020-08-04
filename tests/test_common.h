@@ -5,8 +5,20 @@
 #ifndef PX_ACCOUNTS_SERVICE_TEST_COMMON_H
 #define PX_ACCOUNTS_SERVICE_TEST_COMMON_H
 
+#include <iostream>
+using namespace std;
+
 #define MAIN_SERVER_PATH        "127.0.0.1:4001"
 #define SECRET_SIMULATOR_PATH   "127.0.0.1:4002"
 #define EVENTS_SIMULATOR_PATH   "127.0.0.1:4003"
+
+namespace TESTCOMMON {
+namespace ACCOUNTS {
+
+bool cleanup(const string &title);
+
+}  // namespace ACCOUNTS
+
+}  // namespace TESTCOMMON
 
 #endif //PX_ACCOUNTS_SERVICE_TEST_COMMON_H
