@@ -64,6 +64,7 @@ namespace PXUTILS {
         /// @brief convert a unix path to file-system path
         string unix2path(const string &upath);
 
+        /// @brief split colon separated path string to a vector of paths
         vector<string> extract_path_str(const string &pathStr);
     }
 

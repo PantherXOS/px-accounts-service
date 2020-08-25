@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 set(UNIT_TEST_LIST
         test_common.cpp
         test_account_manager.cpp
+        test_account_parser.cpp
         test_rpc_server.cpp
         test_plugin_system.cpp
         test_providers.cpp
