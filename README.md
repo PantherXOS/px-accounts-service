@@ -228,7 +228,7 @@ We will provide 3 types of interfaces that are available for interacting with `p
 
 #### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/Account.capnp)
  
-```
+```capnp
 struct Account {
    title @0 : Text;
    provider @1 : Text;
@@ -254,7 +254,7 @@ struct Account {
 ```
 
 #### 2. Public Communication Interface. [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/AccountReader.capnp)
-```
+```capnp
 using Account = import "Account.capnp".Account;
 
 interface AccountReader {
@@ -267,7 +267,7 @@ interface AccountReader {
 ```
 
 #### 3. Internal Communication Interface. [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/AccountWriter.capnp)
-```
+```capnp
 using Account = import "Account.capnp".Account;
 using AccountReader = import "AccountReader.capnp".AccountReader;
 
@@ -321,4 +321,13 @@ git submodule update --init --recursive
 mkdir build && cd build
 cmake ..
 make 
+```
+**Note 1:** we can configure account service during build to access account files, from a custom location. following switches are used to configure custom files: 
+
+```bash
+# set custom path for account files
+$ cmake -D ACCOUNT_PATHS=/path/to/accounts/folder ..
+
+# set custom path for readonly account files
+$ cmake -D READONLY_ACCOUNT_PATHS=/path/to/readonly/accounts/folder ..
 ```
