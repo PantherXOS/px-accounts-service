@@ -5,12 +5,6 @@
 #ifndef PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
 #define PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
 
-#ifndef ACCOUNT_PATHS
-#define ACCOUNT_PATHS "~/.userdata/accounts/"
-#endif
-#ifndef READONLY_ACCOUNT_PATHS
-#define READONLY_ACCOUNT_PATHS ""
-#endif
 
 #include <list>
 

@@ -12,6 +12,13 @@
 #include "AccountParser.h"
 #include "Plugins/PluginManager.h"
 
+#ifndef ACCOUNT_PATHS
+#define ACCOUNT_PATHS "~/.userdata/accounts/"
+#endif
+#ifndef READONLY_ACCOUNT_PATHS
+#define READONLY_ACCOUNT_PATHS ""
+#endif
+
 /**
  * @brief Base Class for Managing Online Accounts
  * @details AccountManager is a Singleton class that is responsible for managing
