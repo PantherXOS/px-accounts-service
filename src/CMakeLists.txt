@@ -54,7 +54,7 @@ add_library(${LIB_NAME}
         Secret/SecretManager.cpp
         EventManager.cpp)
 target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
-        PRIVATE nng::nng)
+        PRIVATE nng::nng gcov)
 install(TARGETS ${LIB_NAME} DESTINATION lib)
 
 add_executable(${EXE_NAME} main.cpp)
