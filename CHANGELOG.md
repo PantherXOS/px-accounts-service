@@ -2,10 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.13]
 
 ## Added
 - Multiple paths for account files + support for readonly account paths
+
+## Fixed
+- build issue related to new version of GCC fixed.
+- High cpu usage issue related to thread timeouts fixed.
 
 ## [0.2.12]
 
