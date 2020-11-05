@@ -39,6 +39,7 @@ bool ProviderHandler::init(const string& path) {
  * @return initiation status
  */
 bool ProviderHandler::initProvider(const string &providerPath) {
+    GLOG_INF("Init New Provider: ", providerPath);
     if (!PXUTILS::FILE::exists(providerPath)) {
         addError(string("Provider file not found: ") + providerPath );
         return false;
@@ -56,6 +57,7 @@ bool ProviderHandler::initProvider(const string &providerPath) {
                     string pkey = p.first.as<string>();
                     string pval = p.second.as<string>();
                     provider.plugins[svcName][pkey] = pval;
+                    GLOG_INF("   - ", svcName, ": ", pkey, "\t -> ", pval);
                 }
             }
         }
