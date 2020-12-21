@@ -59,42 +59,30 @@ StringList &AccountManager::LastErrors() { return _instance.getErrors(); }
  * Save Provided AccountObject to disk
  *
  * @param[in,out] act AccountObject we want to create
- * @param existenceCheck   check whether account is already exists during account creation
- * @param emitCreateEvent  configure event emission during account creation
  * @return Account creation status
  */
-bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent) {
+bool AccountManager::createAccount(AccountObject &act) {
+    uuid_t accountId;
+    auto *parser = this->findParser(accountId, true);  // get parser for new accounts
+    if (!parser) {
+        GLOG_ERR("parser not found!");
+        addError("there is no writable parser found!");
+        return false;
+    }
+    uuid_generate(accountId);
+    uuid_copy(act.id, accountId);
+
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
         return false;
     }
-    if (existenceCheck) {
-        auto accountList = listAccounts();
-        if (std::find(accountList.begin(), accountList.end(), act.title) != accountList.end()) {
-            string err = "account with title='" + act.title + "' already exists.";
-            GLOG_ERR(err);
-            addError(err);
-            return false;
-        }
-    }
-    string accountName = PXUTILS::ACCOUNT::title2name(act.title);
-    auto *parser = this->findParser(accountName, true);
-    if (!parser) {
-        parser = this->findParser(string(), true);  // get parser for new accounts
-        if (!parser) {
-            addError("there is no writable parser found!");
-            return false;
-        }
-    }
-    if (!parser->write(accountName, act)) {
+
+    if (!parser->write(act)) {
         addError("Error on saving account file");
         return false;
     }
-    if (emitCreateEvent) {
-        EventManager::EMIT_CREATE_ACCOUNT(act.title);
-    }
-    setStatus(accountName, AC_NONE);
+    setStatus(accountId, AC_NONE);
     return true;
 }
 
@@ -105,40 +93,29 @@ bool AccountManager::createAccount(AccountObject &act, bool existenceCheck, bool
  * @param act AccountObject that we want to selected account to be replaced with
  * @return account modification status
  */
-bool AccountManager::modifyAccount(const string &accountName, AccountObject &act) {
+bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
     AccountObject oldAct;
-    if (!readAccount(accountName, &oldAct)) {
+    if (!readAccount(id, &oldAct)) {
         addError("Error on reading old Account details.");
         return false;
     }
-    bool titleChanged = (oldAct.title != act.title);
-    map<string, string> oldActProtectedParams;
-    string oldName = PXUTILS::ACCOUNT::title2name(oldAct.title);
-    string newName = PXUTILS::ACCOUNT::title2name(act.title);
-
-    if (titleChanged) {
-        // check for new title existence.
-        for (const auto &name : listAccounts(ProviderFilters_t(), ServiceFilters_t())) {
-            if (accountName != name && newName == name) {
-                addError("account with specified 'title' already exists.");
-                return false;
-            }
-        }
-        // transfer old account's protected params
-        oldActProtectedParams = SecretManager::Instance().GetAccount(oldAct.title);
-        SecretManager::Instance().SetAccount(act.title, oldActProtectedParams);
-    }
-
-    if (!this->createAccount(act, false, false)) {
-        SecretManager::Instance().RemoveAccount(act.title);
+    auto *parser = this->findParser(oldAct.id, true);  // get parser for new accounts
+    if (!parser) {
+        addError("there is no writable parser found!");
         return false;
     }
 
-    if (titleChanged) {
-        // remove old account related data
-        return SecretManager::Instance().RemoveAccount(oldAct.title) && this->deleteAccount(accountName);
+    if (!act.verify()) {
+        addErrorList(act.getErrors());
+        addError("Account verification failed");
+        return false;
     }
-    EventManager::EMIT_MODIFY_ACCOUNT(oldAct.title, (titleChanged ? act.title : ""));
+    if (!parser->write(act)) {
+        addError("Error on saving account file");
+        return false;
+    }
+    setStatus(oldAct.id, AC_NONE);
+    EventManager::EMIT_MODIFY_ACCOUNT(oldAct.id);
     return true;
 }
 
@@ -148,14 +125,14 @@ bool AccountManager::modifyAccount(const string &accountName, AccountObject &act
  * @param accountName name of account we want to delete
  * @return account deletion status
  */
-bool AccountManager::deleteAccount(const string &accountName) {
-    auto *parser = this->findParser(accountName, true);
+bool AccountManager::deleteAccount(const uuid_t &id) {
+    auto *parser = this->findParser(id, true);
     if (!parser) {
         addError("Account Parser not found");
         return false;
     }
     AccountObject act;
-    if (!parser->read(accountName, act)) {
+    if (!parser->read(id, act)) {
         addError("unable to read account before delete");
         return false;
     }
@@ -163,12 +140,12 @@ bool AccountManager::deleteAccount(const string &accountName) {
         addErrorList(act.getErrors());
         return false;
     }
-    if (!parser->remove(accountName)) {
+    if (!parser->remove(id)) {
         addError("unable to remove account file");
         return false;
     }
-    m_statDict.erase(accountName);
-    EventManager::EMIT_DELETE_ACCOUNT(act.title);
+    m_statDict.erase(act.idAsString());
+    EventManager::EMIT_DELETE_ACCOUNT(id);
     return true;
 }
 
@@ -179,9 +156,9 @@ bool AccountManager::deleteAccount(const string &accountName) {
  * @param serviceFilter filter list for accounts that use specific services
  * @return list of account titles that matched with provided filters
  */
-vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFilter,
-                                            const ServiceFilters_t &serviceFilter) {
-    vector<string> titles;
+list<AccountObject> AccountManager::listAccounts(const ProviderFilters_t &providerFilter,
+                                                 const ServiceFilters_t &serviceFilter) {
+    list<AccountObject> accountList;
     for (auto *parser : m_parsers) {
         for (const auto &act : parser->list()) {
             bool accepted = providerFilter.empty() && serviceFilter.empty();
@@ -199,11 +176,11 @@ vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFil
                 }
             }
             if (accepted) {
-                titles.push_back(act.title);
+                accountList.push_back(act);
             }
         }
     }
-    return titles;
+    return accountList;
 }
 
 /**
@@ -213,14 +190,14 @@ vector<string> AccountManager::listAccounts(const ProviderFilters_t &providerFil
  * @param[out] account AccountObject that we fill it's details during account read procedure
  * @return read account status
  */
-bool AccountManager::readAccount(const string &accountName, AccountObject *account) {
-    auto *parser = this->findParser(accountName, false);
+bool AccountManager::readAccount(const uuid_t &id, AccountObject *account) {
+    auto *parser = this->findParser(id, false);
     if (!parser) {
         addError("Can't find suitable parser");
         return false;
     }
-    if (!parser->read(accountName, *account)) {
-        addError("Error on reading account file: '" + accountName + "'.");
+    if (!parser->read(id, *account)) {
+        addError("Error on reading account file: '" + uuid_as_string(id) + "'.");
         return false;
     }
     for (auto &kv : account->services) {
@@ -236,17 +213,17 @@ bool AccountManager::readAccount(const string &accountName, AccountObject *accou
  * @param stat the status we want to set for an account
  * @return set status result
  */
-bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
+bool AccountManager::setStatus(const uuid_t &id, AccountStatus stat) {
     // Pre-check to determine if account exists before setting the status
     AccountObject act;
-    if (!readAccount(accountName, &act)) {
+    if (!readAccount(id, &act)) {
         return false;
     }
 
-    AccountStatus oldStat = m_statDict[accountName];
-    m_statDict[accountName] = stat;
+    AccountStatus oldStat = m_statDict[act.idAsString()];
+    m_statDict[act.idAsString()] = stat;
     if (oldStat != stat) {
-        EventManager::EMIT_STATUS_CHANGE(act.title, oldStat, stat);
+        EventManager::EMIT_STATUS_CHANGE(id, oldStat, stat);
     }
     return true;
 }
@@ -257,17 +234,19 @@ bool AccountManager::setStatus(const string &accountName, AccountStatus stat) {
  * @param accountName title of account that we want to read it's status
  * @return status of account
  */
-AccountStatus AccountManager::getStatus(const string &accountName) {
-    if (m_statDict.find(accountName) == m_statDict.end()) {
+AccountStatus AccountManager::getStatus(const uuid_t &id) {
+    auto strId = uuid_as_string(id);
+    if (m_statDict.find(strId) == m_statDict.end()) {
         return AC_NONE;
     }
-    return m_statDict[accountName];
+    return m_statDict[strId];
 }
 
-AccountParser *AccountManager::findParser(const string &actName, bool onlyWritables) {
+AccountParser *AccountManager::findParser(const uuid_t &id, bool onlyWritables) {
     for (auto *parser : m_parsers) {
         if (!onlyWritables || !parser->isReadonly()) {
-            if (parser->hasAccount(actName) || actName.empty()) {
+            if (parser->hasAccount(id) || uuid_is_null(id)) {
+                GLOG_INF("parser selected: ", parser->path());
                 return parser;
             }
         }

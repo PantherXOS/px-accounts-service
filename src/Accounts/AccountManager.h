@@ -5,9 +5,10 @@
 #ifndef PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
 #define PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
 
-#include <memory>
 #include <Utils/ErrorReporter.h>
 #include <Utils/Utils.h>
+
+#include <memory>
 
 #include "AccountParser.h"
 #include "Plugins/PluginManager.h"
@@ -25,51 +26,51 @@
  *          Online Accounts for PantherX.
  */
 class AccountManager : public ErrorReporter {
-public:
+   public:
     typedef vector<string> ProviderFilters_t;
     typedef vector<string> ServiceFilters_t;
 
-private:
+   private:
     explicit AccountManager();
     virtual ~AccountManager();
 
-public:
+   public:
     /// @brief static method in order to access AccountManager object
     static AccountManager &Instance();
 
     /// @brief static method for accessing last occurred errors during last operation
     static StringList &LastErrors();
 
-public:
+   public:
     /// @brief save new account to disk
-    bool createAccount(AccountObject &act, bool existenceCheck, bool emitCreateEvent);
+    bool createAccount(AccountObject &act);
 
     /// @brief modify existing account details
-    bool modifyAccount(const string &accountName, AccountObject &act);
+    bool modifyAccount(const uuid_t &id, AccountObject &act);
 
     /// @brief delete an account from disk
-    bool deleteAccount(const string &accountName);
+    bool deleteAccount(const uuid_t &id);
 
     /// @brief get list of saved accounts
-    vector<string> listAccounts(const ProviderFilters_t &providerFilter = ProviderFilters_t(),
-                                const ServiceFilters_t &serviceFilter = ServiceFilters_t());
+    list<AccountObject> listAccounts(const ProviderFilters_t &providerFilter = ProviderFilters_t(),
+                                     const ServiceFilters_t &serviceFilter = ServiceFilters_t());
 
     /// @brief read account details
-    bool readAccount(const string &accountName, AccountObject *account);
+    bool readAccount(const uuid_t &id, AccountObject *account);
 
     /// @brief set status for an account
-    bool setStatus(const string &accountName, AccountStatus stat);
+    bool setStatus(const uuid_t &id, AccountStatus stat);
 
     /// @brief get status of an account
-    AccountStatus getStatus(const string &accountName);
+    AccountStatus getStatus(const uuid_t &id);
 
-    AccountParser* findParser(const string &actName, bool onlyWritables);
+    AccountParser *findParser(const uuid_t &id, bool onlyWritables);
 
-protected:
+   protected:
     static AccountManager _instance;
 
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status
-    list<AccountParser*> m_parsers;
+    list<AccountParser *> m_parsers;
 };
 
-#endif //PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H
+#endif  // PX_ACCOUNTS_SERVICE_ACCOUNTMANAGER_H

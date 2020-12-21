@@ -70,8 +70,10 @@ PluginManager &PluginManager::Instance() {
  */
 PluginContainerBase *PluginManager::operator[](const std::string &title) {
     if (_plugins.find(title) == _plugins.end()) {
+        GLOG_WRN("plugin not found: ", title);
         return nullptr;
     }
+    GLOG_INF("plugin found: ", _plugins[title]->getTitle(), " - ", _plugins[title]);
     return _plugins[title];
 }
 
