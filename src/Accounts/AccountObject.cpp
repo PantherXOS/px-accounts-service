@@ -3,10 +3,10 @@
 //
 
 #include "AccountObject.h"
+
 #include <Plugins/PluginManager.h>
 #include <ProviderHandler.h>
 #include <Secret/SecretManager.h>
-
 
 /**
  * check whether  account details and services are verified
@@ -15,13 +15,16 @@
  * @return account verification status
  */
 bool AccountObject::verify() {
+    GLOG_INF("verify account with id: ", this->idAsString());
     this->resetErrors();
     if (this->title.empty()) {
+        GLOG_WRN("missing required param: 'title'");
         this->addError("'title' is required");
         return false;
     }
 
     if (!this->provider.empty() && !this->_appendProviderParams()) {
+        GLOG_WRN("update provider params failed");
         this->addError("update provider params failed");
         return false;
     }
@@ -31,6 +34,7 @@ bool AccountObject::verify() {
         string svcName = kv.first;
         PluginContainerBase *plugin = PluginManager::Instance()[svcName];
         if (plugin == nullptr) {
+            GLOG_WRN("unknown service: ", svcName);
             addError(string("unknown service '") + svcName + string("'"));
             verified = false;
         }
@@ -40,6 +44,7 @@ bool AccountObject::verify() {
         }
         verified &= svcVerified;
     }
+    GLOG_INF("account verification status: ", verified);
     return verified;
 }
 
