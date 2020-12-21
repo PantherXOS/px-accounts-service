@@ -3,9 +3,11 @@
 //
 
 #include "RPCHandler.h"
+
 #include <kj/async.h>
-#include <string>
 #include <kj/debug.h>
+
+#include <string>
 
 #include "Accounts/AccountManager.h"
 
@@ -28,31 +30,35 @@ kj::Promise<void> RPCHandler::list(AccountReader::Server::ListContext ctx) {
         }
     }
 
-    vector<string> accountList = AccountManager::Instance().listAccounts(pFilter, sFilter);
-
-    auto result = ctx.getResults().initAccounts(accountList.size());
-    for (int i = 0; i < accountList.size(); ++i) {
-        result.set(i, accountList[i]);
+    auto accounts = AccountManager::Instance().listAccounts(pFilter, sFilter);
+    auto result = ctx.getResults().initAccounts(accounts.size());
+    int i = 0;
+    for (const auto &act : accounts) {
+        result[i].setId(act.idAsString());
+        result[i].setTitle(act.title);
+        i++;
     }
-
     return kj::READY_NOW;
 }
 
 kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
     GLOG_INF("==========================================================");
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
+    KJ_REQUIRE(ctx.getParams().hasId(), "'id' parameter not set");
 
-    auto title = ctx.getParams().getTitle().cStr();
-    auto actName = PXUTILS::ACCOUNT::title2name(title);
+    uuid_t accountId;
+    auto strId = ctx.getParams().getId().cStr();
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+
     AccountObject actObj;
-    bool res = AccountManager::Instance().readAccount(actName, &actObj);
+    bool res = AccountManager::Instance().readAccount(accountId, &actObj);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }
     KJ_ASSERT(res, "Account not found");
 
     auto account = ctx.getResults().initAccount();
+    account.setId(actObj.idAsString());
     account.setTitle(actObj.title);
     account.setProvider(actObj.provider);
     account.setActive(actObj.is_active);
@@ -60,7 +66,7 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
     auto accountSettings = account.initSettings(actObj.settings.size());
     int i, j;
     i = 0;
-    for (const auto &kv: actObj.settings) {
+    for (const auto &kv : actObj.settings) {
         accountSettings[i].setKey(kv.first);
         accountSettings[i].setValue(kv.second);
         i++;
@@ -85,12 +91,14 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
 kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext ctx) {
     GLOG_INF("==========================================================");
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
+    KJ_REQUIRE(ctx.getParams().hasId(), "'id' parameter not set");
 
-    auto title = ctx.getParams().getTitle().cStr();
-    auto accountName = PXUTILS::ACCOUNT::title2name(title);
-    auto stat = (AccountStatus) ctx.getParams().getStat();
-    bool res = AccountManager::Instance().setStatus(accountName, stat);
+    uuid_t accountId;
+    auto strId = ctx.getParams().getId().cStr();
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+
+    auto stat = (AccountStatus)ctx.getParams().getStat();
+    bool res = AccountManager::Instance().setStatus(accountId, stat);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }
@@ -103,12 +111,14 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
 kj::Promise<void> RPCHandler::getStatus(AccountReader::Server::GetStatusContext ctx) {
     GLOG_INF("==========================================================");
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter not set");
+    KJ_REQUIRE(ctx.getParams().hasId(), "'id' parameter not set");
 
-    auto title = ctx.getParams().getTitle().cStr();
-    auto accountName = PXUTILS::ACCOUNT::title2name(title);
-    AccountStatus stat = AccountManager::Instance().getStatus(accountName);
-    ctx.getResults().setStatus((Account::Status) stat);
+    uuid_t accountId;
+    auto strId = ctx.getParams().getId().cStr();
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+
+    AccountStatus stat = AccountManager::Instance().getStatus(accountId);
+    ctx.getResults().setStatus((Account::Status)stat);
 
     return kj::READY_NOW;
 }
@@ -122,7 +132,7 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
 
-    bool res = AccountManager::Instance().createAccount(account, true, true);
+    bool res = AccountManager::Instance().createAccount(account);
     if (!res) {
         string errMessage = "Create new account failed:\n";
         for (const auto &err : AccountManager::LastErrors()) {
@@ -130,6 +140,9 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
         }
         KJ_ASSERT(res, errMessage);
     } else {
+        auto rpcCreatedAccount = ctx.getResults().initAccount();
+        KJ_ASSERT(RPCHandler::ACT2RPC(account, rpcCreatedAccount));
+
         auto warnings = ctx.getResults().initWarnings(AccountManager::LastErrors().size());
         int i = 0;
         for (const auto &wrn : AccountManager::LastErrors()) {
@@ -143,21 +156,26 @@ kj::Promise<void> RPCHandler::add(AccountWriter::Server::AddContext ctx) {
 kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
     GLOG_INF("==========================================================");
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
+    KJ_REQUIRE(ctx.getParams().hasId(), "'id' parameter is not set");
     KJ_REQUIRE(ctx.getParams().hasAccount(), "'account' parameter is not set");
 
-    auto title = ctx.getParams().getTitle().cStr();
-    auto actName = PXUTILS::ACCOUNT::title2name(title);
+    uuid_t accountId;
+    auto strId = ctx.getParams().getId().cStr();
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+
     auto rpcAccount = ctx.getParams().getAccount();
     AccountObject account;
     KJ_ASSERT(RPCHandler::RPC2ACT(rpcAccount, account), "Error on parse received account");
-    bool res = AccountManager::Instance().modifyAccount(actName, account);
+    bool res = AccountManager::Instance().modifyAccount(accountId, account);
     if (!res) {
         for (const auto &err : AccountManager::LastErrors()) {
             KJ_DBG(err);
         }
         KJ_ASSERT(res, "Modify Existing Account failed.");
     } else {
+        auto rpcEditedAccount = ctx.getResults().initAccount();
+        KJ_ASSERT(RPCHandler::ACT2RPC(account, rpcEditedAccount));
+
         auto warnings = ctx.getResults().initWarnings(AccountManager::LastErrors().size());
         int i = 0;
         for (const auto &wrn : AccountManager::LastErrors()) {
@@ -172,11 +190,13 @@ kj::Promise<void> RPCHandler::edit(AccountWriter::Server::EditContext ctx) {
 kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
     GLOG_INF("==========================================================");
 
-    KJ_REQUIRE(ctx.getParams().hasTitle(), "'title' parameter is not set");
+    KJ_REQUIRE(ctx.getParams().hasId(), "'id' parameter is not set");
 
-    auto title = ctx.getParams().getTitle().cStr();
-    auto actName = PXUTILS::ACCOUNT::title2name(title);
-    bool res = AccountManager::Instance().deleteAccount(actName);
+    uuid_t accountId;
+    auto strId = ctx.getParams().getId().cStr();
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+
+    bool res = AccountManager::Instance().deleteAccount(accountId);
     for (const auto &err : AccountManager::LastErrors()) {
         KJ_DBG(err);
     }
@@ -187,6 +207,7 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
 }
 
 bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
+    act.setId(rpc.getId().cStr());
     act.title = rpc.getTitle().cStr();
     act.provider = rpc.getProvider().cStr();
     act.is_active = rpc.getActive();
@@ -211,6 +232,7 @@ bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
 }
 
 bool RPCHandler::ACT2RPC(const AccountObject &act, Account::Builder &rpc) {
+    rpc.setId(act.idAsString());
     rpc.setTitle(act.title);
     rpc.setProvider(act.provider);
     rpc.setActive(act.is_active);
