@@ -6,6 +6,7 @@
 #define PX_ACCOUNTS_SERVICE_EVENTMANAGER_H
 
 #include <nng/nng.h>
+#include <uuid/uuid.h>
 #include <nng/protocol/pipeline0/push.h>
 #include <Utils/Utils.h>
 
@@ -34,10 +35,10 @@ public:
     static EventManager &Instance();
 
     /// @brief helper method for emitting change status event
-    static bool EMIT_STATUS_CHANGE(const string &accountTitle, AccountStatus from, AccountStatus to);
-    static bool EMIT_CREATE_ACCOUNT(const string &accountTitle);
-    static bool EMIT_MODIFY_ACCOUNT(const string &accountTitle, const string &newTitle = "");
-    static bool EMIT_DELETE_ACCOUNT(const string &accountTitle);
+    static bool EMIT_STATUS_CHANGE(const uuid_t &accountId, AccountStatus from, AccountStatus to);
+    static bool EMIT_CREATE_ACCOUNT(const uuid_t &accountId);
+    static bool EMIT_MODIFY_ACCOUNT(const uuid_t &accountId);
+    static bool EMIT_DELETE_ACCOUNT(const uuid_t &accountId);
 
 private:
     nng_socket m_sock;      ///< @brief socket that EventManager use to connect to Event Service

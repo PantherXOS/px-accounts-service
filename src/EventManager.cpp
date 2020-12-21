@@ -3,25 +3,26 @@
 //
 
 #include "EventManager.h"
-#include <chrono>
+
 #include <capnp/serialize-packed.h>
-#include <kj/io.h>
 #include <interface/event.capnp.h>
+#include <kj/io.h>
+
+#include <chrono>
 
 #define RPC_DIR "~/.userdata/rpc"
 #define RPC_PATH RPC_DIR "/events"
 #define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
 #define ACCOUNT_STATUS_CHANGE_EVENT "account_status_change"
-#define ACCOUNT_CREATE_EVENT        "account_create"
-#define ACCOUNT_MODIFY_EVENT        "account_modify"
-#define ACCOUNT_DELETE_EVENT        "account_delete"
+#define ACCOUNT_CREATE_EVENT "account_create"
+#define ACCOUNT_MODIFY_EVENT "account_modify"
+#define ACCOUNT_DELETE_EVENT "account_delete"
 
 /**
  * Initiates NNG socket and connect to Event Service
  */
 EventManager::EventManager() {
-
     system(RPC_MKPATH_CMD);
     this->init();
 }
@@ -61,14 +62,13 @@ EventManager::~EventManager() {
  * @param params string-based key value map about event params
  */
 bool EventManager::emit(const string &event, const map<string, string> &params) {
-
     if (!m_inited) {
         GLOG_WRN("EventManager is not inited.");
         return false;
     }
-    uint64_t now_secs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-    ).count());
+    uint64_t now_secs = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count());
 
     capnp::MallocMessageBuilder message;
     EventData::Builder evt = message.initRoot<EventData>();
@@ -114,31 +114,28 @@ EventManager &EventManager::Instance() {
  * @param from old status of account
  * @param to new status of account
  */
-bool EventManager::EMIT_STATUS_CHANGE(const string &accountTitle, AccountStatus from, AccountStatus to) {
+bool EventManager::EMIT_STATUS_CHANGE(const uuid_t &accountId, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["account"] = accountTitle;
+    params["account"] = uuid_as_string(accountId);
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
     return EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
 }
 
-bool EventManager::EMIT_CREATE_ACCOUNT(const string &accountTitle) {
+bool EventManager::EMIT_CREATE_ACCOUNT(const uuid_t &accountId) {
     map<string, string> params;
-    params["account"] = accountTitle;
+    params["account"] = uuid_as_string(accountId);
     return EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
 }
 
-bool EventManager::EMIT_MODIFY_ACCOUNT(const string &accountTitle, const string &newTitle) {
+bool EventManager::EMIT_MODIFY_ACCOUNT(const uuid_t &accountId) {
     map<string, string> params;
-    params["account"] = accountTitle;
-    if (!newTitle.empty()) {
-        params["new_title"] = newTitle;
-    }
+    params["account"] = uuid_as_string(accountId);
     return EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
 }
 
-bool EventManager::EMIT_DELETE_ACCOUNT(const string &accountTitle) {
+bool EventManager::EMIT_DELETE_ACCOUNT(const uuid_t &accountId) {
     map<string, string> params;
-    params["account"] = accountTitle;
+    params["account"] = uuid_as_string(accountId);
     return EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
 }
