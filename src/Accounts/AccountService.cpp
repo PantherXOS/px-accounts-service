@@ -86,6 +86,8 @@ bool AccountService::verify() {
     this->resetErrors();
     VerifyResultPtr verifyResult = this->_verifyParams();
     if (verifyResult == nullptr) {
+        GLOG_ERR("parameter verification failed");
+        addError("parameter verification failed");
         return false;
     }
     AuthResultPtr authResult = this->_authenticate(verifyResult);
@@ -114,6 +116,10 @@ bool AccountService::verify() {
  * @return          VerifyResult object
  */
 VerifyResultPtr AccountService::_verifyParams() {
+    if (this->_plugin == nullptr) {
+        GLOG_INF("service plugin is not initiated.");
+        return nullptr;
+    }
     auto verifyResult = this->_plugin->verify(*this);
     if (!verifyResult.verified) {
         this->addErrorList(verifyResult.errors);
@@ -122,7 +128,7 @@ VerifyResultPtr AccountService::_verifyParams() {
 
     for (auto &param: verifyResult.params) {
         if (param.is_protected && param.val.empty()) {
-            param.val = SecretManager::Instance().Get(this->_account->title, this->_name, param.key);
+            param.val = SecretManager::Instance().Get(this->_account->idAsString(), this->_name, param.key);
             if (param.val.empty()) {
                 this->addError("protected param not found: '" + param.key + "'");
                 return nullptr;
@@ -172,7 +178,7 @@ AuthResultPtr AccountService::_authenticate(VerifyResultPtr &vResult) {
 bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPtr &aResult) {
     for (const auto &param : vResult->params) {
         if (param.is_protected) {
-            if (!SecretManager::Instance().Set(this->_account->title, this->_name, param.key, param.val)) {
+            if (!SecretManager::Instance().Set(this->_account->idAsString(), this->_name, param.key, param.val)) {
                 GLOG_ERR("saving secret failed");
                 this->addError("unable to set protected params.");
                 return false;
@@ -182,7 +188,7 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
     for (const auto &token : aResult->tokens) {
         const auto &key = token.first;
         const auto &val = token.second;
-        if (!SecretManager::Instance().Set(this->_account->title, this->_name, key, val)) {
+        if (!SecretManager::Instance().Set(this->_account->idAsString(), this->_name, key, val)) {
             GLOG_ERR("saving secret failed");
             this->addError("unable to set protected tokens.");
             return false;
