@@ -17,7 +17,6 @@ set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 
 add_executable(${TARGET_NAME}
         main.cpp
-        PasswordSimulator.cpp
         SecretSimulator.cpp
         simulators/EventSimulator.cpp
         ${UNIT_TEST_LIST})

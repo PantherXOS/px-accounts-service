@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
 
     CLI::App app{"px-accounts-service: Online Accounts Management Service"};
     app.add_flag("-d,--debug", isDebug, "Run px-accounts-service in debug mode");
-    app.add_option("-p,--password", pass, "px-accounts-pass related password");
     app.add_option("--secret-path", rpcSecretPath, "modify px-secret-service rpc path");
     app.add_option("-t,--log-target", logTarget, "Target for application logs to publish")
             ->transform(CLI::CheckedTransformer(logTargetMapping, CLI::ignore_case));

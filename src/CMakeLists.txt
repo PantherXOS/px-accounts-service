@@ -14,27 +14,26 @@ set(CAPNPC_SRC_PREFIX "${INTERFACE_DIR}" CACHE STRING "" FORCE)
 set(CAPNPC_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/interface" CACHE STRING "" FORCE)
 message(${CAPNPC_OUTPUT_DIR})
 file(MAKE_DIRECTORY "${CAPNPC_OUTPUT_DIR}")
-capnp_generate_cpp(accountSources accountHeaders
+capnp_generate_cpp(rpcSources rpcHeaders
         ${INTERFACE_DIR}/Account.capnp
         ${INTERFACE_DIR}/AccountReader.capnp
         ${INTERFACE_DIR}/AccountWriter.capnp
         ${INTERFACE_DIR}/event.capnp
         ${INTERFACE_DIR}/Secret.capnp
-        ${INTERFACE_DIR}/password/interface.capnp
-        ${INTERFACE_DIR}/password/passwordbook.capnp)
+        )
 
 include_directories(${CapnProto_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
         ${yaml-cpp_INCLUDE_DIRS}
         ${PYTHON_INCLUDE_DIRS})
 
-link_libraries(CapnProto::capnp-rpc yaml-cpp dl)
+link_libraries(CapnProto::capnp-rpc yaml-cpp dl uuid)
 set(CMAKE_CXX_FLAGS -pthread)
 set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 
 
 add_library(${LIB_NAME}
-        ${accountSources} ${accountHeaders}
+        ${rpcSources} ${rpcHeaders}
         RPCServer.cpp
         RPCClient.cpp
         RPCHandler.cpp

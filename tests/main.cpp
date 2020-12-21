@@ -17,14 +17,8 @@
 #include "SecretSimulator.h"
 #include "simulators/EventSimulator.h"
 
-#ifdef __linux__
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.so"
 #define CPP_CUSTOM_PLUGIN_PATH "../cpp-custom-plugin/libpx-accounts-service-plugin-cpp-custom.so"
-#else
-#define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.dylib"
-#define CPP_CUSTOM_PLUGIN_PATH "../cpp-custom-plugin/libpx-accounts-service-plugin-cpp-custom.dylib"
-
-#endif
 
 Logger gLogger("account-tests");
 
