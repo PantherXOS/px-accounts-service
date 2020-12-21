@@ -1,11 +1,17 @@
-@0xdc8c8c7471090424;
+@0xd8a732ea56ca14e6;
+
+struct AccountInfo {
+    id    @0 : Text;
+    title @1 : Text;
+}
 
 struct Account {
-    title    @0 : Text;
-    provider @1 : Text;
-    active   @2 : Bool;
-    settings @3 : List(Param);
-    services @4 : List(Service);
+    id       @0 : Text;
+    title    @1 : Text;
+    provider @2 : Text;
+    active   @3 : Bool;
+    settings @4 : List(Param);
+    services @5 : List(Service);
 
     struct Service {
         name   @0 : Text;
