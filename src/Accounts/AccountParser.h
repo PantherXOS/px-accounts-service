@@ -5,7 +5,6 @@
 #ifndef PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
 #define PX_ACCOUNTS_SERVICE_ACCOUNTPARSER_H
 
-
 #include <list>
 
 #include "AccountDefinitions.h"
@@ -16,17 +15,22 @@ class AccountParser : public ErrorReporter {
     explicit AccountParser(const string &path, bool isReadonly);
 
    public:
-    bool read(const string &actName, AccountObject &account);
+    bool read(const uuid_t &id, AccountObject &account);
+    bool read(const string &strId, AccountObject &account);
     std::list<AccountObject> list();
-    bool write(const string &actName, const AccountObject &account);
-    bool remove(const string &actName);
+    bool write(const AccountObject &account);
+    bool remove(const uuid_t &id);
 
-    bool hasAccount(const string &actName);
+    bool hasAccount(const uuid_t &id);
+
     inline bool isReadonly() { return m_readonly; }
     inline string path() { return m_path; }
 
    protected:
-    inline string accountPath(const string &actName) { return m_path + actName + ".yaml"; }
+    inline string accountPath(const uuid_t &id) {
+        auto strId = uuid_as_string(id);
+        return m_path + strId + ".yaml";
+    }
 
    private:
     string m_path;

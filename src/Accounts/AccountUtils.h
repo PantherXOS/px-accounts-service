@@ -19,7 +19,6 @@ namespace PXUTILS {
     /// @brief account related helper functions
     namespace ACCOUNT {
         /// @brief convert account title to a proper format for disk
-        string title2name(const string &title);
     }
 
     /// @brief plugin related helper functions

@@ -18,23 +18,6 @@
 #include <algorithm>
 #include <map>
 
-/**
- * convert account title to a file-system friendly formatted one
- *
- * @param title account title
- *
- * @return file-system friendly formatted version of account title
- */
-string PXUTILS::ACCOUNT::title2name(const string &title) {
-    string result = title;
-    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
-        if (c == ' ') {
-            return (int) '_';
-        }
-        return std::tolower(c);
-    });
-    return result;
-}
 
 /**
  * convert a python plugin package name to python module recommended format
