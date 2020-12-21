@@ -57,9 +57,11 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
             }
         }
         REQUIRE(response.getResult());
+        act.setId(response.getAccount().getId().cStr());
+        REQUIRE_FALSE(uuid_is_null(act.id));
 
         auto getReq = client.getRequest();
-        getReq.setTitle(act.title);
+        getReq.setId(act.idAsString());
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
@@ -76,7 +78,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     SECTION("Edit Account") {
         auto getReq = client.getRequest();
-        getReq.setTitle(act.title);
+        getReq.setId(act.idAsString());
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
@@ -90,7 +92,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         RPCHandler::ACT2RPC(testAct, account);
 
         auto editReq = client.editRequest();
-        editReq.setTitle(title1);
+        editReq.setId(act.idAsString());
         editReq.setAccount(account);
 
         auto response = editReq.send()
@@ -107,7 +109,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     SECTION("Delete Account") {
         auto rmReq = client.removeRequest();
-        rmReq.setTitle(title2);
+        rmReq.setId(act.idAsString());
         auto rmRes = rmReq.send().wait(waitScope);
         REQUIRE(rmRes.getResult());
     }
@@ -144,9 +146,9 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
         REQUIRE(listRes.hasAccounts());
         if (listRes.getAccounts().size() == 0)
             WARN("account list is empty");
-        for (const auto &title : listRes.getAccounts()) {
+        for (const auto &accountInfo : listRes.getAccounts()) {
             auto getReq = client.getRequest();
-            getReq.setTitle(title);
+            getReq.setId(accountInfo.getId().cStr());
             auto getRes = getReq.send().wait(waitScope);
             REQUIRE(getRes.hasAccount());
         }
@@ -159,22 +161,23 @@ TEST_CASE("Account Reader Tests", "[RPCServer]") {
         if (listRes.getAccounts().size() == 0)
             WARN("account list is empty. test omitted.");
         else {
-            auto title = listRes.getAccounts()[0];
-            CAPTURE(title.cStr());
+            auto accountInfo = listRes.getAccounts()[0];
+            CAPTURE(accountInfo.getId().cStr());
+            CAPTURE(accountInfo.getTitle().cStr());
 
             auto getReq = client.getStatusRequest();
-            getReq.setTitle(title);
+            getReq.setId(accountInfo.getId());
             auto getRes = getReq.send().wait(waitScope);
             REQUIRE(getRes.getStatus() == Account::Status::NONE);
 
             auto setReq = client.setStatusRequest();
-            setReq.setTitle(title);
+            setReq.setId(accountInfo.getId());
             setReq.setStat(Account::Status::ONLINE);
             auto setRes = setReq.send().wait(waitScope);
             REQUIRE(setRes.getResult());
 
             getReq = client.getStatusRequest();
-            getReq.setTitle(title);
+            getReq.setId(accountInfo.getId());            
             getRes = getReq.send().wait(waitScope);
             REQUIRE(getRes.getStatus() == Account::Status::ONLINE);
         }

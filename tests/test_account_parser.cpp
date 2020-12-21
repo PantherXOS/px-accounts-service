@@ -11,29 +11,30 @@ TEST_CASE("Account Parser Tests", "[AccountParser]") {
     AccountParser accountWriter(accountsFullPath, false);
     AccountParser accountReader(accountsFullPath, true);
 
-    const string testAccountTitle = "parser test account";
-    const string testAccountName = PXUTILS::ACCOUNT::title2name(testAccountTitle);
+    // const string testAccountTitle = "parser test account";
+    // const string testAccountName = PXUTILS::ACCOUNT::title2name(testAccountTitle);
     AccountObject testAccount;
-    testAccount.title = testAccountTitle;
+    uuid_generate(testAccount.id);
+    testAccount.title = "parser test account";
     testAccount.is_active = true;
     testAccount.services["test-python"].init(&testAccount, "test-python");
     testAccount.services["test-python"]["k1"] = "v1";
     testAccount.services["test-python"]["k2"] = "v2";
 
-    TESTCOMMON::ACCOUNTS::cleanup(testAccountTitle);
+    TESTCOMMON::ACCOUNTS::cleanup(testAccount.title);
 
     SECTION("Create New Account") {
-        REQUIRE(accountWriter.write(testAccountName, testAccount));
+        REQUIRE(accountWriter.write(testAccount));
 
         AccountObject savedAccount;
-        REQUIRE(accountReader.read(testAccountName, savedAccount));
-        CHECK(savedAccount.title == testAccountTitle);
+        REQUIRE(accountReader.read(testAccount.id, savedAccount));
+        CHECK(savedAccount.title == testAccount.title);
         CHECK(savedAccount.is_active == testAccount.is_active);
         CHECK(savedAccount.services.size() == testAccount.services.size());
         REQUIRE(savedAccount.services.find("test-python") != savedAccount.services.end());
     }
 
     SECTION("try to write on readonly parser") {
-        REQUIRE_FALSE(accountReader.write(testAccountName, testAccount)); 
+        REQUIRE_FALSE(accountReader.write(testAccount)); 
     }
 }

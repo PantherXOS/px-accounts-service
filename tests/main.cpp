@@ -42,8 +42,8 @@ void register_test_plugin(const string &name, const string &version, const strin
 int main(int argc, char *argv[]) {
 
     setvbuf(stdout, nullptr, _IONBF, 0);
-    GLOG_INIT(LogTarget::SYSLOG, LogLevel::INF);
-    // GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
+    // GLOG_INIT(LogTarget::SYSLOG, LogLevel::INF);
+    GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
 
 
     register_test_plugin("px-accounts-service-plugin-cpp-test",

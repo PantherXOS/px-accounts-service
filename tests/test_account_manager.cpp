@@ -31,7 +31,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     newAccount.services["python-test"]["k2"] = "v2";
 
 
-    string accountName = PXUTILS::ACCOUNT::title2name(newAccount.title);
+    uuid_t accountId;
+
 
     SECTION("Cleanup Old Test files") {
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(title1));
@@ -40,7 +41,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Create New Account") {
-        bool createResult = AccountManager::Instance().createAccount(newAccount, true, true);
+        GLOG_INF("TEST STARTED: Create New Account");
+        bool createResult = AccountManager::Instance().createAccount(newAccount);
         if (!createResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -52,10 +54,13 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
             }
         }
         REQUIRE(createResult);
+        REQUIRE_FALSE(uuid_is_null(newAccount.id));
+        uuid_copy(accountId, newAccount.id);
     }
 
     SECTION("Read Created Account") {
-        REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
+        GLOG_INF("TEST STARTED: Read Created Account");
+        REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
         REQUIRE(newAccount.title == account.title);
         REQUIRE(newAccount.provider == account.provider);
         REQUIRE(newAccount.is_active == account.is_active);
@@ -70,10 +75,11 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
     }
 
     SECTION("Change Account active status") {
-        REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
+        GLOG_INF("TEST STARTED: Change Account active status");
+        REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
 
         account.is_active = true;
-        bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
+        bool modifyResult = AccountManager::Instance().modifyAccount(accountId, account);
         if (!modifyResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -86,15 +92,16 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         }
         REQUIRE(modifyResult);
 
-        REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
+        REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
         REQUIRE(account.is_active);
     }
 
     SECTION("Change Account Title") {
-        REQUIRE(AccountManager::Instance().readAccount(accountName, &account));
+        GLOG_INF("TEST STARTED: Change Account Title");
+        REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
 
         account.title = title2;
-        bool modifyResult = AccountManager::Instance().modifyAccount(accountName, account);
+        bool modifyResult = AccountManager::Instance().modifyAccount(accountId, account);
         if (!modifyResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -107,24 +114,23 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         }
         REQUIRE(modifyResult);
 
-        string newAccountName = PXUTILS::ACCOUNT::title2name(account.title);
-        REQUIRE_FALSE(AccountManager::Instance().readAccount(accountName, &account));
-        REQUIRE(AccountManager::Instance().readAccount(newAccountName, &account));
+        REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
     }
 
     SECTION("Delete Account") {
-        accountName = PXUTILS::ACCOUNT::title2name(title2);
-        REQUIRE(AccountManager::Instance().deleteAccount(accountName));
+        GLOG_INF("TEST STARTED: Delete Account");
+        REQUIRE(AccountManager::Instance().deleteAccount(accountId));
     }
 
     SECTION("Create Account with Provider") {
+        GLOG_INF("TEST STARTED: Create Account with Provider");
         AccountObject providerAccount;
         providerAccount.title = title3;
         providerAccount.provider = "test_provider";
         providerAccount.services["python-test"].init(&providerAccount, "python-test");
         providerAccount.services["python-test"]["k2"] = "v2";
 
-        bool createResult = AccountManager::Instance().createAccount(providerAccount, true, true);
+        bool createResult = AccountManager::Instance().createAccount(providerAccount);
         if (!createResult) {
             for (const auto &err : AccountManager::LastErrors()) {
                 WARN(err);
@@ -136,9 +142,8 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
             }
         }
         REQUIRE(createResult);
-
-        string providerActName = PXUTILS::ACCOUNT::title2name(title3);
-        REQUIRE(AccountManager::Instance().readAccount(providerActName, &account));
+        REQUIRE_FALSE(uuid_is_null(providerAccount.id));
+        REQUIRE(AccountManager::Instance().readAccount(providerAccount.id, &account));
         REQUIRE(providerAccount.provider == account.provider);
         REQUIRE(EXISTS(providerAccount.services, "python-test"));
         REQUIRE(EXISTS(providerAccount.services["python-test"], "k1"));
@@ -149,31 +154,34 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(providerAccount.services["python-test"]["k2"] == "v2");
         REQUIRE(providerAccount.services["python-test"]["k3"] == "provider_val3");
 
-        REQUIRE(AccountManager::Instance().deleteAccount(providerActName));
+        REQUIRE(AccountManager::Instance().deleteAccount(providerAccount.id));
     }
 
     SECTION("Modify Account with Public Plugin") {
+        GLOG_INF("TEST STARTED: Modify Account with Public Plugin");
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_public_account"));
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("modified_public_act"));
 
         AccountObject act;
         act.title = "my_public_account";
         act.services["public-test"].init(&act, "public-test");
-        bool createRes = AccountManager::Instance().createAccount(act, true, true);
+        bool createRes = AccountManager::Instance().createAccount(act);
         (AccountManager::LastErrors());
         REQUIRE(createRes);
+        REQUIRE_FALSE(uuid_is_null(act.id));
 
         AccountObject savedAct;
-        REQUIRE(AccountManager::Instance().readAccount(act.title, &savedAct));
+        REQUIRE(AccountManager::Instance().readAccount(act.id, &savedAct));
         REQUIRE(savedAct.services.find("public-test") != savedAct.services.end());
         savedAct.title = "modified_public_act";
-        bool modifyRes = AccountManager::Instance().modifyAccount(act.title, savedAct);
+        bool modifyRes = AccountManager::Instance().modifyAccount(act.id, savedAct);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(modifyRes);
 
     }
 
     SECTION("Python plugin with custom read/write") {
+        GLOG_INF("TEST STARTED: Python plugin with custom read/write");
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_json_account"));
 
         AccountObject act;
@@ -181,14 +189,13 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["python-json"].init(&act, "python-json");
         act.services["python-json"]["k1"] = "pv1";
         act.services["python-json"]["k2"] = "v2";
-        bool createRes = AccountManager::Instance().createAccount(act, true, true);
+        bool createRes = AccountManager::Instance().createAccount(act);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createRes);
-
-        string actName = PXUTILS::ACCOUNT::title2name(act.title);
+        REQUIRE_FALSE(uuid_is_null(act.id));
 
         AccountObject receivedAct;
-        bool readResult = AccountManager::Instance().readAccount(actName, &receivedAct);
+        bool readResult = AccountManager::Instance().readAccount(act.id, &receivedAct);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(readResult);
 
@@ -201,12 +208,13 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(receivedAct.services["python-json"].find("o2") != receivedAct.services["python-json"].end());
 
 
-        auto removeResult = AccountManager::Instance().deleteAccount(actName);
+        auto removeResult = AccountManager::Instance().deleteAccount(act.id);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(removeResult);
     }
 
     SECTION("CPP Plugin with custom read/write") {
+        GLOG_INF("TEST STARTED: CPP Plugin with custom read/write");
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup("my_custom_cpp_account"));
 
         AccountObject act;
@@ -214,14 +222,13 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["cpp-custom"].init(&act, "cpp-custom");
         act.services["cpp-custom"]["k1"] = "v1";
         act.services["cpp-custom"]["k2"] = "v2";
-        bool createRes = AccountManager::Instance().createAccount(act, true, true);
+        bool createRes = AccountManager::Instance().createAccount(act);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createRes);
-
-        string actName = PXUTILS::ACCOUNT::title2name(act.title);
+        REQUIRE_FALSE(uuid_is_null(act.id));
 
         AccountObject receivedAct;
-        bool readResult = AccountManager::Instance().readAccount(actName, &receivedAct);
+        bool readResult = AccountManager::Instance().readAccount(act.id, &receivedAct);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(readResult);
 
@@ -233,12 +240,13 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         CHECK(receivedAct.services["cpp-custom"]["k2"] == "v2");
 
 
-        auto removeResult = AccountManager::Instance().deleteAccount(actName);
+        auto removeResult = AccountManager::Instance().deleteAccount(act.id);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(removeResult);
     }
 
     SECTION("retrieve account only with protected params") {
+        GLOG_INF("TEST STARTED: retrieve account only with protected params");
 
         AccountObject act;
         act.title = "my protected account";
@@ -247,13 +255,14 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         act.services["protected-test"]["param2"] = "value2";
 
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(act.title));
-        string actName = PXUTILS::ACCOUNT::title2name(act.title);
-        bool createResult = AccountManager::Instance().createAccount(act, true, true);
+        // string actName = PXUTILS::ACCOUNT::title2name(act.title);
+        bool createResult = AccountManager::Instance().createAccount(act);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(createResult);
+        REQUIRE_FALSE(uuid_is_null(act.id));
 
         AccountObject receivedAct;
-        bool readResult = AccountManager::Instance().readAccount(actName, &receivedAct);
+        bool readResult = AccountManager::Instance().readAccount(act.id, &receivedAct);
         CAPTURE(AccountManager::LastErrors());
         REQUIRE(readResult);
 

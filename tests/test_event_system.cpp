@@ -30,12 +30,14 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
     act.services["python-test"]["k1"] = "v1";
     act.services["python-test"]["k2"] = "v2";
 
+    uuid_t accountId;
 
     SECTION("Cleanup old test files") {
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(act.title));
     }
 
     SECTION("Create Test Account") {
+        GLOG_INF("TEST STARTED: Create Test Account");
         capnp::EzRpcClient rpcClient(MAIN_SERVER_PATH);
         kj::WaitScope &waitScope = rpcClient.getWaitScope();
         AccountWriter::Client client = rpcClient.getMain<AccountWriter>();
@@ -48,10 +50,14 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         request.setAccount(rpcAct);
         auto response = request.send().wait(waitScope);
         REQUIRE(response.getResult());
+        REQUIRE(response.getAccount().getTitle() == act.title);
+        REQUIRE(uuid_from_string(response.getAccount().getId().cStr(), accountId));
+        REQUIRE_FALSE(uuid_is_null(accountId));
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     SECTION("Test Subscriber") {
+        GLOG_INF("TEST STARTED: Test Subscriber");
         nng_socket subSock;
         EventManager::Instance();
 
@@ -73,7 +79,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
             auto setReq = client.setStatusRequest();
-            setReq.setTitle(PXUTILS::ACCOUNT::title2name(act.title));
+            setReq.setId(uuid_as_string(accountId));
             setReq.setStat(Account::Status::ONLINE);
             setReq.send().wait(waitScope);
             INFO("Send DONE");
@@ -97,7 +103,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         bool oldFound = false, newFound = false, actFound = false;
         for (const auto &param : evtData.getParams()) {
             if (param.getKey().cStr() == string("account")) {
-                REQUIRE(param.getValue().cStr() == act.title);
+                REQUIRE(param.getValue().cStr() == uuid_as_string(accountId));
                 actFound = true;
             }
             if (param.getKey().cStr() == string("old")) {
