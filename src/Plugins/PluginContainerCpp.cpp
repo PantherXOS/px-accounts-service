@@ -6,11 +6,15 @@
 
 PluginContainerCpp::PluginContainerCpp(const PluginInfo &info) : _loader(info.path) {
     _info = info;
-    _inited = _loader.DLOpenLib();
 }
 
 PluginContainerCpp::~PluginContainerCpp() {
     _loader.DLCloseLib();
+}
+
+bool PluginContainerCpp::init() {
+    _inited = _loader.DLOpenLib();
+    return _inited;
 }
 
 string PluginContainerCpp::getTitle() {

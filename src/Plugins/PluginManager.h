@@ -9,28 +9,29 @@
 
 /// @brief Base class for managing plugin related classes
 class PluginManager {
-
-protected:
+   protected:
     explicit PluginManager();
 
-    /// @brief init a plugin based on it's path
-    bool initPlugins(const std::string &path);
+    /// @brief read list of plugins for in a path
+    PluginContainerPtrList readPathPlugins(const std::string &path);
 
-public:
+    /// @brief init plugin logic
+    bool initPlugins(PluginContainerPtrMap plugins);
+
+   public:
     virtual ~PluginManager();
 
     /// @brief method to access
     static PluginManager &Instance();
 
     /// @brief array item access operator
-    PluginContainerBase *operator[](const std::string &);
+    PluginContainerBase *operator[](const string &pluginName);
 
     /// @brief get reference to map of registered plugins
-    map<string, PluginContainerBase *> &plugins();
+    PluginContainerPtrMap &registeredPlugins();
 
-protected:
-    map<string, PluginContainerBase *> _plugins;
+   protected:
+    PluginContainerPtrMap _plugins;
 };
 
-
-#endif //PX_ACCOUNTS_SERVICE_PLUGINMANAGER_H
+#endif  // PX_ACCOUNTS_SERVICE_PLUGINMANAGER_H

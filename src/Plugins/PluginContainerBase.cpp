@@ -36,6 +36,7 @@ PluginContainerBase *PluginContainerBase::CreateContainer(const string &pluginIn
                 inf.version = plugin[PLUGIN_KEY][PLUGIN_VERSION_KEY].as<string>();
                 inf.path = plugin[PLUGIN_KEY][PLUGIN_PATH_KEY].as<string>();
                 inf.typeStr = plugin[PLUGIN_KEY][PLUGIN_TYPE_KEY].as<string>();
+                inf.loadPath = pluginInfoPath;
 
                 if (inf.typeStr == PLUGIN_TYPE_PYTHON_VAL) {
                     inf.type = PluginTypes::PythonPlugin;

@@ -16,6 +16,8 @@ public:
 
     ~PluginContainerCpp() override;
 
+    bool init() override;
+
     /// @brief get plugin title
     string getTitle() override;
 

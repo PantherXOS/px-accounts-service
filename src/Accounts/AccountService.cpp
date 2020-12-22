@@ -2,10 +2,11 @@
 // Created by Reza Alizadeh Majd on 9/11/19.
 //
 
+#include "AccountService.h"
+
 #include "../Accounts/AccountDefinitions.h"
 #include "../Plugins/PluginManager.h"
 #include "../Secret/SecretManager.h"
-#include "AccountService.h"
 
 #define PLUGIN_ID_PARAM "PLUGIN_ID"
 
@@ -68,9 +69,7 @@ bool AccountService::isRequired(const string &key) const {
     return false;
 }
 
-PluginContainerBase *AccountService::plugin() {
-    return _plugin;
-}
+PluginContainerBase *AccountService::plugin() { return _plugin; }
 
 /**
  * Verify AccountService, this method.
@@ -102,8 +101,7 @@ bool AccountService::verify() {
         string pluginId = this->plugin()->write(*(verifyResult.get()), *(authResult.get()));
         this->clearService();
         this->operator[](PLUGIN_ID_PARAM) = pluginId;
-    }
-    catch (std::exception &ex) {
+    } catch (std::exception &ex) {
         GLOG_WRN(ex.what());
     }
     return true;
@@ -126,7 +124,7 @@ VerifyResultPtr AccountService::_verifyParams() {
         return nullptr;
     }
 
-    for (auto &param: verifyResult.params) {
+    for (auto &param : verifyResult.params) {
         if (param.is_protected && param.val.empty()) {
             param.val = SecretManager::Instance().Get(this->_account->idAsString(), this->_name, param.key);
             if (param.val.empty()) {
@@ -141,8 +139,8 @@ VerifyResultPtr AccountService::_verifyParams() {
     GLOG_INF("parameters are verified:");
     for (const auto &param : verifyResult.params) {
         GLOG_INF("\t", param.key, " : ", param.val,
-                 (param.is_protected ? " - PROTECTED" : ""),
-                 (param.is_required ? " - REQUIRED" : ""));
+                 (param.is_protected ? " - PROTECTED" : ""),  // protected flag
+                 (param.is_required ? " - REQUIRED" : ""));   // required flag
     }
     return make_shared<VerifyResult>(verifyResult);
 }
@@ -163,7 +161,10 @@ AuthResultPtr AccountService::_authenticate(VerifyResultPtr &vResult) {
     }
     GLOG_INF("service authenticated:");
     for (const auto &token : authResult.tokens) {
-        GLOG_INF("\t", token.first, " : ", token.second);
+        GLOG_INF("\t", token.label, " : ", token.secret);
+        for (auto &attrib : token.attributes) {
+            GLOG_INF("\t\t[", attrib.first, " : ", attrib.second, "]");
+        }
     }
     return make_shared<AuthResult>(authResult);
 }
@@ -186,8 +187,8 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
         }
     }
     for (const auto &token : aResult->tokens) {
-        const auto &key = token.first;
-        const auto &val = token.second;
+        const auto &key = token.label;
+        const auto &val = token.secret;
         if (!SecretManager::Instance().Set(this->_account->idAsString(), this->_name, key, val)) {
             GLOG_ERR("saving secret failed");
             this->addError("unable to set protected tokens.");
@@ -197,11 +198,9 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
     return true;
 }
 
-
 bool AccountService::performCustomRead() {
-
     if (this->find(PLUGIN_ID_PARAM) == this->end()) {
-        return false; // plugin id parameter id not found.
+        return false;  // plugin id parameter id not found.
     }
     try {
         auto params = this->plugin()->read(this->operator[](PLUGIN_ID_PARAM));
@@ -209,14 +208,12 @@ bool AccountService::performCustomRead() {
         for (const auto &kv : params) {
             this->operator[](kv.first) = kv.second;
         }
-    }
-    catch (std::exception &ex) {
+    } catch (std::exception &ex) {
         GLOG_ERR(ex.what());
         return false;
     }
     return true;
 }
-
 
 bool AccountService::performServiceCustomRemoval() {
     if (this->find(PLUGIN_ID_PARAM) == this->end()) {

@@ -17,6 +17,7 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
     py::bind_map<StrStrMap>(m, "StrStrMap");
     py::bind_vector<StringList>(m, "StringList");
     py::bind_vector<ServiceParamList>(m, "ServiceParamList");
+    py::bind_vector<SecretTokenList>(m, "SecretTokenList");
 
     py::class_<ServiceParam>(m, "ServiceParam")
             .def(py::init())
@@ -31,6 +32,12 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
             .def_readwrite("verified", &VerifyResult::verified)
             .def_readwrite("params", &VerifyResult::params)
             .def_readwrite("errors", &VerifyResult::errors);
+
+    py::class_<SecretToken>(m, "SecretToken")
+            .def(py::init())
+            .def_readwrite("label", &SecretToken::label)
+            .def_readwrite("secret", &SecretToken::secret)
+            .def_readwrite("attributes", &SecretToken::attributes);
 
     py::class_<AuthResult>(m, "AuthResult")
             .def(py::init())
@@ -51,16 +58,21 @@ AuthResult PythonPlugin::authenticate(const ServiceParamList &params) {
 
 
 PluginContainerPython::PluginContainerPython(const PluginInfo &info) {
+    _info = info;
+}
+
+bool PluginContainerPython::init() {
     try {
         py::dict locals;
-        locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(info.name));
-        if (!info.path.empty()) {
-            locals["module_path"] = py::cast(info.path);
+        locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(_info.name));
+        if (!_info.path.empty()) {
+            locals["module_path"] = py::cast(_info.path);
         }
         py::exec(R"(
 import sys
-if module_path not in sys.path:
-   sys.path.append(module_path)
+if module_path in sys.path:
+   sys.path.remove(module_path)
+sys.path.insert(0, module_path)
 # for p in sys.path:
 #    print(p)
 
@@ -83,7 +95,6 @@ new_module = importlib.import_module(module_name)
 )",
                  py::globals(), locals);
 
-        _info = info;
         _module = locals["new_module"];
         py::object PluginClass = _module.attr("Plugin");
         _plugin = PluginClass();
@@ -92,6 +103,7 @@ new_module = importlib.import_module(module_name)
         GLOG_ERR(e.what());
         _inited = false;
     }
+    return _inited;
 }
 
 string PluginContainerPython::getTitle() {

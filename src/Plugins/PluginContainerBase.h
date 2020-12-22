@@ -11,32 +11,34 @@
 
 /// @brief enumeration for Plugin Types
 enum class PluginTypes {
-    PythonPlugin,   ///< Python plugin type
-    CppPlugin,      ///< CPP plugin type
-    UnknownPlugin   ///< Unknown plugin type
+    PythonPlugin,  ///< Python plugin type
+    CppPlugin,     ///< CPP plugin type
+    UnknownPlugin  ///< Unknown plugin type
 };
 /// @brief String representation of PluginTypes
 extern map<PluginTypes, string> PluginTypesStr;
 
 /// @brief data structure to store plugin information file
 struct PluginInfo {
-    string name;            ///< plugin name
-    string version;         ///< plugin version
-    string typeStr;         ///< plugin type string
-    PluginTypes type = PluginTypes::UnknownPlugin;      ///< plugin type in PluginTypes format
-    string path;            ///< path to plugin location
+    string name;                                    ///< plugin name
+    string version;                                 ///< plugin version
+    string typeStr;                                 ///< plugin type string
+    PluginTypes type = PluginTypes::UnknownPlugin;  ///< plugin type in PluginTypes format
+    string path;                                    ///< path to plugin location
+    string loadPath;                                ///< path for pluginInfo YAML file
 };
 
 /// @brief abstract base class for plugin containers
 class PluginContainerBase {
-
-protected:
+   protected:
     PluginContainerBase() = default;
 
-public:
+   public:
     virtual ~PluginContainerBase() = default;
 
-public:
+   public:
+    virtual bool init() = 0;
+
     /// @brief pure virtual method to get plugin title
     virtual string getTitle() = 0;
 
@@ -55,12 +57,11 @@ public:
     /// @brief virtual method to delete plugin saved details
     virtual bool remove(const string &id) = 0;
 
-public:
+   public:
     /// @brief static method used to initiate a new PluginContainer based on provided path
     static PluginContainerBase *CreateContainer(const string &pluginInfoPath);
 
-public:
-
+   public:
     /// @brief getter method for plugin name
     const string &getName() const;
 
@@ -73,10 +74,14 @@ public:
     /// @brief getter method to show if plugin container is initiated
     bool isInited() const;
 
-protected:
+    inline string loadPath() const { return _info.loadPath; }
+
+   protected:
     PluginInfo _info;
     bool _inited = false;
 };
 
+typedef list<PluginContainerBase*> PluginContainerPtrList;
+typedef map<string, PluginContainerBase*> PluginContainerPtrMap;
 
-#endif //PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H
+#endif  // PX_ACCOUNTS_SERVICE_PLUGINCONTAINERBASE_H

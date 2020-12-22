@@ -16,6 +16,7 @@ using namespace py::literals;
 PYBIND11_MAKE_OPAQUE(StrStrMap);
 PYBIND11_MAKE_OPAQUE(StringList);
 PYBIND11_MAKE_OPAQUE(ServiceParamList);
+PYBIND11_MAKE_OPAQUE(SecretTokenList);
 
 class PythonPlugin : public IPlugin {
 
@@ -36,6 +37,8 @@ public:
     explicit PluginContainerPython(const PluginInfo &info);
 
 public:
+    bool init() override;
+
     string getTitle() override;
 
     VerifyResult verify(const StrStrMap &params) override;

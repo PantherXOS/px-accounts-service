@@ -2,16 +2,16 @@
 // Created by Reza Alizadeh Majd on 11/28/18.
 //
 
-
 #include "PluginManager.h"
-#include "../Accounts/AccountUtils.h"
 
-#include <iostream>
-#include <cstdlib>
 #include <pybind11/embed.h>
 
-namespace py = pybind11;
+#include <cstdlib>
+#include <iostream>
 
+#include "../Accounts/AccountUtils.h"
+
+namespace py = pybind11;
 
 #define APP_PLUGIN_PATH "./plugins"
 #define USER_PLUGIN_PATH "~/.guix-profile/etc/px/accounts/plugins"
@@ -39,9 +39,14 @@ PluginManager::PluginManager() {
         }
         pluginPaths.push_back(PXUTILS::FILE::abspath(token));
     }
-    for (const auto &plugin : pluginPaths) {
-        initPlugins(plugin);
+    PluginContainerPtrMap plugins;
+    for (const auto &path : pluginPaths) {
+        auto pathPlugins = readPathPlugins(path);
+        for (auto p : pathPlugins) {
+            plugins[p->getName()] = p;
+        }
     }
+    initPlugins(plugins);
 }
 
 /**
@@ -49,8 +54,8 @@ PluginManager::PluginManager() {
  * close python plugins interpreter
  */
 PluginManager::~PluginManager() {
-    for (const auto &plugin : _plugins) {
-        delete plugin.second;
+    for (const auto &kv : _plugins) {
+        delete kv.second;
     }
     _plugins.clear();
     py::finalize_interpreter();
@@ -68,36 +73,52 @@ PluginManager &PluginManager::Instance() {
  * @param title plugin title we want to get it's reference
  * @return reference to specified plugin
  */
-PluginContainerBase *PluginManager::operator[](const std::string &title) {
-    if (_plugins.find(title) == _plugins.end()) {
-        GLOG_WRN("plugin not found: ", title);
-        return nullptr;
+PluginContainerBase *PluginManager::operator[](const std::string &pluginName) {
+    for (auto &kv : _plugins) {
+        if (kv.second && kv.second->isInited()) {
+            if (kv.second->getTitle() == pluginName) {
+                return kv.second;
+            }
+        }
     }
-    GLOG_INF("plugin found: ", _plugins[title]->getTitle(), " - ", _plugins[title]);
-    return _plugins[title];
+    GLOG_WRN("plugin not found: ", pluginName);
+    return nullptr;
 }
 
 /**
  * @return reference to list of registered plugins
  */
-map<string, PluginContainerBase *> &PluginManager::plugins() {
-    return _plugins;
-}
+PluginContainerPtrMap &PluginManager::registeredPlugins() { return _plugins; }
 
 /**
  * @param path path to plugin's information file
  * @return plugin initiation status
  */
-bool PluginManager::initPlugins(const std::string &path) {
-    GLOG_INF("===============================================================================");
-    GLOG_INF("search for registered plugins on: ", path);
-    for (const string &pluginFile: PXUTILS::FILE::dirfiles(path, ".yaml")) {
-        PluginContainerBase *plugin = PluginContainerBase::CreateContainer(path + "/" + pluginFile); // NOLINT(performance-inefficient-string-concatenation)
-        if (plugin != nullptr && plugin->isInited()) {
-            GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle());
+PluginContainerPtrList PluginManager::readPathPlugins(const std::string &path) {
+    PluginContainerPtrList plugins;
+    for (const auto &pluginFile : PXUTILS::FILE::dirfiles(path, ".yaml")) {
+        auto infoPath = path + "/" + pluginFile;
+        auto *plugin = PluginContainerBase::CreateContainer(infoPath);
+        if (plugin) {
+            plugins.push_back(plugin);
+        } else {
+            GLOG_WRN("Unable to load plugin from: ", infoPath);
+        }
+    }
+    return plugins;
+}
+
+bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
+    for (auto &kv : plugins) {
+        auto pluginName = kv.first;
+        auto plugin = kv.second;
+        if (plugin && plugin->init()) {
+            GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle()
+                     // , " - ", plugin->loadPath()
+            );
             _plugins[plugin->getTitle()] = plugin;
         } else {
-            GLOG_ERR("Unable to load Plugin: ", pluginFile, "\nfrom path: ", path);
+            GLOG_WRN("plugin initiation failed: ", pluginName);
         }
     }
     return true;
