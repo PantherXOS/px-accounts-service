@@ -18,7 +18,7 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
 
     SECTION("Check Loaded Plugins") {
 
-        REQUIRE(mgr.plugins().size() > 0);
+        REQUIRE(mgr.registeredPlugins().size() > 0);
         REQUIRE(mgr["python-test"] != nullptr);
         REQUIRE(mgr["python-json"] != nullptr);
         REQUIRE(mgr["cpp-test"] != nullptr);
