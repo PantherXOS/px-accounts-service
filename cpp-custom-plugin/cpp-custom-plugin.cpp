@@ -30,7 +30,9 @@ VerifyResult CPPCustomPlugin::verify(const StrStrMap &params) {
 
 AuthResult CPPCustomPlugin::authenticate(const ServiceParamList &params) {
     AuthResult result;
-    SecretToken token{.label = "token1", .secret = "token_value_1"};
+    SecretToken token{.label = "password", .secret = "token_value_1"};
+    token.attributes["username"] = "user1";
+    token.attributes["schema"] = "password";
     result.tokens.push_back(token);
     result.authenticated = true;
     return result;

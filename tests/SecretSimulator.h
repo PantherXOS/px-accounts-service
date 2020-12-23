@@ -7,31 +7,36 @@
 
 #include <interface/Secret.capnp.h>
 
-#include <map>
-#include <string>
 #include <iostream>
 #include <list>
+#include <map>
+#include <string>
+#include <vector>
 
 using namespace std;
 
-
-class SecretSimulator final : public RPCSecretService::Server {
-private:
-    map<string, map<string, map<string, string> > > m_wallets;
-
-protected:
-    kj::Promise<void> addParam(AddParamContext context) override;
-
-    kj::Promise<void> getParams(GetParamsContext context) override;
-
-    kj::Promise<void> getParam(GetParamContext context) override;
-
-    kj::Promise<void> editParam(EditParamContext context) override;
-
-    kj::Promise<void> delParam(DelParamContext context) override;
-
-    kj::Promise<void> delApplication(DelApplicationContext context) override;
-
+struct MockSecret {
+    string label;
+    map<string, string> attributes;
+    map<string, string> secrets;
 };
 
-#endif //PX_ACCOUNTS_SERVICE_SECRETSIMULATOR_H
+class SecretSimulator final : public RPCSecretService::Server {
+   private:
+    list<MockSecret> _secrets;
+    map<string, list<string> > _schemas;
+    list<string> _attributes;
+
+   protected:
+    kj::Promise<void> getSupportedAttributes(GetSupportedAttributesContext context) override;
+    kj::Promise<void> getSupportedSchemas(GetSupportedSchemasContext context) override;
+    kj::Promise<void> getSchemaKeys(GetSchemaKeysContext context) override;
+    kj::Promise<void> setSecret(SetSecretContext context) override;
+    kj::Promise<void> search(SearchContext context) override;
+    kj::Promise<void> deleteSecret(DeleteSecretContext context) override;
+
+   public:
+    explicit SecretSimulator();
+};
+
+#endif  // PX_ACCOUNTS_SERVICE_SECRETSIMULATOR_H

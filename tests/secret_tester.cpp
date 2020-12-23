@@ -19,14 +19,23 @@ int main() {
 
     SecretManager::Init(serverPath);
 
-    std::string act = "test_act",
-            svc = "testsvc",
-            key = "testkey",
-            val = "testval";
 
-    bool res = SecretManager::Instance().Set(act, svc, key, val);
+    uuid_t aid;
+    uuid_generate(aid);
+
+    SecretItemBase secret;
+    secret.label = "test_secret";
+    secret.attributes["service"] = "test_svc";
+    secret.attributes["accountId"] = uuid_as_string(aid);
+    secret.attributes["username"] = "foo";
+    secret.attributes["schema"] = "password";
+    secret.secrets["password"] = "bar";
+    
+
+    bool res = SecretManager::Instance().setSecret(secret);
     cout << "set val: " << res << endl;
 
-    string receivedVal = SecretManager::Instance().Get(act, svc, key);
-    cout << "get val: " << receivedVal << endl;
+
+    auto receivedVal = SecretManager::Instance().getAccountSecrets(aid);
+    // cout << "get val: " << receivedVal << endl;
 }
