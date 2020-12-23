@@ -3,12 +3,53 @@
 //
 
 #include "SecretManager.h"
+
 #include "../Accounts/AccountUtils.h"
 
+// === SecretItemBase methods: ================================================
 
-SecretManager::SecretManager() {
-    this->_currentUserr = PXUTILS::SYSTEM::current_user();
+void SecretItemBase::updateAttributes(const string &accountId, const string &service, const StrStrMap &others) {
+    /**
+     * service        : attribute as string
+     * username       : attribute as string
+     * account_id     : attribute as string
+     * schema         : attribute as string
+     */
+    attributes["service"] = service;
+    attributes["account_id"] = accountId;
+    attributes["schema"] = this->schema();
+    for (const auto &attr : others) {
+        attributes[attr.first] = attr.second;
+    }
 }
+
+string SecretItemBase::getSecret(const string &key) const {
+    auto res = secrets.find(key);
+    if (res != secrets.end()) {
+        return res->second;
+    }
+    return string();
+}
+
+void SecretItemBase::setSecret(const string &key, const string &val) { secrets[key] = val; }
+
+string SecretItemBase::toString(bool pretty) const {
+    string sep1 = pretty ? "\n" : " ";
+    string sep2 = pretty ? "   " : " ";
+    stringstream sstream;
+    sstream << "Secret: " << sep1;
+    sstream << "attributes: " << sep1;
+    for (const auto &attr : attributes) {
+        sstream << sep2 << "[" << attr.first << ":" << attr.second << "]" << sep1;
+    }
+    sstream << "secrets: " << sep1;
+    for (const auto &s : secrets) {
+        sstream << sep2 << "[" << s.first << ":" << s.second << "]" << sep1;
+    }
+    return sstream.str();
+}
+// ============================================================================
+// ============================================================================
 
 SecretManager::~SecretManager() {
     if (_rpcClient != nullptr) {
@@ -33,359 +74,231 @@ bool SecretManager::Init(const string &path) {
     return true;
 }
 
-/**
- *
- * @param act account name
- * @param svc service name
- * @param key parameter key
- * @return status indicates that if key is exists
- */
-bool SecretManager::IsExists(const string &act, const string &svc, const string &key) const {
-    string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-    return this->checkParam(_currentUserr, act, paramKey);
-}
+StringList SecretManager::getSupportedAttributes() {
+    GLOG_INF("==========");
+    bool isSucceed = false;
+    StringList attributes;
+    string errString;
 
-/**
- *
- * @param act account name
- * @param svc service name
- * @param key parameter key
- * @param val parameter value
- * @return set parameter status
- */
-bool SecretManager::Set(const string &act, const string &svc, const string &key, const string &val) {
-    string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-    if (this->IsExists(act, svc, key)) {
-        return this->editParam(_currentUserr, act, paramKey, val);
-    } else {
-        return this->addParam(_currentUserr, act, paramKey, val);
+    bool requestSucceeded = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        // getSupportedAttributes  @0() -> (attributes : List(Text));
+        auto req = client.getSupportedAttributesRequest();
+        req.send()
+            .then(
+                [&](RPCSecretService::GetSupportedAttributesResults::Reader &&result) {
+                    isSucceed = true;
+                    for (const auto &p : result.getAttributes()) {
+                        attributes.push_back(p.cStr());
+                    }
+                },
+                [&](kj::Exception &&ex) {
+                    isSucceed = false;
+                    errString = ex.getDescription().cStr();
+                })
+            .wait(ctx.waitScope);
+    });
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
-    GLOG_INF("new secret saved: [", act, "][", svc, "][", key, "]");
-    return true;
+    return attributes;
 }
 
-/**
- *
- * @param act    account name
- * @param params string-based mapping for parameters to set
- * @return set status result for all account parameter
- */
-bool SecretManager::SetAccount(const string &act, const map<string, string> &params) {
-    bool result = true;
-    for (const auto &kv : params) {
-        if (this->checkParam(_currentUserr, act, kv.first)) {
-            result = result && this->editParam(_currentUserr, act, kv.first, kv.second);
-        } else {
-            result = result && this->addParam(_currentUserr, act, kv.first, kv.second);
-        }
+StringList SecretManager::getSupportedSchemas() {
+    // getSupportedSchemas @1() -> (schemas : List(Text));
+    GLOG_INF("==========");
+    auto isSucceed = false;
+    string errString;
+    StringList schemas;
+    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.getSupportedSchemasRequest();
+        req.send()
+            .then(
+                [&](RPCSecretService::GetSupportedSchemasResults::Reader &&result) {
+                    isSucceed = true;
+                    for (const auto &s : result.getSchemas()) {
+                        schemas.push_back(s.cStr());
+                    }
+                },
+                [&](kj::Exception &&ex) {
+                    isSucceed = false;
+                    errString = ex.getDescription().cStr();
+                })
+            .wait(ctx.waitScope);
+    });
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
-    return result;
+    return schemas;
 }
 
-/**
- *
- * @param act account name
- * @param svc service name
- * @param key parameter key
- * @return value of requested parameter
- */
-string SecretManager::Get(const string &act, const string &svc, const string &key) {
-    string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-    try {
-        return this->getParam(_currentUserr, act, paramKey);
-    } catch (std::exception &) {
-        return string();
+StringList SecretManager::getSchemaKeys(const string &schemaName) {
+    // getSchemaKeys @2(schema  : Text) -> (keys : List(Text));
+    GLOG_INF("==========");
+    auto isSucceed = false;
+    string errString;
+    StringList keys;
+    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.getSchemaKeysRequest();
+        req.send()
+            .then(
+                [&](RPCSecretService::GetSchemaKeysResults::Reader &&result) {
+                    isSucceed = true;
+                    for (const auto &k : result.getKeys()) {
+                        keys.push_back(k.cStr());
+                    }
+                },
+                [&](kj::Exception &&ex) {
+                    isSucceed = false;
+                    errString = ex.getDescription().cStr();
+                })
+            .wait(ctx.waitScope);
+    });
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
+    return keys;
 }
 
-/**
- *
- * @param act account name
- * @return string-based key-value mapping about all account parameters
- */
-map<string, string> SecretManager::GetAccount(const string &act) {
-    map<string, string> result;
-    try {
-        auto keyList = this->getParams(_currentUserr, act);
-        for (const auto &key : keyList) {
-            string val = this->getParam(_currentUserr, act, key);
-            result[key] = val;
-        }
-    } catch (std::exception &) {
-        result.clear();
-    }
-    return result;
-}
-
-/**
- *
- * @param act account name
- * @param svc service name
- * @param key parameter key
- * @return parameter removal status
- */
-bool SecretManager::Remove(const string &act, const string &svc, const string &key) {
-    bool result = true;
-    if (this->IsExists(act, svc, key)) {
-        string paramKey = SecretManager::MAKE_PARAM_KEY(svc, key);
-        result = this->delParam(_currentUserr, act, paramKey);
-    }
-    return result;
-}
-
-/**
- *
- * @param act account name
- * @return account removal status
- */
-bool SecretManager::RemoveAccount(const string &act) {
-    bool result = true;
-    if (this->checkApplication(_currentUserr, act)) {
-        result = this->delApplication(_currentUserr, act);
-    }
-    return result;
-}
-
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @param key parameter key
- * @return parameter existence status
- */
-bool SecretManager::checkParam(const string &wlt, const string &app, const string &key) const {
-    bool result = false;
-    try {
-        this->getParam(wlt, app, key, true);
-        result = true;
-    } catch (const std::logic_error &err) {
-        result = false;
-    }
-    return result;
-}
-
-/**
- * check if an application is exists, using `getParam` RPC interface.
- * @param wlt   wallet name
- * @param app   application
- * @return      application existence status
- */
-bool SecretManager::checkApplication(const string &wlt, const string &app) const {
-    bool result;
-    try {
-        this->getParams(wlt, app);
-        result = true;
-    } catch (const std::logic_error &err) {
-        result = false;
-    }
-    return result;
-}
-
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @param key parameter key
- * @param val parameter value
- * @return add parameter result
- */
-bool SecretManager::addParam(const string &wlt, const string &app, const string &key, const string &val) const {
-    // addParam @7 (wallet : Text, application: Text, param : RPCSecretParam) -> (result: RPCSecretResult);
-    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key, " - val: ", val);
+bool SecretManager::setSecret(const SecretItemBase &secret) {
+    GLOG_INF("==========");
+    // setSecret @3(item : RPCSecretItem) -> (result : RPCSecretResult);
     bool isSucceed = false;
     string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.addParamRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
-        auto param = req.initParam();
-        param.setKey(key);
-        param.setValue(val);
+    auto rpcResult = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.setSecretRequest();
+        auto rpcSecret = req.initItem();
+        rpcSecret.setLabel(secret.label);
+        auto rSecrets = rpcSecret.initSecrets(secret.secrets.size());
+        int i = 0;
+        for (const auto &kv : secret.secrets) {
+            rSecrets[i].setKey(kv.first);
+            rSecrets[i++].setValue(kv.second);
+        }
+        auto rAttributes = rpcSecret.initAttributes(secret.attributes.size());
+        i = 0;
+        for (const auto &kv : secret.attributes) {
+            rAttributes[i].setKey(kv.first);
+            rAttributes[i++].setValue(kv.second);
+        }
         req.send()
-                .then([&](auto &&result) {
+            .then(
+                [&](RPCSecretService::SetSecretResults::Reader &&result) {
                     isSucceed = result.getResult().getSuccess();
-                    errString = result.getResult().getError().cStr();
-                }, [&](kj::Exception &&err) {
-                    isSucceed = false;
-                    errString = err.getDescription().cStr();
-                })
-                .wait(ctx.waitScope);
-    });
-    if (!requestSucceed || !isSucceed) {
-        GLOG_ERR("request failed: ", errString);
-    }
-    return isSucceed;
-}
-
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @param key parameter key
- * @param val parameter value
- * @return parameter modification status
- */
-bool SecretManager::editParam(const string &wlt, const string &app, const string &key, const string &val) const {
-    // editParam @8 (wallet : Text, application   : Text, param : RPCSecretParam) -> (result: RPCSecretResult);
-    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key, " - val: ", val);
-    bool isSucceed = false;
-    string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.editParamRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
-        auto param = req.initParam();
-        param.setKey(key);
-        param.setValue(val);
-        req.send()
-                .then([&](auto &&resp) {
-                    isSucceed = resp.getResult().getSuccess();
-                    errString = resp.getResult().getError().cStr();
-                }, [&](kj::Exception &&err) {
-                    isSucceed = false;
-                    errString = err.getDescription().cStr();
-                })
-                .wait(ctx.waitScope);
-    });
-    if (!requestSucceed || !isSucceed) {
-        GLOG_ERR("editParam failed: ", errString);
-    }
-    return isSucceed;
-}
-
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @param key parameter key
- * @param ignoreExistance ignore writing error log if parameter is exists
- * @return
- */
-string SecretManager::getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance) const {
-    // getParam @3 (wallet : Text, application : Text, paramKey : Text)-> (paramValue  : Text);
-    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key);
-    bool isSucceed = false;
-    string paramVal;
-    string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.getParamRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
-        req.setParamKey(key);
-        req.send()
-                .then([&](auto &&result) {
-                    isSucceed = true;
-                    paramVal = result.getParamValue().cStr();
-                }, [&](kj::Exception &&err) {
-                    isSucceed = false;
-                    if (!ignoreExistance) {
-                        GLOG_ERR("getParam failed: %s", err.getDescription().cStr()); // NOLINT(bugprone-lambda-function-name)
+                    if (!isSucceed) {
+                        errString = result.getResult().getError().cStr();
                     }
-                    errString = err.getDescription().cStr();
+                },
+                [&](kj::Exception &&ex) {
+                    isSucceed = false;
+                    errString = ex.getDescription().cStr();
                 })
-                .wait(ctx.waitScope);
+            .wait(ctx.waitScope);
     });
-    if (!requestSucceed || !isSucceed) {
-        throw std::logic_error(errString);
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
-    return paramVal;
+    return rpcResult && isSucceed;
 }
 
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @throws std::logic_error in case of RPC request failure
- * @return list af application parameters
- */
-list<string> SecretManager::getParams(const string &wlt, const string &app) const {
-    // getParams        @2 (wallet : Text, application   : Text -> (params : List(Text));
-    GLOG_INF("wlt: ", wlt, " - app: ", app);
+SecretItemPtrList SecretManager::search(StrStrMap attributes) {
+    GLOG_INF("==========");
+    // search @4(attributes :List(RPCSecretAttribute)) -> (items : List(RPCSecretItem));
     bool isSucceed = false;
-    list<string> result;
     string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.getParamsRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
+    SecretItemPtrList secretItems;
+    _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.searchRequest();
+        auto rAttributes = req.initAttributes(attributes.size());
+        int i = 0;
+        for (const auto &kv : attributes) {
+            rAttributes[i].setKey(kv.first);
+            rAttributes[i++].setValue(kv.second);
+        }
         req.send()
-                .then([&](auto &&resp) {
-                    isSucceed = true;
-                    for (const auto &key : resp.getParams()) {
-                        result.push_back(key.cStr());
+            .then(
+                [&](RPCSecretService::SearchResults::Reader &&result) {
+                    for (const auto &item : result.getItems()) {
+                        string schema;
+                        StrStrMap attributes;
+                        StrStrMap secrets;
+                        for (const auto &attr : item.getAttributes()) {
+                            if (attr.getKey().cStr() == string("schema")) {
+                                schema = attr.getValue().cStr();
+                            }
+                            attributes[attr.getKey().cStr()] = attr.getValue().cStr();
+                        }
+                        for (const auto &s : item.getSecrets()) {
+                            secrets[s.getKey().cStr()] = s.getValue().cStr();
+                        }
+                        SecretItemPtr secret = nullptr;
+                        if (schema == "password") {
+                            secret = make_shared<PasswordSecret>();
+                        } else if (schema == "dual_password") {
+                            secret = make_shared<DualPasswordsecret>();
+                        } else if (schema == "oauth2") {
+                            secret = make_shared<OAuth2Secret>();
+                        }
+
+                        if (secret != nullptr) {
+                            secret->label = item.getLabel().cStr();
+                            secret->attributes = attributes;
+                            secret->secrets = secrets;
+                            secretItems.push_back(secret);
+                        } else {
+                            GLOG_ERR("secret is nullptr. schema: ", schema);
+                        }
                     }
-                }, [&](kj::Exception &&err) {
-                    isSucceed = false;
-                    errString = err.getDescription().cStr();
+                    isSucceed = true;
+                },
+                [&](kj::Exception &&ex) {
+                    isSucceed = true;
+                    errString = ex.getDescription().cStr();
                 })
-                .wait(ctx.waitScope);
+            .wait(ctx.waitScope);
     });
-    if (!requestSucceed || !isSucceed) {
-        throw std::logic_error(errString);
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
-    return result;
+    GLOG_INF("search results: ", secretItems.size());
+    for (const auto &secret : secretItems) {
+        GLOG_INF(secret->toString());
+    }
+    return secretItems;
 }
 
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @param key parameter key
- * @return parameter deletion status
- */
-bool SecretManager::delParam(const string &wlt, const string &app, const string &key) const {
-    // delParam @6 (wallet : Text, application: Text, paramKey : Text) -> (result: RPCSecretResult);
-    GLOG_INF("wlt: ", wlt, " - app: ", app, " - key: ", key);
+bool SecretManager::deleteSecret(StrStrMap attributes) {
+    // deleteSecret @5(attributes :List(RPCSecretAttribute)) -> (result : RPCSecretResult);
+    GLOG_INF("==========");
     bool isSucceed = false;
     string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.delParamRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
-        req.setParamKey(key);
+    auto rpcResult = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
+        auto req = client.deleteSecretRequest();
+        auto rAttributes = req.initAttributes(attributes.size());
         req.send()
-                .then([&](auto &&resp) {
-                    isSucceed = resp.getResult().getSuccess();
-                    errString = resp.getResult().getError().cStr();
-                }, [&](kj::Exception &&err) {
+            .then(
+                [&](RPCSecretService::DeleteSecretResults::Reader &&result) {
+                    isSucceed = result.getResult().getSuccess();
+                },
+                [&](kj::Exception &&ex) {
                     isSucceed = false;
-                    errString = err.getDescription().cStr();
+                    errString = ex.getDescription().cStr();
                 })
-                .wait(ctx.waitScope);
+            .wait(ctx.waitScope);
     });
-    if (!requestSucceed || !isSucceed) {
-        GLOG_ERR("Error: ", errString);
+    if (!isSucceed) {
+        GLOG_ERR("RPC ERROR: ", errString);
     }
-    return isSucceed;
+    return rpcResult && isSucceed;
 }
 
-/**
- *
- * @param wlt wallet name
- * @param app application name
- * @return application removal status
- */
-bool SecretManager::delApplication(const string &wlt, const string &app) const {
-    // delApplication @5 (wallet : Text, application   : Text) -> (result: RPCSecretResult);
-    GLOG_INF("wlt: ", wlt, " - app: ", app);
-    bool isSucceed = false;
-    string errString;
-    bool requestSucceed = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
-        auto req = client.delApplicationRequest();
-        req.setWallet(wlt);
-        req.setApplication(app);
-        req.send()
-                .then([&](auto &&resp) {
-                    isSucceed = resp.getResult().getSuccess();
-                    errString = resp.getResult().getError().cStr();
-                }, [&](kj::Exception &&err) {
-                    isSucceed = false;
-                    errString = err.getDescription().cStr();
-                })
-                .wait(ctx.waitScope);
-    });
-    if (!requestSucceed || !isSucceed) {
-        GLOG_ERR("Error: ", errString);
-    }
-    return isSucceed;
+SecretItemPtrList SecretManager::getAccountSecrets(const uuid_t &accountId) {
+    StrStrMap attributes;
+    attributes["account_id"] = uuid_as_string(accountId);
+    return this->search(attributes);
+}
+
+bool SecretManager::removeAccount(const uuid_t &accountId) {
+    StrStrMap attributes;
+    attributes["account_id"] = uuid_as_string(accountId);
+    return this->deleteSecret(attributes);
 }

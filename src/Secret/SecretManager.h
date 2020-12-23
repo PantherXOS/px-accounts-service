@@ -5,82 +5,155 @@
 #ifndef PX_ACCOUNTS_SERVICE_SECRETMANAGER_H
 #define PX_ACCOUNTS_SERVICE_SECRETMANAGER_H
 
+#include <Utils/Utils.h>
+#include <interface/Secret.capnp.h>
+
 #include <iostream>
 #include <list>
+
 #include "../RPCClient.h"
-#include <interface/Secret.capnp.h>
 
 using namespace std;
 
+struct SecretItemBase {
+    string label;
+    StrStrMap secrets;
+    StrStrMap attributes;
+
+    string schema() const {
+        auto it = attributes.find("schema");
+        if (it != attributes.end()) {
+            return it->second;
+        }
+        return string();
+    }
+
+    void updateAttributes(const string &accountId, const string &service, const StrStrMap &others);
+
+    bool is(const string &type) const { return this->schema() == type; }
+
+    template <typename T>
+    shared_ptr<T> as() {
+        auto *childPtr = dynamic_cast<T *>(this);
+        return std::make_shared<T>(*childPtr);
+    }
+
+    string toString(bool pretty = false) const;
+
+    explicit SecretItemBase() = default;
+    virtual ~SecretItemBase() = default;
+
+   protected:
+    string getSecret(const string &key) const;
+    void setSecret(const string &key, const string &val);
+};
+
+typedef std::shared_ptr<SecretItemBase> SecretItemPtr;
+typedef list<SecretItemPtr> SecretItemPtrList;
+
+struct PasswordSecret : public SecretItemBase {
+    // explicit PasswordSecret() = default;
+    explicit PasswordSecret() { attributes["schema"] = "password"; }
+
+    string password() const { return getSecret(_passwordKey); }
+    void setPassword(const string &value) { setPassword(_passwordKey); }
+
+   private:
+    string _passwordKey = "password";
+};
+
+struct DualPasswordsecret : public SecretItemBase {
+    explicit DualPasswordsecret() { attributes["schema"] = "dual_password"; }
+
+    string userPassword() const { return getSecret(_userPasswordKey); }
+    void setUserPassword(const string &value) { setSecret(_userPasswordKey, value); }
+    bool isUserPassword(const string &key) const {
+        // return EXISTS(attributes, "user_password_key") && attributes.find("user_password_key"] == key;
+        return attributes.find("user_password_key") != attributes.end() &&
+               attributes.find("user_pasword_key")->second == key;
+    }
+
+    string servicePassword() const { return this->getSecret(this->_servicePasswordKey); }
+    void setServicePassword(const string &value) { this->setSecret(this->_servicePasswordKey, value); }
+    bool isServicePassword(const string &key) const {
+        return attributes.find("service_password_key") != attributes.end() &&
+               attributes.find("service_password_key")->second == key;
+        // return EXISTS(attributes, "service_password_key") && attributes["service_password_key"] == key;
+    }
+
+    string getMatchingPassword(const string &key) {
+        if (isUserPassword(key)) {
+            return userPassword();
+        } else if (isServicePassword(key)) {
+            return servicePassword();
+        } else {
+            return string();
+        }
+    }
+
+   private:
+    string _userPasswordKey = "user_password";
+    string _servicePasswordKey = "service_password";
+};
+
+struct OAuth2Secret : public SecretItemBase {
+    explicit OAuth2Secret() { attributes["schema"] = "oauh2"; }
+
+    string clientId() const { return getSecret(_clientIdKey); }
+    void setClientId(const string &value) { setSecret(_clientIdKey, value); }
+
+    string secretId() const { return getSecret(_secretIdKey); }
+    void setSecretId(const string &value) { setSecret(_secretIdKey, value); }
+
+    string accessToken() const { return getSecret(_accessTokenKey); }
+    void setAccessToken(const string &value) { setSecret(_accessTokenKey, value); }
+
+    string refreshToken() const { return getSecret(_refreshTokenKey); }
+    void setRefreshToken(const string &value) { setSecret(_refreshTokenKey, value); }
+
+   private:
+    string _clientIdKey = "client_id";
+    string _secretIdKey = "secret_id";
+    string _accessTokenKey = "access_token";
+    string _refreshTokenKey = "refresh_token";
+};
 
 /// @brief Base class for managing rpc interactions with Secret Service
 class SecretManager {
-
-protected:
-    explicit SecretManager();
-
+   protected:
+    explicit SecretManager() = default;
     virtual ~SecretManager();
 
-public:
+   public:
     /// @brief static method to singleton instance of SecretManager
     static SecretManager &Instance();
 
     /// @brief init rpc instance to interact with secret service
     static bool Init(const string &path);
 
-    /// @brief check if key exists in secret service
-    bool IsExists(const string &act, const string &svc, const string &key) const;
+    StringList getSupportedAttributes();
 
-    /// @brief set data for a key
-    bool Set(const string &act, const string &svc, const string &key, const string &val);
+    StringList getSupportedSchemas();
 
-    /// @brief set all keys for an account
-    bool SetAccount(const string &act, const map<string, string> &params);
+    // getSchemaKeys           @2(schema  : Text)                         -> (keys         : List(Text));
+    StringList getSchemaKeys(const string &schemaName);
 
-    /// @brief get value of a key
-    string Get(const string &act, const string &svc, const string &key);
+    // setSecret               @3(item : RPCSecretItem)                   -> (result       : RPCSecretResult);
+    bool setSecret(const SecretItemBase &secret);
 
-    /// @brief get all keys for an account
-    map<string, string> GetAccount(const string &act);
+    // search                  @4(attributes :List(RPCSecretAttribute))   -> (items        : List(RPCSecretItem));
+    SecretItemPtrList search(StrStrMap attributes);
 
-    /// @brief remove a key from secret service
-    bool Remove(const string &act, const string &svc, const string &key);
+    // deleteSecret            @5(attributes :List(RPCSecretAttribute))   -> (result       : RPCSecretResult);
+    bool deleteSecret(StrStrMap attributes);
 
-    /// @brief remove all keys for an account
-    bool RemoveAccount(const string &act);
+   public:
+    SecretItemPtrList getAccountSecrets(const uuid_t &accountId);
+    bool removeAccount(const uuid_t &accountId);
 
-protected:
-    /// @brief low-level method to check if a parameter exists for an application inside specific wallet
-    bool checkParam(const string &wlt, const string &app, const string &key) const;
-
-    /// @brief low-level method to check if an application exists inside specific wallet
-    bool checkApplication(const string &wlt, const string &app) const;
-
-    /// @brief low-level method to add a new parameter to an application inside specific wallet
-    bool addParam(const string &wlt, const string &app, const string &key, const string &val) const;
-
-    /// @brief low-level method to modify existing parameter for an application inside specific wallet
-    bool editParam(const string &wlt, const string &app, const string &key, const string &val) const;
-
-    /// @brief low-level method to get value of a parameter of an application inside specific wallet
-    string getParam(const string &wlt, const string &app, const string &key, bool ignoreExistance = false) const;
-
-    /// @brief low-level method to get all parameter keys for an application inside specific wallet
-    list<string> getParams(const string &wlt, const string &app) const;
-
-    /// @brief low-level method to delete an existing parameter from an application inside specific wallet
-    bool delParam(const string &wlt, const string &app, const string &key) const;
-
-    /// @brief low-level method to delete all parameters of an application inside specific wallet
-    bool delApplication(const string &wallet, const string &application) const;
-
-    /// @brief helper method to generate a key for secret srvice based on service name and parameter key
-    inline static string MAKE_PARAM_KEY(const string &svc, const string &key) { return svc + string("_") + key; }
-
-private:
+   private:
     string _path;
-    string _currentUserr;
     RPCClient<RPCSecretService, RPCSecretService::Client> *_rpcClient = nullptr;
 };
 
-#endif //PX_ACCOUNTS_SERVICE_SECRETMANAGER_H
+#endif  // PX_ACCOUNTS_SERVICE_SECRETMANAGER_H

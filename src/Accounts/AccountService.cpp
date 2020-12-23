@@ -124,10 +124,20 @@ VerifyResultPtr AccountService::_verifyParams() {
         return nullptr;
     }
 
+    auto savedSecrets = SecretManager::Instance().getAccountSecrets(this->_account->id);
     for (auto &param : verifyResult.params) {
         if (param.is_protected && param.val.empty()) {
-            param.val = SecretManager::Instance().Get(this->_account->idAsString(), this->_name, param.key);
+            for (auto secret : savedSecrets) {
+                if (EXISTS(secret->attributes, "service") && secret->attributes["service"] == this->_name) {
+                    if (secret->is("dual_password")) {
+                        param.val = secret->as<DualPasswordsecret>()->getMatchingPassword(param.key);
+                    } else if (secret->is("password")) {
+                        param.val = secret->as<PasswordSecret>()->password();
+                    }
+                }
+            }
             if (param.val.empty()) {
+                GLOG_ERR("protected param not found: ", param.key);
                 this->addError("protected param not found: '" + param.key + "'");
                 return nullptr;
             }
@@ -177,19 +187,24 @@ AuthResultPtr AccountService::_authenticate(VerifyResultPtr &vResult) {
  * @return          result of saving protected methods
  */
 bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPtr &aResult) {
-    for (const auto &param : vResult->params) {
-        if (param.is_protected) {
-            if (!SecretManager::Instance().Set(this->_account->idAsString(), this->_name, param.key, param.val)) {
-                GLOG_ERR("saving secret failed");
-                this->addError("unable to set protected params.");
-                return false;
+    map<string, SecretItemBase> secretDict;
+
+    for (const auto &token : aResult->tokens) {
+        string key = token.label;
+        if (EXISTS(token.attributes, "schema")) {
+            if (EXISTS(token.attributes, "schema")) {
+                auto tokenSchema = token.attributes.find("schema")->second;
+                if (tokenSchema == "oauth2" || tokenSchema == "dual_password") {
+                    key = tokenSchema;
+                }
             }
         }
+        secretDict[key].label = key;
+        secretDict[key].secrets[token.label] = token.secret;
+        secretDict[key].updateAttributes(this->_account->idAsString(), this->_name, token.attributes);
     }
-    for (const auto &token : aResult->tokens) {
-        const auto &key = token.label;
-        const auto &val = token.secret;
-        if (!SecretManager::Instance().Set(this->_account->idAsString(), this->_name, key, val)) {
+    for (const auto &kv : secretDict) {
+        if (!SecretManager::Instance().setSecret(kv.second)) {
             GLOG_ERR("saving secret failed");
             this->addError("unable to set protected tokens.");
             return false;

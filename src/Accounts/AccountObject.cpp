@@ -55,7 +55,7 @@ bool AccountObject::performAccountRemoval() {
             return false;
         }
     }
-    if (!SecretManager::Instance().RemoveAccount(this->idAsString())) {
+    if (!SecretManager::Instance().removeAccount(this->id)) {
         addError("Error on removing account secrets");
     }
     return true;

@@ -1,18 +1,8 @@
-@0xbff711e54e34c0d2;
+@0xb1d433c2f455c89e;
 
 struct RPCSecretParam{
     key             @0 :Text;
     value           @1 :Text;
-}
-
-struct RPCSecretApplication{
-    name            @0 :Text;
-    params          @1 :List(RPCSecretParam);
-}
-
-struct RPCSecretWallet{
-    name            @0 :Text;
-    applications    @1 :List(RPCSecretApplication);
 }
 
 struct RPCSecretResult {
@@ -20,21 +10,22 @@ struct RPCSecretResult {
     error           @1 : Text;
 }
 
+struct RPCSecretAttribute {
+    key             @0 : Text;
+    value           @1 : Text;
+}
+
+struct RPCSecretItem {
+    label           @0 : Text;
+    attributes      @1 : List(RPCSecretAttribute);
+    secrets         @2 : List(RPCSecretParam);
+}
+
 interface RPCSecretService {
-    getWallets       @0 ()                                                           -> (wallets     : List(Text));
-    getApplications  @1 (wallet : Text)                                              -> (applications: List(Text));
-    getParams        @2 (wallet : Text, application   : Text)                        -> (params      : List(Text));
-    getParam         @3 (wallet : Text, application   : Text, paramKey : Text)       -> (paramValue  : Text);
-
-    delWallet        @4 (wallet : Text)                                              -> (result      : RPCSecretResult);
-    delApplication   @5 (wallet : Text, application   : Text)                        -> (result      : RPCSecretResult);
-    delParam         @6 (wallet : Text, application   : Text, paramKey : Text)       -> (result      : RPCSecretResult);
-
-    addParam         @7 (wallet : Text, application   : Text, param : RPCSecretParam)-> (result      : RPCSecretResult);
-    addParams        @8 (wallet : Text, application   : Text, params: List(RPCSecretParam))-> (result: RPCSecretResult);
-    editParam        @9 (wallet : Text, application   : Text, param : RPCSecretParam)-> (result      : RPCSecretResult);
-
-    allowAccess      @10(wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
-    disallowAccess   @11(wallet : Text, application   : Text, thirdPartyApp : Text)  -> (result      : RPCSecretResult);
-    getAccessList    @12(wallet : Text, application   : Text)                        -> (thirdParties: List(Text));
+    getSupportedAttributes  @0()                                       -> (attributes   : List(Text));
+    getSupportedSchemas     @1()                                       -> (schemas      : List(Text));
+    getSchemaKeys           @2(schema  : Text)                         -> (keys         : List(Text));
+    setSecret               @3(item : RPCSecretItem)                   -> (result       : RPCSecretResult);
+    search                  @4(attributes :List(RPCSecretAttribute))   -> (items        : List(RPCSecretItem));
+    deleteSecret            @5(attributes :List(RPCSecretAttribute))   -> (result       : RPCSecretResult);
 }

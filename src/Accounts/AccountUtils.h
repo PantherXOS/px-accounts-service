@@ -8,10 +8,13 @@
 #include <vector>
 #include <string>
 #include <Utils/Logger.h>
+#include <algorithm>
 
 using namespace std;
 
 #define EXISTS(m, v) ((m).find((v)) != (m).end())
+#define VEXISTS(v, k) ((std::find(v.begin(), v.end(), k) != v.end()))
+
 
 /// @brief namespace that contains helper functions, used in Accounts Service
 namespace PXUTILS {
