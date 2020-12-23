@@ -291,13 +291,52 @@ EventData:
   params:
     -
       key: "account"
-      value: "test_account"
+      value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
     -
       key: "from"
       value: "online"
     -
       key: "to"
       value: "offline"
+```
+
+2. _Create new account_
+```yaml
+EventData:
+  topic: "account"
+  source: "px-accounts-service"
+  time: 123456789
+  event: "account_create"
+  params:
+    -
+      key: "account"
+      value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
+```
+
+3. _Modify existing account_
+```yaml
+EventData:
+  topic: "account"
+  source: "px-accounts-service"
+  time: 123456789
+  event: "account_modify"
+  params:
+    -
+      key: "account"
+      value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
+```
+
+4. _Delete existing account_
+```yaml
+EventData:
+  topic: "account"
+  source: "px-accounts-service"
+  time: 123456789
+  event: "account_delete"
+  params:
+    -
+      key: "account"
+      value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
 ```
 
 
