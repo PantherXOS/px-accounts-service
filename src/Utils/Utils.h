@@ -24,10 +24,6 @@ inline string uuid_as_string(const uuid_t id) {
 
 inline bool uuid_from_string(const string strId, uuid_t id) {
     uuid_clear(id);
-    if (strId.empty()) {
-        uuid_generate(id);
-        return true;
-    }
     return uuid_parse(strId.c_str(), id) == 0;
 }
 

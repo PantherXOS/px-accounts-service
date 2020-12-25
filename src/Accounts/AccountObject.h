@@ -13,6 +13,8 @@
 /// @brief Object holding Account details
 class AccountObject : public ErrorReporter {
    public:
+    explicit AccountObject();
+
     /// @brief verify Account
     bool verify();
 

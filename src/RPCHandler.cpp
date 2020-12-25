@@ -207,7 +207,9 @@ kj::Promise<void> RPCHandler::remove(AccountWriter::Server::RemoveContext ctx) {
 }
 
 bool RPCHandler::RPC2ACT(const Account::Reader &rpc, AccountObject &act) {
-    act.setId(rpc.getId().cStr());
+    if (rpc.hasId()) {
+        act.setId(rpc.getId().cStr());
+    }
     act.title = rpc.getTitle().cStr();
     act.provider = rpc.getProvider().cStr();
     act.is_active = rpc.getActive();

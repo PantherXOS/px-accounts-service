@@ -14,7 +14,7 @@ bool TESTCOMMON::ACCOUNTS::cleanup(const uuid_t &id) {
 bool TESTCOMMON::ACCOUNTS::cleanup(const string &title) {
     auto accountList = AccountManager::Instance().listAccounts();
     for (auto &act : accountList) {
-        if (!cleanup(act.id)) {
+        if (act.title == title && !cleanup(act.id)) {
             return false;
         }
     }

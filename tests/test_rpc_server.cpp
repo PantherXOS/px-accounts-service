@@ -19,6 +19,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
     std::string title1 = "RPC Test Account";
     std::string title2 = "RPC Test Account Edited";
 
+    uuid_t accountId;
     AccountObject act;
     act.title = title1;
     act.is_active = false;
@@ -64,6 +65,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         getReq.setId(act.idAsString());
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
+        REQUIRE(getRes.getAccount().hasId());
 
         AccountObject savedAct;
         RPCHandler::RPC2ACT(getRes.getAccount(), savedAct);
@@ -74,11 +76,13 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         REQUIRE(savedAct.settings.size() == act.settings.size());
         REQUIRE(savedAct.services.size() == act.services.size());
         REQUIRE(savedAct.services["python-test"]["k2"] == act.services["python-test"]["k2"]);
+        uuid_copy(accountId, savedAct.id);
     }
 
     SECTION("Edit Account") {
+        CAPTURE(uuid_as_string(accountId));
         auto getReq = client.getRequest();
-        getReq.setId(act.idAsString());
+        getReq.setId(uuid_as_string(accountId));
         auto getRes = getReq.send().wait(waitScope);
         REQUIRE(getRes.hasAccount());
 
@@ -92,7 +96,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
         RPCHandler::ACT2RPC(testAct, account);
 
         auto editReq = client.editRequest();
-        editReq.setId(act.idAsString());
+        editReq.setId(uuid_as_string(accountId));
         editReq.setAccount(account);
 
         auto response = editReq.send()
@@ -109,7 +113,7 @@ TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     SECTION("Delete Account") {
         auto rmReq = client.removeRequest();
-        rmReq.setId(act.idAsString());
+        rmReq.setId(uuid_as_string(accountId));
         auto rmRes = rmReq.send().wait(waitScope);
         REQUIRE(rmRes.getResult());
     }

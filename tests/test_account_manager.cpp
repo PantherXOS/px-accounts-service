@@ -54,12 +54,14 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
             }
         }
         REQUIRE(createResult);
+        CAPTURE(newAccount.idAsString());
         REQUIRE_FALSE(uuid_is_null(newAccount.id));
         uuid_copy(accountId, newAccount.id);
     }
 
     SECTION("Read Created Account") {
         GLOG_INF("TEST STARTED: Read Created Account");
+        CAPTURE(uuid_as_string(accountId));
         REQUIRE(AccountManager::Instance().readAccount(accountId, &account));
         REQUIRE(newAccount.title == account.title);
         REQUIRE(newAccount.provider == account.provider);

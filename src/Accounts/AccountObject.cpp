@@ -48,6 +48,8 @@ bool AccountObject::verify() {
     return verified;
 }
 
+AccountObject::AccountObject() { uuid_clear(this->id); }
+
 bool AccountObject::performAccountRemoval() {
     for (auto &kv : this->services) {
         if (!kv.second.performServiceCustomRemoval()) {

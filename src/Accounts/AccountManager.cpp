@@ -63,6 +63,8 @@ StringList &AccountManager::LastErrors() { return _instance.getErrors(); }
  */
 bool AccountManager::createAccount(AccountObject &act) {
     uuid_t accountId;
+    uuid_clear(accountId);
+
     auto *parser = this->findParser(accountId, true);  // get parser for new accounts
     if (!parser) {
         GLOG_ERR("parser not found!");
@@ -105,6 +107,7 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         return false;
     }
 
+    uuid_copy(act.id, id);  // overwrite id to prevent modifying the account Id
     if (!act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
@@ -243,10 +246,11 @@ AccountStatus AccountManager::getStatus(const uuid_t &id) {
 }
 
 AccountParser *AccountManager::findParser(const uuid_t &id, bool onlyWritables) {
+    GLOG_INF("search", (onlyWritables ? "writable" : ""), "parser for:", uuid_as_string(id));
     for (auto *parser : m_parsers) {
         if (!onlyWritables || !parser->isReadonly()) {
             if (parser->hasAccount(id) || uuid_is_null(id)) {
-                GLOG_INF("parser selected: ", parser->path());
+                GLOG_INF("parser selected: ", (parser->isReadonly() ? "[R-ONLY] " : ""), parser->path());
                 return parser;
             }
         }

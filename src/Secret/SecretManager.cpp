@@ -5,6 +5,8 @@
 #include "SecretManager.h"
 
 #include "../Accounts/AccountUtils.h"
+#include <sstream>
+
 
 // === SecretItemBase methods: ================================================
 
