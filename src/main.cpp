@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
     system(RPC_MKPATH_CMD);
 
     bool isDebug = false;
-    string pass = "123";
     string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
     string rpcSecretPath = string("unix:") + PXUTILS::FILE::abspath((RPC_CLIENT_SECRET_PATH));
     LogTarget logTarget = LogTarget::SYSLOG;
@@ -55,6 +54,7 @@ int main(int argc, char *argv[]) {
 
 
     SecretManager::Init(rpcSecretPath);
+    AccountManager::Instance();
     PluginManager::Instance();
 
     RPCServer<RPCHandler> srv(rpcActPath);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     GLOG_INF("User Accounts Path:", ACCOUNT_PATHS);
     GLOG_INF("Readonly Accounts Path:", READONLY_ACCOUNT_PATHS);
-
+    GLOG_INF("========================================");
     GLOG_INF_FORCE("px-accounts-service started.");
     GLOG_INF("debug mode enabled");
     GLOG_INF("log target: [", (logTarget == LogTarget::SYSLOG ? "syslog" : "console"), "]");

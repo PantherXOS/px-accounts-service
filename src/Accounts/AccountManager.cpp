@@ -9,7 +9,7 @@
 #include "EventManager.h"
 #include "Secret/SecretManager.h"
 
-AccountManager AccountManager::_instance;  // NOLINT(cert-err58-cpp)
+// AccountManager AccountManager::_instance;  // NOLINT(cert-err58-cpp)
 
 AccountManager::AccountManager() {
     auto userPaths = PXUTILS::PATH::extract_path_str(std::string(ACCOUNT_PATHS));
@@ -42,18 +42,23 @@ AccountManager::~AccountManager() {
     }
 }
 
+AccountManager &AccountManager::_rawInstance() {
+    static AccountManager instance; 
+    return instance;
+}
+
 /**
  * @return initiated instance of AccountManager
  */
 AccountManager &AccountManager::Instance() {
-    _instance.resetErrors();
-    return _instance;
+    _rawInstance().resetErrors();
+    return _rawInstance();
 }
 
 /**
  * @return list of errors occurred during last operation
  */
-StringList &AccountManager::LastErrors() { return _instance.getErrors(); }
+StringList &AccountManager::LastErrors() { return _rawInstance().getErrors(); }
 
 /**
  * Save Provided AccountObject to disk
@@ -106,7 +111,7 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         addError("there is no writable parser found!");
         return false;
     }
-
+    
     uuid_copy(act.id, id);  // overwrite id to prevent modifying the account Id
     if (!act.verify()) {
         addErrorList(act.getErrors());

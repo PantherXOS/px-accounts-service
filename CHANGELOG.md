@@ -2,12 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1]
+### Fixed
+- issue related to initiating the account id
+
+## [0.3.0]
+### Changed
+- integration with new implementation of px-secret-service
+
 ## [0.2.13]
 
-## Added
+### Added
 - Multiple paths for account files + support for readonly account paths
 
-## Fixed
+### Fixed
 - build issue related to new version of GCC fixed.
 - High cpu usage issue related to thread timeouts fixed.
 
