@@ -40,6 +40,7 @@ string SecretItemBase::toString(bool pretty) const {
     string sep2 = pretty ? "   " : " ";
     stringstream sstream;
     sstream << "Secret: " << sep1;
+    sstream << "label: " << label << sep1;
     sstream << "attributes: " << sep1;
     for (const auto &attr : attributes) {
         sstream << sep2 << "[" << attr.first << ":" << attr.second << "]" << sep1;
@@ -276,6 +277,11 @@ bool SecretManager::deleteSecret(StrStrMap attributes) {
     auto rpcResult = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.deleteSecretRequest();
         auto rAttributes = req.initAttributes(attributes.size());
+        int i = 0;
+        for (const auto &kv : attributes) {
+            rAttributes[i].setKey(kv.first);
+            rAttributes[i++].setValue(kv.second);
+        }
         req.send()
             .then(
                 [&](RPCSecretService::DeleteSecretResults::Reader &&result) {
@@ -300,7 +306,9 @@ SecretItemPtrList SecretManager::getAccountSecrets(const uuid_t &accountId) {
 }
 
 bool SecretManager::removeAccount(const uuid_t &accountId) {
+    auto strId = uuid_as_string(accountId);
+    GLOG_INF("remove account:", strId);
     StrStrMap attributes;
-    attributes["account_id"] = uuid_as_string(accountId);
+    attributes["account_id"] = strId;
     return this->deleteSecret(attributes);
 }
