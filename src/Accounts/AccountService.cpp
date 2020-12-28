@@ -190,20 +190,25 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
     map<string, SecretItemBase> secretDict;
 
     for (const auto &token : aResult->tokens) {
-        string key = token.label;
         if (EXISTS(token.attributes, "schema")) {
-            if (EXISTS(token.attributes, "schema")) {
-                auto tokenSchema = token.attributes.find("schema")->second;
-                if (tokenSchema == "oauth2" || tokenSchema == "dual_password") {
-                    key = tokenSchema;
-                }
+            auto key = token.label;
+            auto schema = token.attributes.find("schema")->second;
+            string secretKey = "password";
+            if (schema == "oauth2" || schema == "dual_password") {
+                secretKey = token.label;
+                key = schema;
             }
+            GLOG_INF("   NEW SET SECRET PARAM:", key, "->", schema, "(", secretKey, ")");
+            secretDict[key].label = key;
+            secretDict[key].secrets[secretKey] = token.secret;
+            secretDict[key].updateAttributes(this->_account->idAsString(), this->_name, token.attributes);
+        } else {
+            GLOG_WRN("schema not set for protected param:", token.label);
+            addError("schema not set for protected param: " + token.label);
         }
-        secretDict[key].label = key;
-        secretDict[key].secrets[token.label] = token.secret;
-        secretDict[key].updateAttributes(this->_account->idAsString(), this->_name, token.attributes);
     }
     for (const auto &kv : secretDict) {
+        GLOG_INF("save new secret:", kv.second.toString(true));
         if (!SecretManager::Instance().setSecret(kv.second)) {
             GLOG_ERR("saving secret failed");
             this->addError("unable to set protected tokens.");

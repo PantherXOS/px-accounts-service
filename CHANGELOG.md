@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- issue related to remove secrets during account removal.
+- fix add secret issue for dual_password schema.
+
 ## [0.3.1]
 ### Fixed
 - issue related to initiating the account id
