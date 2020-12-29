@@ -1,8 +1,9 @@
 # Online Accounts Management Service
 
-- `px-accounts-ui` **Online Accounts** ui-application (frontend, only UI)
-- `px-accounts` Command line interface for **Online Accounts**
+## Components
+
 - `px-accounts-service` background-service for **Online Accounts** that serves Account related requests using _RPC_
+- `px-accounts` Command line interface for **Online Accounts**
 - `px-accounts-plugin-*` support for provider & protocols, verify credentials **(1)**
 
 **(1)** a small helper script, that either reports `OK` or `ERROR(message)`  
@@ -229,40 +230,49 @@ We will provide 3 types of interfaces that are available for interacting with `p
 #### 1. Online Accounts Structure: [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/Account.capnp)
  
 ```capnp
+struct AccountInfo {
+    id    @0 : Text;
+    title @1 : Text;
+}
+
 struct Account {
-   title @0 : Text;
-   provider @1 : Text;
-   active @2 : Bool;
-   settings @3 : List(Param);
-   services @4 : List(Service);
-   
-   struct Service {
-      name @0 : Text;
-      params @1 : List(Param);
-   }
-   struct Param{
-      key @0 : Text;
-      value @1 : Text;
-   }
-   enum Status {
-      none @0;
-      online @1;
-      offline @2;
-      error @3;
-   }
+    id       @0 : Text;
+    title    @1 : Text;
+    provider @2 : Text;
+    active   @3 : Bool;
+    settings @4 : List(Param);
+    services @5 : List(Service);
+
+    struct Service {
+        name   @0 : Text;
+        params @1 : List(Param);
+    }
+
+    struct Param {
+        key   @0 : Text;
+        value @1 : Text;
+    }
+
+    enum Status {
+        none @0;
+        online @1;
+        offline @2;
+        error @3;
+    }
 }
 ```
 
 #### 2. Public Communication Interface. [link](https://git.pantherx.org/development/applications/px-accounts-service/blob/master/interface/AccountReader.capnp)
 ```capnp
 using Account = import "Account.capnp".Account;
+using AccountInfo = import "Account.capnp".AccountInfo;
 
 interface AccountReader {
-    list    @0 (providerFilter: List(Text), serviceFilter: List(Text)) -> (accounts: List(Text));
-    get     @1 (title: Text) -> (account: Account);
+    list    @0 (providerFilter: List(Text), serviceFilter: List(Text)) -> (accounts: List(AccountInfo));
+    get     @1 (id: Text) -> (account: Account);
 
-    setStatus @2 (title: Text, stat: Account.Status) -> (result: Bool);
-    getStatus @3 (title: Text) -> (status: Account.Status);
+    setStatus @2 (id: Text, stat: Account.Status) -> (result: Bool);
+    getStatus @3 (id: Text) -> (status: Account.Status);
 }
 ```
 
@@ -273,9 +283,9 @@ using AccountReader = import "AccountReader.capnp".AccountReader;
 
 interface AccountWriter extends(AccountReader) {
 
-   add @0 (account: Account) -> (result: Bool);
-   edit @1 (account: Account) -> (result: Bool);
-   remove @2 (title: Text) -> (result: Bool);
+   add    @0 (account: Account) -> (result: Bool, account: Account, warnings: List(Text));
+   edit   @1 (id: Text, account: Account) -> (result: Bool, account: Account, warnings: List(Text));
+   remove @2 (id: Text) -> (result: Bool);
 }
 ```
 
@@ -370,3 +380,6 @@ $ cmake -D ACCOUNT_PATHS=/path/to/accounts/folder ..
 # set custom path for readonly account files
 $ cmake -D READONLY_ACCOUNT_PATHS=/path/to/readonly/accounts/folder ..
 ```
+
+## Development resources:
+  - [Plugin Development](https://git.pantherx.org/development/snippets/project-templates/px-accounts-service-plugin-template): template project and documents
