@@ -123,7 +123,7 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         return false;
     }
     setStatus(oldAct.id, AC_NONE);
-    EventManager::EMIT_MODIFY_ACCOUNT(oldAct.id);
+    EventManager::EMIT_MODIFY_ACCOUNT(oldAct);
     return true;
 }
 
@@ -153,7 +153,7 @@ bool AccountManager::deleteAccount(const uuid_t &id) {
         return false;
     }
     m_statDict.erase(act.idAsString());
-    EventManager::EMIT_DELETE_ACCOUNT(id);
+    EventManager::EMIT_DELETE_ACCOUNT(act);
     return true;
 }
 
@@ -231,7 +231,7 @@ bool AccountManager::setStatus(const uuid_t &id, AccountStatus stat) {
     AccountStatus oldStat = m_statDict[act.idAsString()];
     m_statDict[act.idAsString()] = stat;
     if (oldStat != stat) {
-        EventManager::EMIT_STATUS_CHANGE(id, oldStat, stat);
+        EventManager::EMIT_STATUS_CHANGE(act, oldStat, stat);
     }
     return true;
 }

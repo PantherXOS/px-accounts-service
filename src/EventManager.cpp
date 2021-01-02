@@ -9,6 +9,7 @@
 #include <kj/io.h>
 
 #include <chrono>
+#include <sstream>
 
 #define RPC_DIR "~/.userdata/rpc"
 #define RPC_PATH RPC_DIR "/events"
@@ -95,6 +96,14 @@ bool EventManager::emit(const string &event, const map<string, string> &params) 
     return true;
 }
 
+string EventManager::MAKE_SERVICES_PARAM(const AccountObject &account) {
+    stringstream ss;
+    for (const auto &kv : account.services) {
+        ss << kv.first;
+    }
+    return ss.str();
+}
+
 /**
  * @return reference for EventManager instance
  */
@@ -114,28 +123,32 @@ EventManager &EventManager::Instance() {
  * @param from old status of account
  * @param to new status of account
  */
-bool EventManager::EMIT_STATUS_CHANGE(const uuid_t &accountId, AccountStatus from, AccountStatus to) {
+bool EventManager::EMIT_STATUS_CHANGE(const AccountObject &account, AccountStatus from, AccountStatus to) {
     map<string, string> params;
-    params["account"] = uuid_as_string(accountId);
+    params["account"] = account.idAsString();
+    params["services"] = EventManager::MAKE_SERVICES_PARAM(account);
     params["old"] = AccountStatusString[from];
     params["new"] = AccountStatusString[to];
     return EventManager::Instance().emit(ACCOUNT_STATUS_CHANGE_EVENT, params);
 }
 
-bool EventManager::EMIT_CREATE_ACCOUNT(const uuid_t &accountId) {
+bool EventManager::EMIT_CREATE_ACCOUNT(const AccountObject &account) {
     map<string, string> params;
-    params["account"] = uuid_as_string(accountId);
+    params["account"] = account.idAsString();
+    params["services"] = EventManager::MAKE_SERVICES_PARAM(account);
     return EventManager::Instance().emit(ACCOUNT_CREATE_EVENT, params);
 }
 
-bool EventManager::EMIT_MODIFY_ACCOUNT(const uuid_t &accountId) {
+bool EventManager::EMIT_MODIFY_ACCOUNT(const AccountObject &account) {
     map<string, string> params;
-    params["account"] = uuid_as_string(accountId);
+    params["account"] = account.idAsString();
+    params["services"] = EventManager::MAKE_SERVICES_PARAM(account);
     return EventManager::Instance().emit(ACCOUNT_MODIFY_EVENT, params);
 }
 
-bool EventManager::EMIT_DELETE_ACCOUNT(const uuid_t &accountId) {
+bool EventManager::EMIT_DELETE_ACCOUNT(const AccountObject &account) {
     map<string, string> params;
-    params["account"] = uuid_as_string(accountId);
+    params["account"] = account.idAsString();
+    params["services"] = EventManager::MAKE_SERVICES_PARAM(account);
     return EventManager::Instance().emit(ACCOUNT_DELETE_EVENT, params);
 }

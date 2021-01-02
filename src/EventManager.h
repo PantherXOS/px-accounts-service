@@ -10,6 +10,7 @@
 #include <nng/protocol/pipeline0/push.h>
 #include <Utils/Utils.h>
 
+#include "Accounts/AccountObject.h"
 #include "Accounts/AccountParser.h"
 
 
@@ -25,6 +26,8 @@ protected:
     /// @brief general method for emitting events to Event Service
     bool emit(const string &event, const map<string, string> &params);
 
+    static string MAKE_SERVICES_PARAM(const AccountObject &account);
+
 public:
     /// @brief EventManager destructor
     virtual ~EventManager();
@@ -35,10 +38,10 @@ public:
     static EventManager &Instance();
 
     /// @brief helper method for emitting change status event
-    static bool EMIT_STATUS_CHANGE(const uuid_t &accountId, AccountStatus from, AccountStatus to);
-    static bool EMIT_CREATE_ACCOUNT(const uuid_t &accountId);
-    static bool EMIT_MODIFY_ACCOUNT(const uuid_t &accountId);
-    static bool EMIT_DELETE_ACCOUNT(const uuid_t &accountId);
+    static bool EMIT_STATUS_CHANGE(const AccountObject &account, AccountStatus from, AccountStatus to);
+    static bool EMIT_CREATE_ACCOUNT(const AccountObject &account);
+    static bool EMIT_MODIFY_ACCOUNT(const AccountObject &account);
+    static bool EMIT_DELETE_ACCOUNT(const AccountObject &account);
 
 private:
     nng_socket m_sock;      ///< @brief socket that EventManager use to connect to Event Service
