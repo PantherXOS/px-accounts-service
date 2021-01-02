@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changed
+- add `services` param to Account events.
+
+### Fixed
+- Fix account creation event trigger issue.
+
 ## [0.3.2]
 ### Fixed
 - issue related to remove secrets during account removal.

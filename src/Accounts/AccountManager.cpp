@@ -90,6 +90,7 @@ bool AccountManager::createAccount(AccountObject &act) {
         return false;
     }
     setStatus(accountId, AC_NONE);
+    EventManager::EMIT_CREATE_ACCOUNT(act);
     return true;
 }
 
