@@ -100,7 +100,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         REQUIRE(evtData.getSource() == "px-accounts-service");
         REQUIRE(evtData.getEvent() == "account_status_change");
 
-        bool oldFound = false, newFound = false, actFound = false;
+        bool oldFound = false, newFound = false, actFound = false, svcSet = false;
         for (const auto &param : evtData.getParams()) {
             if (param.getKey().cStr() == string("account")) {
                 REQUIRE(param.getValue().cStr() == uuid_as_string(accountId));
@@ -114,8 +114,12 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
                 REQUIRE(param.getValue().cStr() == AccountStatusString[AC_ONLINE]);
                 newFound = true;
             }
+            if (param.getKey().cStr() == string("services")) {
+                REQUIRE(strlen(param.getValue().cStr()) > 0);
+                svcSet = true;
+            }
         }
-        REQUIRE((actFound && oldFound && newFound));
+        REQUIRE((actFound && oldFound && newFound && svcSet));
         nng_free(buff, sz);
 
         statThread.join();

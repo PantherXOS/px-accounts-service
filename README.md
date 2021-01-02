@@ -303,6 +303,9 @@ EventData:
       key: "account"
       value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
     -
+      key: "services"
+      value: "svc1,svc2"
+    -
       key: "from"
       value: "online"
     -
@@ -321,6 +324,9 @@ EventData:
     -
       key: "account"
       value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
+    -
+      key: "services"
+      value: "svc1,svc2"
 ```
 
 3. _Modify existing account_
@@ -334,6 +340,9 @@ EventData:
     -
       key: "account"
       value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
+    -
+      key: "services"
+      value: "svc1,svc2"
 ```
 
 4. _Delete existing account_
@@ -347,6 +356,9 @@ EventData:
     -
       key: "account"
       value: "b6588a68-3ff1-4779-8ea5-f57daa0beed4"
+    -
+      key: "services"
+      value: "svc1,svc2"
 ```
 
 
