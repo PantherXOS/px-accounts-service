@@ -188,6 +188,7 @@ AuthResultPtr AccountService::_authenticate(VerifyResultPtr &vResult) {
  */
 bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPtr &aResult) {
     map<string, SecretItemBase> secretDict;
+    GLOG_INF("saving protected params:", aResult->tokens.size());
 
     for (const auto &token : aResult->tokens) {
         if (EXISTS(token.attributes, "schema")) {
@@ -199,7 +200,7 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
                 key = schema;
             }
             GLOG_INF("   NEW SET SECRET PARAM:", key, "->", schema, "(", secretKey, ")");
-            secretDict[key].label = key;
+            secretDict[key].label = this->_account->title + "->" + this->_name + " [" + schema + "]";
             secretDict[key].secrets[secretKey] = token.secret;
             secretDict[key].updateAttributes(this->_account->idAsString(), this->_name, token.attributes);
         } else {
