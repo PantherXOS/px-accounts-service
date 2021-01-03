@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changed
+- update secret labels to a meaningful value
 ## [0.3.3]
 ### Changed
 - add `services` param to Account events.
