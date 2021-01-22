@@ -18,7 +18,7 @@ AccountManager::AccountManager() {
             auto *parser = new AccountParser(path, false);
             m_parsers.push_back(parser);
         } else {
-            GLOG_WRN("invalid user path provided:", path);
+            GLOG_WRN("Invalid user path provided: ", path);
         }
     }
     if (!std::string(READONLY_ACCOUNT_PATHS).empty()) {
@@ -28,7 +28,7 @@ AccountManager::AccountManager() {
                 auto *parser = new AccountParser(path, true);
                 m_parsers.push_back(parser);
             } else {
-                GLOG_WRN("invalid readonly path provided:", path);
+                GLOG_WRN("Invalid readonly path provided: ", path);
             }
         }
     }
@@ -72,8 +72,8 @@ bool AccountManager::createAccount(AccountObject &act) {
 
     auto *parser = this->findParser(accountId, true);  // get parser for new accounts
     if (!parser) {
-        GLOG_ERR("parser not found!");
-        addError("there is no writable parser found!");
+        GLOG_ERR("Parser not found!");
+        addError("Could not find writable parser!");
         return false;
     }
     uuid_generate(accountId);
@@ -86,7 +86,7 @@ bool AccountManager::createAccount(AccountObject &act) {
     }
 
     if (!parser->write(act)) {
-        addError("Error on saving account file");
+        addError("Could not save account file.");
         return false;
     }
     setStatus(accountId, AC_NONE);
@@ -104,12 +104,12 @@ bool AccountManager::createAccount(AccountObject &act) {
 bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
     AccountObject oldAct;
     if (!readAccount(id, &oldAct)) {
-        addError("Error on reading old Account details.");
+        addError("Could not read old account details.");
         return false;
     }
     auto *parser = this->findParser(oldAct.id, true);  // get parser for new accounts
     if (!parser) {
-        addError("there is no writable parser found!");
+        addError("Could not find writable parser!");
         return false;
     }
     
@@ -120,7 +120,7 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         return false;
     }
     if (!parser->write(act)) {
-        addError("Error on saving account file");
+        addError("Could not save account file.");
         return false;
     }
     setStatus(oldAct.id, AC_NONE);
@@ -137,12 +137,12 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
 bool AccountManager::deleteAccount(const uuid_t &id) {
     auto *parser = this->findParser(id, true);
     if (!parser) {
-        addError("Account Parser not found");
+        addError("Could not find suitable parser.");
         return false;
     }
     AccountObject act;
     if (!parser->read(id, act)) {
-        addError("unable to read account before delete");
+        addError("Could not read account before deletion.");
         return false;
     }
     if (!act.performAccountRemoval()) {
@@ -150,7 +150,7 @@ bool AccountManager::deleteAccount(const uuid_t &id) {
         return false;
     }
     if (!parser->remove(id)) {
-        addError("unable to remove account file");
+        addError("Could not remove account file.");
         return false;
     }
     m_statDict.erase(act.idAsString());
@@ -202,7 +202,7 @@ list<AccountObject> AccountManager::listAccounts(const ProviderFilters_t &provid
 bool AccountManager::readAccount(const uuid_t &id, AccountObject *account) {
     auto *parser = this->findParser(id, false);
     if (!parser) {
-        addError("Can't find suitable parser");
+        addError("Could not find suitable parser.");
         return false;
     }
     if (!parser->read(id, *account)) {
@@ -252,11 +252,11 @@ AccountStatus AccountManager::getStatus(const uuid_t &id) {
 }
 
 AccountParser *AccountManager::findParser(const uuid_t &id, bool onlyWritables) {
-    GLOG_INF("search", (onlyWritables ? "writable" : ""), "parser for:", uuid_as_string(id));
+    GLOG_INF("Search", (onlyWritables ? "writable" : ""), "parser for:", uuid_as_string(id));
     for (auto *parser : m_parsers) {
         if (!onlyWritables || !parser->isReadonly()) {
             if (parser->hasAccount(id) || uuid_is_null(id)) {
-                GLOG_INF("parser selected: ", (parser->isReadonly() ? "[R-ONLY] " : ""), parser->path());
+                GLOG_INF("Parser selected: ", (parser->isReadonly() ? "[R-ONLY] " : ""), parser->path());
                 return parser;
             }
         }

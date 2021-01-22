@@ -64,7 +64,7 @@ EventManager::~EventManager() {
  */
 bool EventManager::emit(const string &event, const map<string, string> &params) {
     if (!m_inited) {
-        GLOG_WRN("EventManager is not inited.");
+        GLOG_WRN("EventManager is not initiated.");
         return false;
     }
     uint64_t now_secs = static_cast<uint64_t>(
@@ -89,10 +89,10 @@ bool EventManager::emit(const string &event, const map<string, string> &params) 
     kj::ArrayPtr<kj::byte> data = words.asBytes();
     int ret;
     if ((ret = nng_send(m_sock, data.begin(), data.size(), 0)) != 0) {
-        GLOG_WRN("send error: ", ret);
+        GLOG_WRN("Send error: ", ret);
         return false;
     }
-    GLOG_INF("new event sent: ", event);
+    GLOG_INF("New event sent: ", event);
     return true;
 }
 

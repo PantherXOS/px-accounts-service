@@ -18,14 +18,14 @@ bool AccountObject::verify() {
     GLOG_INF("verify account with id: ", this->idAsString());
     this->resetErrors();
     if (this->title.empty()) {
-        GLOG_WRN("missing required param: 'title'");
+        GLOG_WRN("Missing required parameter: 'title'");
         this->addError("'title' is required");
         return false;
     }
 
     if (!this->provider.empty() && !this->_appendProviderParams()) {
-        GLOG_WRN("update provider params failed");
-        this->addError("update provider params failed");
+        GLOG_WRN("Could not update provider details.");
+        this->addError("Could not update provider details.");
         return false;
     }
 
@@ -34,8 +34,8 @@ bool AccountObject::verify() {
         string svcName = kv.first;
         PluginContainerBase *plugin = PluginManager::Instance()[svcName];
         if (plugin == nullptr) {
-            GLOG_WRN("unknown service: ", svcName);
-            addError(string("unknown service '") + svcName + string("'"));
+            GLOG_WRN("Unknown service: ", svcName);
+            addError(string("Unknown service '") + svcName + string("'"));
             verified = false;
         }
         bool svcVerified = kv.second.verify();
@@ -44,7 +44,7 @@ bool AccountObject::verify() {
         }
         verified &= svcVerified;
     }
-    GLOG_INF("account verification status: ", verified);
+    GLOG_INF("Account verification status: ", verified);
     return verified;
 }
 
@@ -58,7 +58,7 @@ bool AccountObject::performAccountRemoval() {
         }
     }
     if (!SecretManager::Instance().removeAccount(this->id)) {
-        addError("Error on removing account secrets");
+        addError("Could not remove account secrets.");
     }
     return true;
 }
@@ -70,8 +70,8 @@ bool AccountObject::performAccountRemoval() {
  */
 bool AccountObject::_appendProviderParams() {
     if (!ProviderHandler::Instance().exists(this->provider)) {
-        this->addError(string("unknown provider: '") + this->provider + string("'"));
-        GLOG_ERR("unknown provider: ", this->provider);
+        this->addError(string("Unknown provider: '") + this->provider + string("'"));
+        GLOG_ERR("Unknown provider: ", this->provider);
         return false;
     }
 

@@ -81,7 +81,7 @@ PluginContainerBase *PluginManager::operator[](const std::string &pluginName) {
             }
         }
     }
-    GLOG_WRN("plugin not found: ", pluginName);
+    GLOG_WRN("Could not find plugin: ", pluginName);
     return nullptr;
 }
 
@@ -118,7 +118,7 @@ bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
             );
             _plugins[plugin->getTitle()] = plugin;
         } else {
-            GLOG_WRN("plugin initiation failed: ", pluginName);
+            GLOG_WRN("Plugin initiation failed: ", pluginName);
         }
     }
     return true;

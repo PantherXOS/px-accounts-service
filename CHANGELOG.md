@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.3.4]
 ### Changed
 - update secret labels to a meaningful value
+- updated error messages to be more uniform
+
 ## [0.3.3]
 ### Changed
 - add `services` param to Account events.

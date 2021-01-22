@@ -48,7 +48,7 @@ public:
 
     bool DLOpenLib() override {
         if (!(_handle = dlopen(_libPath.c_str(), RTLD_NOW | RTLD_LAZY))) {
-            GLOG_ERR("plugin open failed: ", dlerror());
+            GLOG_ERR("Could not open plugin: ", dlerror());
             return false;
         }
         return true;
@@ -56,13 +56,13 @@ public:
 
     void DLCloseLib() override {
         if (dlclose(_handle) != 0) {
-            GLOG_ERR("plugin close failed: ", dlerror());
+            GLOG_ERR("Could not close plugin: ", dlerror());
         }
     }
 
     shared_ptr<T> DLGetInstance() override {
         if (_handle == nullptr) {
-            GLOG_WRN("invalid handle");
+            GLOG_WRN("Invalid handle");
             return nullptr;
         }
         using allocClass = T *(*)();
@@ -73,7 +73,7 @@ public:
 
         if (!allocFunc || !deleteFunc) {
             DLCloseLib();
-            GLOG_ERR("get plugin instance failed: ", dlerror());
+            GLOG_ERR("Could not get plugin instance: ", dlerror());
             return nullptr;
         }
 
