@@ -113,7 +113,8 @@ bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
         auto pluginName = kv.first;
         auto plugin = kv.second;
         if (plugin && plugin->init()) {
-            GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle()
+            GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle(), "[",
+                     plugin->getVersion(), "]"
                      // , " - ", plugin->loadPath()
             );
             _plugins[plugin->getTitle()] = plugin;
