@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5]
+### Fixed
+
+- Issue related to loading python plugins. (define __init__ method to PluginFramework.Plugin class).
+
 ## [0.3.4]
 ### Changed
 - update secret labels to a meaningful value
