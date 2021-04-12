@@ -9,6 +9,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
         title = 'python-test'
 
         def __init__(self):
+            PluginFramework.Plugin.__init__(self)
             pass
 
         def verify(self, params):

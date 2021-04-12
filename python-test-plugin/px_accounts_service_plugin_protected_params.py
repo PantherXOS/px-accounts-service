@@ -9,6 +9,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
         title = 'protected-test'
 
         def __init__(self):
+            PluginFramework.Plugin.__init__(self)
             pass
 
 

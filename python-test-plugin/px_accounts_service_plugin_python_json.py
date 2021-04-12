@@ -12,6 +12,7 @@ if pkgutil.find_loader('PluginFramework') is not None:
         title = 'python-json'
 
         def __init__(self):
+            PluginFramework.Plugin.__init__(self)
             pass
 
         def verify(self, params):
