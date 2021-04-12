@@ -14,11 +14,11 @@
 AccountManager::AccountManager() {
     auto userPaths = PXUTILS::PATH::extract_path_str(std::string(ACCOUNT_PATHS));
     for (const auto &path : userPaths) {
-        if (PXUTILS::FILE::exists(path)) {
-            auto *parser = new AccountParser(path, false);
+        auto *parser = new AccountParser(path, false);
+        if (parser) {
             m_parsers.push_back(parser);
         } else {
-            GLOG_WRN("Invalid user path provided: ", path);
+            GLOG_ERR("Unable to init parser: ", path);
         }
     }
     if (!std::string(READONLY_ACCOUNT_PATHS).empty()) {
@@ -28,7 +28,7 @@ AccountManager::AccountManager() {
                 auto *parser = new AccountParser(path, true);
                 m_parsers.push_back(parser);
             } else {
-                GLOG_WRN("Invalid readonly path provided: ", path);
+                GLOG_ERR("Unable to init readonly parser: ", path);
             }
         }
     }

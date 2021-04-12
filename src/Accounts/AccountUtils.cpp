@@ -60,8 +60,12 @@ string PXUTILS::FILE::abspath(const string &path) {
 string PXUTILS::FILE::basedir(const string &path) {
     string dir;
     size_t lastpos = path.rfind('/');
-    if (lastpos != std::string::npos) {
+    cout << " - PATH: " << path << " - POS: " << lastpos << endl;
+    if (lastpos > 0) {
         dir = path.substr(0, lastpos);
+    } else if (lastpos == 0) {
+        // base directory is "/"
+        dir = "/";
     }
     return dir;
 }
@@ -156,6 +160,32 @@ bool PXUTILS::FILE::write(const string &path, const string &data) {
     of << data;
     of.close();
     return true;
+}
+
+/**
+ * create directory path
+ *
+ * @param path: path to create
+ * @return creation succeed or not
+ */
+bool PXUTILS::FILE::mkpath(const string &path) {
+    auto fullPath = abspath(path);
+    cout << "create: " << fullPath << endl;
+
+    if (PXUTILS::FILE::exists(fullPath)) {
+        cout << "path exists: " << fullPath << endl;
+        return true;
+    }
+    auto parent = PXUTILS::FILE::basedir(fullPath);
+    if (PXUTILS::FILE::mkpath(parent)) {
+        int status = ::mkdir(fullPath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+        if (status != 0) {
+            cout << "[" << errno << "] " << strerror(errno) << endl;
+            return false;
+        }
+        return true;
+    }
+    return false;
 }
 
 

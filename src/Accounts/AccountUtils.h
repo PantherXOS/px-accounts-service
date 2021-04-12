@@ -55,6 +55,9 @@ namespace PXUTILS {
 
         /// @brief write text data to disk
         bool write(const string &path, const string &data);
+
+        /// @brief create directory path
+        bool mkpath(const string& path);
     }
 
     /// @brief PATH related helper functions

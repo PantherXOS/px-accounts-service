@@ -16,6 +16,9 @@
 
 AccountParser::AccountParser(const string &path, bool isReadonly) : m_path(path), m_readonly(isReadonly) {
     GLOG_INF("Account Parser Initiated for:", m_path);
+    if (!PXUTILS::FILE::exists(path) && !isReadonly) {
+        PXUTILS::FILE::mkpath(path);
+    }
 }
 
 bool AccountParser::read(const uuid_t &id, AccountObject &account) {
