@@ -60,7 +60,7 @@ string PXUTILS::FILE::abspath(const string &path) {
 string PXUTILS::FILE::basedir(const string &path) {
     string dir;
     size_t lastpos = path.rfind('/');
-    cout << " - PATH: " << path << " - POS: " << lastpos << endl;
+//    cout << " - PATH: " << path << " - POS: " << lastpos << endl;
     if (lastpos > 0) {
         dir = path.substr(0, lastpos);
     } else if (lastpos == 0) {
@@ -170,10 +170,10 @@ bool PXUTILS::FILE::write(const string &path, const string &data) {
  */
 bool PXUTILS::FILE::mkpath(const string &path) {
     auto fullPath = abspath(path);
-    cout << "create: " << fullPath << endl;
+//    cout << "create: " << fullPath << endl;
 
     if (PXUTILS::FILE::exists(fullPath)) {
-        cout << "path exists: " << fullPath << endl;
+//        cout << "path exists: " << fullPath << endl;
         return true;
     }
     auto parent = PXUTILS::FILE::basedir(fullPath);

@@ -9,27 +9,16 @@
 #include "EventManager.h"
 #include "Secret/SecretManager.h"
 
-// AccountManager AccountManager::_instance;  // NOLINT(cert-err58-cpp)
+AccountManager *AccountManager::_instance = nullptr;
 
-AccountManager::AccountManager() {
-    auto userPaths = PXUTILS::PATH::extract_path_str(std::string(ACCOUNT_PATHS));
-    for (const auto &path : userPaths) {
-        auto *parser = new AccountParser(path, false);
+AccountManager::AccountManager(const vector<ParserPath> &parserPaths) {
+    for (const auto &path: parserPaths) {
+        auto *parser = new AccountParser(path);
         if (parser) {
             m_parsers.push_back(parser);
         } else {
-            GLOG_ERR("Unable to init parser: ", path);
-        }
-    }
-    if (!std::string(READONLY_ACCOUNT_PATHS).empty()) {
-        auto readonlyPaths = PXUTILS::PATH::extract_path_str(std::string(READONLY_ACCOUNT_PATHS));
-        for (const auto &path : readonlyPaths) {
-            if (PXUTILS::FILE::exists(path)) {
-                auto *parser = new AccountParser(path, true);
-                m_parsers.push_back(parser);
-            } else {
-                GLOG_ERR("Unable to init readonly parser: ", path);
-            }
+            string readonlyStr = path.isReadOnly ? "[READONLY]" : "";
+            GLOG_ERR("Unable to init parser: ", readonlyStr, path.path);
         }
     }
 }
@@ -42,23 +31,35 @@ AccountManager::~AccountManager() {
     }
 }
 
-AccountManager &AccountManager::_rawInstance() {
-    static AccountManager instance; 
-    return instance;
+bool AccountManager::Init(const vector<string> &userPaths, const vector<string> &readonlyPaths) {
+    if (AccountManager::_instance != nullptr) {
+        delete AccountManager::_instance;
+        AccountManager::_instance = nullptr;
+    }
+    vector<ParserPath> parserPaths;
+    for (const auto &userPath: userPaths) {
+        auto fullPath = PXUTILS::FILE::abspath(userPath);
+        parserPaths.push_back(ParserPath{.path = userPath, .isReadOnly = false});
+    }
+    for (const auto &readonlyPath : readonlyPaths) {
+        parserPaths.push_back(ParserPath{.path = readonlyPath, .isReadOnly = true});
+    }
+    AccountManager::_instance = new AccountManager(parserPaths);
+    return AccountManager::_instance != nullptr;
 }
 
 /**
  * @return initiated instance of AccountManager
  */
 AccountManager &AccountManager::Instance() {
-    _rawInstance().resetErrors();
-    return _rawInstance();
+    AccountManager::_instance->resetErrors();
+    return *AccountManager::_instance;
 }
 
 /**
  * @return list of errors occurred during last operation
  */
-StringList &AccountManager::LastErrors() { return _rawInstance().getErrors(); }
+StringList &AccountManager::LastErrors() { return AccountManager::_instance->getErrors(); }
 
 /**
  * Save Provided AccountObject to disk
@@ -112,7 +113,7 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         addError("Could not find writable parser!");
         return false;
     }
-    
+
     uuid_copy(act.id, id);  // overwrite id to prevent modifying the account Id
     if (!act.verify()) {
         addErrorList(act.getErrors());

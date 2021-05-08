@@ -10,9 +10,15 @@
 #include "AccountDefinitions.h"
 #include "AccountUtils.h"
 
+
+struct ParserPath {
+    string path;
+    bool isReadOnly;
+};
+
 class AccountParser : public ErrorReporter {
    public:
-    explicit AccountParser(const string &path, bool isReadonly);
+    explicit AccountParser(const ParserPath & path);
 
    public:
     bool read(const uuid_t &id, AccountObject &account);
@@ -29,7 +35,12 @@ class AccountParser : public ErrorReporter {
    protected:
     inline string accountPath(const uuid_t &id) {
         auto strId = uuid_as_string(id);
-        return m_path + strId + ".yaml";
+        string result = m_path;
+        if (!result.empty() && result[result.length() - 1] != '/') {
+            result += "/";
+        }
+        result += strId + ".yaml";
+        return result;
     }
 
    private:

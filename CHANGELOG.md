@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 ### Changes
 - add support for optional provider services
 - improve logs, mask secret strings
+- use $XDG_DATA_HOME as prefix for default accounts path
  
 ## [0.3.6]
 ### Fixed

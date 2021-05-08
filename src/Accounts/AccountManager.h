@@ -13,12 +13,6 @@
 #include "AccountParser.h"
 #include "Plugins/PluginManager.h"
 
-#ifndef ACCOUNT_PATHS
-#define ACCOUNT_PATHS "~/.userdata/accounts/"
-#endif
-#ifndef READONLY_ACCOUNT_PATHS
-#define READONLY_ACCOUNT_PATHS ""
-#endif
 
 /**
  * @brief Base Class for Managing Online Accounts
@@ -31,10 +25,19 @@ class AccountManager : public ErrorReporter {
     typedef vector<string> ServiceFilters_t;
 
    private:
-    explicit AccountManager();
+    explicit AccountManager(const vector<ParserPath> &parserPaths);
     virtual ~AccountManager();
 
    public:
+    // prevent AccountManager to be cloneable
+    AccountManager(AccountManager &other) = delete;
+
+    // prevent AccountManager to be assignable
+    void operator=(const AccountManager &) = delete;
+
+    /// @brief static method to initiate paths for AccountManager
+    static bool Init(const vector<string> &userPaths, const vector<string> &readonlyPaths = vector<string>());
+
     /// @brief static method in order to access AccountManager object
     static AccountManager &Instance();
 
@@ -67,8 +70,7 @@ class AccountManager : public ErrorReporter {
     AccountParser *findParser(const uuid_t &id, bool onlyWritables);
 
    protected:
-    static AccountManager &_rawInstance();
-
+    static AccountManager *_instance;
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status
     list<AccountParser *> m_parsers;
 };

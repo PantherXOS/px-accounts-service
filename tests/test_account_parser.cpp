@@ -8,8 +8,8 @@
 TEST_CASE("Account Parser Tests", "[AccountParser]") {
     const string accountsFullPath = PXUTILS::FILE::abspath("./accounts/");
     system("mkdir -p ./accounts/");
-    AccountParser accountWriter(accountsFullPath, false);
-    AccountParser accountReader(accountsFullPath, true);
+    AccountParser accountWriter(ParserPath { .path = accountsFullPath, .isReadOnly = false});
+    AccountParser accountReader(ParserPath { .path = accountsFullPath, .isReadOnly = true});
 
     // const string testAccountTitle = "parser test account";
     // const string testAccountName = PXUTILS::ACCOUNT::title2name(testAccountTitle);

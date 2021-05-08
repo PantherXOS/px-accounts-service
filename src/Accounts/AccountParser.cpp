@@ -14,10 +14,10 @@
 #define ACCOUNT_SETTING_KEY "settings"
 #define ACCOUNT_SERVICE_KEY "services"
 
-AccountParser::AccountParser(const string &path, bool isReadonly) : m_path(path), m_readonly(isReadonly) {
+AccountParser::AccountParser(const ParserPath &path) : m_path(path.path), m_readonly(path.isReadOnly) {
     GLOG_INF("Account Parser Initiated for:", m_path);
-    if (!PXUTILS::FILE::exists(path) && !isReadonly) {
-        PXUTILS::FILE::mkpath(path);
+    if (!PXUTILS::FILE::exists(m_path) && !m_readonly) {
+        PXUTILS::FILE::mkpath(m_path);
     }
 }
 

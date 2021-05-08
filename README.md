@@ -44,7 +44,7 @@ graph TD
 SVC>px-accounts-service]
 CMD>px-accounts]
 GUI>px-accounts-ui]
-DB("~/.userdata/accounts/*")
+DB[(local DB)]
 PAS>px-pass-service]
 MOD[modules]
 PLG>px-accounts-plugin-*]
@@ -66,7 +66,7 @@ PLG --> |support new account types| K[Crypto, VPN, Proxy, 3rd party]
 
 **Accounts** manages all app-related accounts such as Email, Calendar, Contacts, Matrix, IRC, Dropbox, Telegram, among others.
 
-- Configuration is stored in `~/.userdata/accounts` (file_name: `<account-name>.yaml`)
+- Configuration is stored in `~/.local/share/px-accounts-service/accounts` (file_name: `<account-id>.yaml`)
 - Credentials are stored using `px-pass-service`, via _RPC_
 - Applications (ex.: `px-mail-service`) request account credentials via _RPC_ `px-pass-service`
 - Add, modify or remove accounts through `px-accounts-service` using _RPC_
@@ -129,7 +129,7 @@ _All protocols and providers, will be implemented using a `px-accounts-plugin-*`
 
 **Q: What does the `px-accounts-service` do?**
 
-- read, modify and delete accounts stored in `~/.userdata/accounts`
+- read, modify and delete accounts stored in `~/.local/share/px-accounts-service/accounts`
 - verify account details using 3rd-party plugins. 
 - provide _RPC_ Server in order to serve received requests from other applications. 
 - Keep track of account status with one of following possible states:
@@ -165,7 +165,7 @@ PLG>px-accounts-plugin...]
 RPC[RPC Server]
 ACT[Account Manager]
 MOD[Modules]
-FS(File System)
+FS[(File System)]
   
 subgraph px-accounts-service
 ACT --- FS
@@ -190,7 +190,7 @@ Following tasks should be done by `px-accounts-service`:
 7. get account status
 
 ### Account Config file format:
-Each Account details stores in a separated `YAML` file in `~/.userdata/accounts/` folder. structure of *Account Configuration Files* are as follows: 
+Each Account details stores in a separated `YAML` file in `~/.local/share/px-accounts-service/accounts/` folder. structure of *Account Configuration Files* are as follows: 
 
 ```yaml
 

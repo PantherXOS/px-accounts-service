@@ -45,15 +45,6 @@ public:
      * @return whether the RPC connection is successfully established or not
      */
     bool performRequest(std::function<void(kj::AsyncIoContext &ctx, TClient &client)> func) {
-//        std::cout << "request ... ";
-
-        // check for timeout between password requests.
-        // todo: need to find a way to automatically handle this issue. (remove if everything was OK)
-//        auto elapsedDuration = chrono::high_resolution_clock::now() - lastExec;
-//        auto elapsedMS = chrono::duration_cast<chrono::milliseconds>(elapsedDuration).count();
-//        if (elapsedMS < EXEC_INTERVAL) {
-//            std::this_thread::sleep_for(chrono::milliseconds(EXEC_INTERVAL - elapsedMS));
-//        }
 
         bool _isSucceed = false;
         auto thClient = std::thread([&]() {
