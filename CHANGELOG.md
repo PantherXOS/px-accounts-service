@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changes
+- add support for optional provider services
+- improve logs, mask secret strings
+ 
+## [0.3.6]
+### Fixed
+- update internal plugin definition to work with `v0.3.5` changes
+
 ## [0.3.5]
 ### Fixed
-
 - Issue related to loading python plugins. (define __init__ method to PluginFramework.Plugin class).
 
 ## [0.3.4]

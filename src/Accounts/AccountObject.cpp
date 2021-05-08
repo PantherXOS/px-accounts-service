@@ -77,15 +77,18 @@ bool AccountObject::_appendProviderParams() {
 
     GLOG_INF("Updating provider '", this->provider, "' params:");
     ProviderStruct &curProvider = ProviderHandler::Instance()[this->provider];
-    for (const auto &plg : curProvider.plugins) {
-        const string &plgName = plg.first;
-        const auto &plgParams = plg.second;
-
-        for (const auto &prm : plgParams) {
-            const auto &pkey = prm.first;
-            const auto &pval = prm.second;
-            this->services[plgName][pkey] = pval;
-            GLOG_INF("\t[", plgName, "][", pkey, "] = ", pval);
+    for (auto &kv : this->services) {
+        auto svcName = kv.first;
+        if (curProvider.plugins.find(svcName) != curProvider.plugins.end()) { // matching plugin found.
+            const auto pluginParams = curProvider.plugins[svcName];
+            for (const auto &kv : pluginParams) {
+                const auto &paramKey = kv.first;
+                const auto &paramVal = kv.second;
+                if (this->services[svcName].find(paramKey) == this->services[svcName].end()) { // param is not added before
+                    this->services[svcName][paramKey] = paramVal;
+                    GLOG_INF("\t[", svcName, "][", paramKey, "] = ", paramVal);
+                }
+            }
         }
     }
     return true;
