@@ -1,19 +1,16 @@
 #include <iostream>
 #include <unistd.h>
+#include <cassert>
 #include <CLI11/CLI11.hpp>
 
 #include "RPCServer.h"
 #include "RPCHandler.h"
+#include "EventManager.h"
 #include "Secret/SecretManager.h"
 #include "Plugins/PluginManager.h"
 #include "Accounts/AccountUtils.h"
 #include "Accounts/AccountManager.h"
 
-#define RPC_DIR "~/.userdata/rpc"
-#define RPC_SERVER_PATH         RPC_DIR "/accounts"
-#define RPC_CLIENT_SECRET_PATH  RPC_DIR "/secret"
-
-#define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
 Logger gLogger("accounts");
 
@@ -24,26 +21,33 @@ void IntHandler(int dummy) {
 
 int main(int argc, char *argv[]) {
 
-
     setvbuf(stdout, nullptr, _IONBF, 0);
     signal(SIGINT, IntHandler);
-    system(RPC_MKPATH_CMD);
+
+    string username = PXUTILS::SYSTEM::current_user();
+    assert(username != "");
+    string rpcBasePath = "/tmp/" + username + "/rpc";
+    assert(PXUTILS::FILE::mkpath(rpcBasePath));
 
     bool isDebug = false;
-    string rpcActPath = string("unix:") + PXUTILS::FILE::abspath(RPC_SERVER_PATH);
-    string rpcSecretPath = string("unix:") + PXUTILS::FILE::abspath((RPC_CLIENT_SECRET_PATH));
+    string rpcActPath = string("unix:") + rpcBasePath + "/accounts";
+    string rpcEventPath = string("ipc://") + rpcBasePath + "/events";
+    // default path for secret service: https://git.pantherx.org/development/applications/px-secret-service/-/issues/34#note_30058
+    string rpcSecretPath = string("unix:") + rpcBasePath + "/secret";
+
     LogTarget logTarget = LogTarget::SYSLOG;
     std::vector<std::string> userAccountPaths;
     std::vector<std::string> readonlyAccountsPath;
 
     std::vector<std::pair<std::string, LogTarget> > logTargetMapping = {
-            {"syslog", LogTarget::SYSLOG},
+            {"syslog",  LogTarget::SYSLOG},
             {"console", LogTarget::CONSOLE}
     };
 
     CLI::App app{"px-accounts-service: Online Accounts Management Service"};
     app.add_flag("-d,--debug", isDebug, "Run px-accounts-service in debug mode");
-    app.add_option("--secret-path", rpcSecretPath, "modify px-secret-service rpc path");
+    app.add_option("--secret-path", rpcSecretPath, "set RPC path for px-secret-service");
+    app.add_option("--events-path", rpcEventPath, "set RPC path for px-events-service");
     app.add_option("-t,--log-target", logTarget, "Target for application logs to publish")
             ->transform(CLI::CheckedTransformer(logTargetMapping, CLI::ignore_case));
     app.add_option("--user-account-dir", userAccountPaths, "path for account files to read/write");
@@ -69,8 +73,8 @@ int main(int argc, char *argv[]) {
     }
 
 
+    EventManager::Init(rpcEventPath);
     SecretManager::Init(rpcSecretPath);
-//    AccountManager::Instance();
     PluginManager::Instance();
 
     RPCServer<RPCHandler> srv(rpcActPath);

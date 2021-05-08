@@ -11,7 +11,12 @@ using namespace std;
 
 #define MAIN_SERVER_PATH "127.0.0.1:4001"
 #define SECRET_SIMULATOR_PATH "127.0.0.1:4002"
-#define EVENTS_SIMULATOR_PATH "127.0.0.1:4003"
+
+#define TEST_RPC_BASE_PATH "/tmp/px-accounts-tests/rpc"
+#define TEST_RPC_EVENT_PATH TEST_RPC_BASE_PATH "/events"
+#define TEST_RPC_EVENT_CHANNELS_PATH   TEST_RPC_BASE_PATH "/event-channels"
+
+
 
 namespace TESTCOMMON {
 namespace ACCOUNTS {

@@ -13,6 +13,7 @@
 #include <Accounts/AccountUtils.h>
 #include <Accounts/AccountManager.h>
 #include <Secret/SecretManager.h>
+#include <EventManager.h>
 
 #include "test_common.h"
 #include "SecretSimulator.h"
@@ -85,6 +86,7 @@ int main(int argc, char *argv[]) {
     vector<string> userAccountsPath;
     userAccountsPath.push_back("/tmp/px-accounts-tests");
     AccountManager::Init(userAccountsPath);
+    EventManager::Init(TEST_RPC_EVENT_PATH);
 
     RPCServer<RPCHandler> srv(MAIN_SERVER_PATH);
     srv.start();

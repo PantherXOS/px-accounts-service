@@ -222,6 +222,9 @@ of key-value pairs of *service parameters*.
  
 
 ### `px-accounts-service` communication interface:
+
+in order to communicate with `px-accounts-service` you need to connect to it's RPC server which is listening on `unix:/tmp/USERNAME/rpc/accounts` path by default.
+
 We will provide 3 types of interfaces that are available for interacting with `px-accounts-service`.
 - Account Structure that holds the details of each online account.
 - Public Communication Interface that is available for all modules to communicate with `px-accounts-service` using RPC.

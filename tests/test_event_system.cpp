@@ -20,8 +20,6 @@
 
 #include "test_common.h"
 
-#define  IPC_PATH   "~/.userdata/event/channels/account"
-
 TEST_CASE("Event System Tests", "[EventSystem]") {
 
     AccountObject act;
@@ -65,7 +63,7 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
         REQUIRE(nng_sub0_open(&subSock) == 0);
         REQUIRE(nng_setopt(subSock, NNG_OPT_SUB_SUBSCRIBE, "", 0) == 0);
 
-        string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(IPC_PATH);
+        string ipcSock = string("ipc://") + TEST_RPC_EVENT_CHANNELS_PATH + "/account";
         CAPTURE(ipcSock.c_str());
         REQUIRE(nng_dial(subSock, ipcSock.c_str(), NULL, 0) == 0);
         INFO("DIAL finished");

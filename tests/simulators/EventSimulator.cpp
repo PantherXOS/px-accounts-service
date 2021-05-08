@@ -3,6 +3,7 @@
 //
 
 #include "EventSimulator.h"
+#include "../test_common.h"
 
 #include <chrono>
 
@@ -15,11 +16,9 @@
 
 #include <Accounts/AccountUtils.h>
 
-#define EVENT_CHANNEL_BASE_PATH   "~/.userdata/event/channels/"
-#define EVENT_RPC_PATH            "~/.userdata/rpc/events"
-
 
 void EventSimulator::start() {
+    PXUTILS::FILE::mkpath(TEST_RPC_EVENT_CHANNELS_PATH);
 
     int ret = 0;
     if ((ret = nng_pull0_open(&m_receiverSocket)) != 0) {
@@ -27,7 +26,7 @@ void EventSimulator::start() {
         exit(EXIT_FAILURE);
     }
 
-    string listenerPath = "ipc://" + PXUTILS::FILE::abspath(EVENT_RPC_PATH);
+    string listenerPath = "ipc://" + PXUTILS::FILE::abspath(TEST_RPC_EVENT_PATH);
     if ((ret = nng_listen(m_receiverSocket, listenerPath.c_str(), nullptr, NNG_FLAG_NONBLOCK)) != 0) {
         cerr << "failed to listen on: '" << listenerPath << "'" << endl;
         exit(EXIT_FAILURE);
@@ -67,8 +66,7 @@ void EventSimulator::stop() {
 
 void EventSimulator::registerChannel(const string &topic) {
     if (m_publisherSockets.find(topic) == m_publisherSockets.end()) {
-        system("mkdir -p " EVENT_CHANNEL_BASE_PATH);
-        string channelPath = "ipc://" + PXUTILS::FILE::abspath(EVENT_CHANNEL_BASE_PATH) + topic;
+        string channelPath = "ipc://" + PXUTILS::FILE::abspath(TEST_RPC_EVENT_CHANNELS_PATH) + "/" + topic;
         int ret;
         m_publisherSockets[topic];
         if ((ret = nng_pub0_open(&m_publisherSockets[topic])) != 0) {

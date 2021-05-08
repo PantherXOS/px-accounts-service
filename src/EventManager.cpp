@@ -11,48 +11,56 @@
 #include <chrono>
 #include <sstream>
 
-#define RPC_DIR "~/.userdata/rpc"
-#define RPC_PATH RPC_DIR "/events"
-#define RPC_MKPATH_CMD "mkdir -p " RPC_DIR
 
 #define ACCOUNT_STATUS_CHANGE_EVENT "account_status_change"
 #define ACCOUNT_CREATE_EVENT "account_create"
 #define ACCOUNT_MODIFY_EVENT "account_modify"
 #define ACCOUNT_DELETE_EVENT "account_delete"
 
+EventManager *EventManager::m_instancePtr = nullptr;
+
 /**
  * Initiates NNG socket and connect to Event Service
  */
-EventManager::EventManager() {
-    system(RPC_MKPATH_CMD);
-    this->init();
-}
-
-bool EventManager::init() {
-    m_inited = false;
+EventManager::EventManager(const string &socketPath) {
     int rv;
     if ((rv = nng_push0_open(&m_sock)) != 0) {
-        GLOG_ERR("unable to open socket: ", rv);
-        return false;
+        stringstream errStream;
+        errStream << "unable to open socket: " << rv;
+        throw std::logic_error(errStream.str());
+    } else if ((rv = nng_dial(m_sock, socketPath.c_str(), nullptr, 0)) != 0) {
+        stringstream errStream;
+        errStream << "connect error: " << rv;
+        throw std::logic_error(errStream.str());
     }
-
-    string ipcSock = string("ipc://") + PXUTILS::FILE::abspath(RPC_PATH);
-    if ((rv = nng_dial(m_sock, ipcSock.c_str(), nullptr, 0)) != 0) {
-        GLOG_ERR("connect error: ", rv);
-        return false;
-    }
-    m_inited = true;
-    return false;
 }
 
 /**
  * close nng socket which was initiated for communication with Event Service
  */
 EventManager::~EventManager() {
-    if (m_inited) {
-        nng_close(m_sock);
-        m_inited = false;
+    nng_close(m_sock);
+}
+
+bool EventManager::Init(const string &path) {
+    try {
+        if (m_instancePtr != nullptr) {
+            delete m_instancePtr;
+            m_instancePtr = nullptr;
+        }
+        string rpcPath;
+        if (path.find("/") == 0) {       // absolute path to unix socket
+            rpcPath = "ipc://" + path;
+        } else {
+            rpcPath = path;
+        }
+        m_instancePtr = new EventManager(rpcPath);
+        GLOG_INF("EventManager inited on: ", rpcPath);
+    } catch (std::exception &ex) {
+        GLOG_ERR(ex.what());
+        m_instancePtr = nullptr;
     }
+    return m_instancePtr != nullptr;
 }
 
 /**
@@ -63,7 +71,7 @@ EventManager::~EventManager() {
  * @param params string-based key value map about event params
  */
 bool EventManager::emit(const string &event, const map<string, string> &params) {
-    if (!m_inited) {
+    if (!this->inited()) {
         GLOG_WRN("EventManager is not initiated.");
         return false;
     }
@@ -108,11 +116,10 @@ string EventManager::MAKE_SERVICES_PARAM(const AccountObject &account) {
  * @return reference for EventManager instance
  */
 EventManager &EventManager::Instance() {
-    static EventManager instance;
-    if (!instance.inited()) {
-        instance.init();
+    if (m_instancePtr == nullptr) {
+        throw std::logic_error("EventManager is not inited yet!");
     }
-    return instance;
+    return *m_instancePtr;
 }
 
 /**

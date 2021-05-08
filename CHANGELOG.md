@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - add support for optional provider services
 - improve logs, mask secret strings
 - use $XDG_DATA_HOME as prefix for default accounts path
+- update RPC path for px-accounts-service
+- update RPC path for px-events-service
+- update RPC path for px-secret-service
  
 ## [0.3.6]
 ### Fixed

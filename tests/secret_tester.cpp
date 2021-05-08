@@ -15,7 +15,7 @@ int main() {
     setvbuf(stdout, nullptr, _IONBF, 0);
     GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
 
-    string serverPath = "unix:/root/.userdata/rpc/secret";
+    string serverPath = "unix:/tmp/" + PXUTILS::SYSTEM::current_user() +  "/rpc/secret";
 
     SecretManager::Init(serverPath);
 

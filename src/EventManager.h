@@ -19,9 +19,7 @@ class EventManager {
 
 protected:
     /// @brief protected method for creating EventManager instance
-    explicit EventManager();
-
-    bool init();
+    explicit EventManager(const string &path);
 
     /// @brief general method for emitting events to Event Service
     bool emit(const string &event, const map<string, string> &params);
@@ -32,7 +30,9 @@ public:
     /// @brief EventManager destructor
     virtual ~EventManager();
 
-    inline bool inited() const { return m_inited; }
+    static bool Init(const string &path);
+
+    inline bool inited() const { return m_instancePtr != nullptr; }
 
     /// @brief static method to access EventManager singleton instance
     static EventManager &Instance();
@@ -44,9 +44,8 @@ public:
     static bool EMIT_DELETE_ACCOUNT(const AccountObject &account);
 
 private:
-    nng_socket m_sock;      ///< @brief socket that EventManager use to connect to Event Service
-    bool m_inited = false;  ///< @brief flag that indicates if EventManager is initiated or not
-
+    static EventManager *m_instancePtr; ///< @brief static pointer to EventManager instance
+    nng_socket m_sock;                  ///< @brief socket that EventManager use to connect to Event Service
 };
 
 #endif //PX_ACCOUNTS_SERVICE_EVENTMANAGER_H

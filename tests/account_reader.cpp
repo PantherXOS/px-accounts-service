@@ -9,7 +9,6 @@
 #include <Accounts/AccountParser.h>
 #include <interface/AccountReader.capnp.h>
 
-#define SERVER_ADDRESS "~/.userdata/rpc/accounts"
 
 using namespace std;
 
@@ -38,7 +37,7 @@ int main() {
 
     usleep(10000);
 
-    string addr = string("unix:") + PXUTILS::FILE::abspath(SERVER_ADDRESS);
+    string addr = string("unix:/tmp/") + PXUTILS::SYSTEM::current_user() + "/rpc/accounts";
     capnp::EzRpcClient rpcClient(addr);
     auto &waitScope = rpcClient.getWaitScope();
     AccountReader::Client client = rpcClient.getMain<AccountReader>();
