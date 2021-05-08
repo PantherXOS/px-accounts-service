@@ -8,6 +8,7 @@
 #include <uuid/uuid.h>
 
 #include <iostream>
+#include <sstream>
 #include <map>
 #include <vector>
 
@@ -25,6 +26,19 @@ inline string uuid_as_string(const uuid_t id) {
 inline bool uuid_from_string(const string strId, uuid_t id) {
     uuid_clear(id);
     return uuid_parse(strId.c_str(), id) == 0;
+}
+
+inline string mask_string(const string &input, bool showFirstChar = true, char maskCharacter = 'X') {
+    stringstream maskedStream;
+    if (input.length() == 0) {
+        maskedStream << maskCharacter << maskCharacter << maskCharacter;
+    } else {
+        maskedStream << (showFirstChar ? input.at(0) : maskCharacter);
+        for (int i = 0; i < input.length() - 1; i++) {
+            maskedStream << maskCharacter;
+        }
+    }
+    return maskedStream.str();
 }
 
 #endif  // PX_ACCOUNTS_SERVICE_UTILS_H

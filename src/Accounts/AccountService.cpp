@@ -171,7 +171,7 @@ AuthResultPtr AccountService::_authenticate(VerifyResultPtr &vResult) {
     }
     GLOG_INF("service authenticated:");
     for (const auto &token : authResult.tokens) {
-        GLOG_INF("\t", token.label, " : ", token.secret);
+        GLOG_INF("\t", token.label, " : ", mask_string(token.secret));
         for (auto &attrib : token.attributes) {
             GLOG_INF("\t\t[", attrib.first, " : ", attrib.second, "]");
         }

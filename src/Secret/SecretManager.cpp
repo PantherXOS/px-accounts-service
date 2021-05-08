@@ -47,7 +47,7 @@ string SecretItemBase::toString(bool pretty) const {
     }
     sstream << "secrets: " << sep1;
     for (const auto &s : secrets) {
-        sstream << sep2 << "[" << s.first << ":" << s.second << "]" << sep1;
+        sstream << sep2 << "[" << s.first << ":" << mask_string(s.second) << "]" << sep1;
     }
     return sstream.str();
 }
