@@ -219,6 +219,13 @@ bool AccountService::_saveProtectedParams(VerifyResultPtr &vResult, AuthResultPt
     return true;
 }
 
+bool AccountService::removeSecrets() const {
+    if (!this->_account->isIdSet()) {
+        return false;
+    }
+    return SecretManager::Instance().removeService(this->_account->id, this->_name);
+}
+
 bool AccountService::performCustomRead() {
     if (this->find(PLUGIN_ID_PARAM) == this->end()) {
         return false;  // plugin id parameter id not found.

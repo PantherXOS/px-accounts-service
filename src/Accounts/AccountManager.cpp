@@ -14,12 +14,7 @@ AccountManager *AccountManager::_instance = nullptr;
 AccountManager::AccountManager(const vector<ParserPath> &parserPaths) {
     for (const auto &path: parserPaths) {
         auto *parser = new AccountParser(path);
-        if (parser) {
-            m_parsers.push_back(parser);
-        } else {
-            string readonlyStr = path.isReadOnly ? "[READONLY]" : "";
-            GLOG_ERR("Unable to init parser: ", readonlyStr, path.path);
-        }
+        m_parsers.push_back(parser);
     }
 }
 

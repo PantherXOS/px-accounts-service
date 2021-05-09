@@ -271,17 +271,19 @@ SecretItemPtrList SecretManager::search(StrStrMap attributes) {
 
 bool SecretManager::deleteSecret(StrStrMap attributes) {
     // deleteSecret @5(attributes :List(RPCSecretAttribute)) -> (result : RPCSecretResult);
-    GLOG_INF("==========");
     bool isSucceed = false;
     string errString;
     auto rpcResult = _rpcClient->performRequest([&](kj::AsyncIoContext &ctx, RPCSecretService::Client &client) {
         auto req = client.deleteSecretRequest();
         auto rAttributes = req.initAttributes(attributes.size());
         int i = 0;
+        stringstream logStream;
         for (const auto &kv : attributes) {
             rAttributes[i].setKey(kv.first);
             rAttributes[i++].setValue(kv.second);
+            logStream << " [" << kv.first << " : " << kv.second << "]";
         }
+        GLOG_INF("Delete Secret:", logStream.str());
         req.send()
             .then(
                 [&](RPCSecretService::DeleteSecretResults::Reader &&result) {

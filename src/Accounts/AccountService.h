@@ -47,6 +47,9 @@ public:
         this->_requiredDict.clear();
     }
 
+    /// request for Secrets removal
+    bool removeSecrets() const;
+
     bool performCustomRead();
 
     bool performServiceCustomRemoval();

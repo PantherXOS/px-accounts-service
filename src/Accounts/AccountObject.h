@@ -25,7 +25,10 @@ class AccountObject : public ErrorReporter {
     bool performAccountRemoval();
 
     string idAsString() const { return uuid_as_string(this->id); }
+
     bool setId(const string &strId) { return uuid_from_string(strId, this->id); }
+
+    inline bool isIdSet() const { return uuid_is_null(this->id) == 0; }
 
    protected:
     /// @brief update params related to defined provider for AccountObject

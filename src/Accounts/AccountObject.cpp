@@ -44,6 +44,13 @@ bool AccountObject::verify() {
         }
         verified &= svcVerified;
     }
+    if (!verified) {
+        for (const auto &kv : this->services) {
+            if (!kv.second.removeSecrets()) {
+                GLOG_WRN("Failed to remove secrets for:", this->idAsString(), "[", kv.first, "]");
+            }
+        }
+    }
     GLOG_INF("Account verification status: ", verified);
     return verified;
 }
@@ -56,10 +63,10 @@ bool AccountObject::cleanup(const AccountObject &newAccount) {
 
     for (const auto &kv : this->services) {
         string svcName = kv.first;
-        const auto& svcParams = kv.second;
+        const auto& svc = kv.second;
         if (std::find(newSvcNames.begin(), newSvcNames.end(), svcName) == newSvcNames.end()) {
             // svc is not available anymore, so we can remove secret params
-            SecretManager::Instance().removeService(this->id, svcName);
+            svc.removeSecrets();
         }
     }
     return true;
