@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changes
+- cleanup account secrets in case of account creation failure.
+
 ## [0.4.1]
 ### Changes
 - cleanup old account secrets during modify account
