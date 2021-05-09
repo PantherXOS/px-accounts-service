@@ -149,6 +149,7 @@ class SecretManager {
 
    public:
     SecretItemPtrList getAccountSecrets(const uuid_t &accountId);
+    bool removeService(const uuid_t &accountId, const string &svcName);
     bool removeAccount(const uuid_t &accountId);
 
    private:

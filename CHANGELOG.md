@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.1]
+### Changes
+- cleanup old account secrets during modify account
+
 ## [0.4.0]
 ### Changes
 - add support for optional provider services

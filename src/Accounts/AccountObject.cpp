@@ -48,6 +48,23 @@ bool AccountObject::verify() {
     return verified;
 }
 
+bool AccountObject::cleanup(const AccountObject &newAccount) {
+    vector<string> newSvcNames;
+    for (const auto &kv : newAccount.services) {
+        newSvcNames.push_back(kv.first);
+    }
+
+    for (const auto &kv : this->services) {
+        string svcName = kv.first;
+        const auto& svcParams = kv.second;
+        if (std::find(newSvcNames.begin(), newSvcNames.end(), svcName) == newSvcNames.end()) {
+            // svc is not available anymore, so we can remove secret params
+            SecretManager::Instance().removeService(this->id, svcName);
+        }
+    }
+    return true;
+}
+
 AccountObject::AccountObject() { uuid_clear(this->id); }
 
 bool AccountObject::performAccountRemoval() {

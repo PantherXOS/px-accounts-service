@@ -286,6 +286,9 @@ bool SecretManager::deleteSecret(StrStrMap attributes) {
             .then(
                 [&](RPCSecretService::DeleteSecretResults::Reader &&result) {
                     isSucceed = result.getResult().getSuccess();
+                    if (result.getResult().hasError()) {
+                        errString = result.getResult().getError().cStr();
+                    }
                 },
                 [&](kj::Exception &&ex) {
                     isSucceed = false;
@@ -303,6 +306,14 @@ SecretItemPtrList SecretManager::getAccountSecrets(const uuid_t &accountId) {
     StrStrMap attributes;
     attributes["account_id"] = uuid_as_string(accountId);
     return this->search(attributes);
+}
+
+bool SecretManager::removeService(const uuid_t &accountId, const string &svcName) {
+    StrStrMap attributes;
+    auto strId = uuid_as_string(accountId);
+    attributes["account_id"] = strId;
+    attributes["service"] = svcName;
+    return this->deleteSecret(attributes);
 }
 
 bool SecretManager::removeAccount(const uuid_t &accountId) {

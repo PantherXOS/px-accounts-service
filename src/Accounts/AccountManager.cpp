@@ -125,6 +125,11 @@ bool AccountManager::modifyAccount(const uuid_t &id, AccountObject &act) {
         return false;
     }
     setStatus(oldAct.id, AC_NONE);
+
+    if (!oldAct.cleanup(act)) {
+        GLOG_WRN("Unable to cleanup old account data");
+    }
+
     EventManager::EMIT_MODIFY_ACCOUNT(oldAct);
     return true;
 }
