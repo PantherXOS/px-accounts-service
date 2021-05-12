@@ -75,7 +75,7 @@ kj::Promise<void> SecretSimulator::setSecret(SetSecretContext context) {
     string schema;
     for (const auto& attr : item.getAttributes()) {
         receivedAttributes.push_back(attr.getKey().cStr());
-        if (attr.getKey().cStr() == "schema") {
+        if (attr.getKey().cStr() == string("schema")) {
             schema = attr.getValue();
         }
         secret.attributes[attr.getKey().cStr()] = attr.getValue().cStr();

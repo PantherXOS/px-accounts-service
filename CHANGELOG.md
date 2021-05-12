@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.4.2]
 ### Changes
 - cleanup account secrets in case of account creation failure.
+- fix EventManager connection issue
 
 ## [0.4.1]
 ### Changes

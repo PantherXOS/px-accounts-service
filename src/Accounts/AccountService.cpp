@@ -102,7 +102,11 @@ bool AccountService::verify() {
         this->clearService();
         this->operator[](PLUGIN_ID_PARAM) = pluginId;
     } catch (std::exception &ex) {
-        GLOG_WRN(ex.what());
+        string errMsg = ex.what();
+        // bypass plugin's missing write method warning.
+        if (errMsg != "write not found") {
+            GLOG_WRN(errMsg);
+        }
     }
     return true;
 }

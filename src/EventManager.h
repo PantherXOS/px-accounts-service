@@ -34,6 +34,9 @@ public:
 
     inline bool inited() const { return m_instancePtr != nullptr; }
 
+    /// @brief connect to remote event manager service
+    bool connect();
+
     /// @brief static method to access EventManager singleton instance
     static EventManager &Instance();
 
@@ -46,6 +49,7 @@ public:
 private:
     static EventManager *m_instancePtr; ///< @brief static pointer to EventManager instance
     nng_socket m_sock;                  ///< @brief socket that EventManager use to connect to Event Service
+    string m_socketPath;                ///< @brief remote path that receiver connects to
 };
 
 #endif //PX_ACCOUNTS_SERVICE_EVENTMANAGER_H

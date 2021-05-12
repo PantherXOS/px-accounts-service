@@ -22,15 +22,11 @@ EventManager *EventManager::m_instancePtr = nullptr;
 /**
  * Initiates NNG socket and connect to Event Service
  */
-EventManager::EventManager(const string &socketPath) {
+EventManager::EventManager(const string &socketPath) : m_socketPath(socketPath) {
     int rv;
     if ((rv = nng_push0_open(&m_sock)) != 0) {
         stringstream errStream;
         errStream << "unable to open socket: " << rv;
-        throw std::logic_error(errStream.str());
-    } else if ((rv = nng_dial(m_sock, socketPath.c_str(), nullptr, 0)) != 0) {
-        stringstream errStream;
-        errStream << "connect error: " << rv;
         throw std::logic_error(errStream.str());
     }
 }
@@ -63,6 +59,15 @@ bool EventManager::Init(const string &path) {
     return m_instancePtr != nullptr;
 }
 
+bool EventManager::connect() {
+    int rv;
+    if ((rv = nng_dial(m_sock, m_socketPath.c_str(), nullptr, 0)) != 0) {
+        GLOG_ERR("connection failed: ", rv);
+        return false;
+    }
+    return true;
+}
+
 /**
  * Create and serialize a CapnProto message and send it to Event Service
  * using initiated NNG socket
@@ -73,6 +78,9 @@ bool EventManager::Init(const string &path) {
 bool EventManager::emit(const string &event, const map<string, string> &params) {
     if (!this->inited()) {
         GLOG_WRN("EventManager is not initiated.");
+        return false;
+    }
+    if (!this->connect()) {
         return false;
     }
     uint64_t now_secs = static_cast<uint64_t>(
