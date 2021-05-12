@@ -1,5 +1,8 @@
 //
-// Created by Reza Alizadeh Majd on 2019-02-05.
+// Global Logger Module
+// Author   : Reza Alizadeh Majd
+// Version  : 0.0.2
+// Modified : 2021-05-12
 //
 
 #include "Logger.h"
