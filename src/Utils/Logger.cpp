@@ -1,7 +1,7 @@
 //
 // Global Logger Module
 // Author   : Reza Alizadeh Majd
-// Version  : 0.0.2
+// Version  : 0.0.3
 // Modified : 2021-05-12
 //
 
@@ -74,7 +74,8 @@ int SysLogEngine::TranslateLogLevel(LogLevel lvl) {
     static map<LogLevel, int> lvlDict = {
             std::make_pair<LogLevel, int>(LogLevel::ERR, LOG_ERR),
             std::make_pair<LogLevel, int>(LogLevel::WRN, LOG_WARNING),
-            std::make_pair<LogLevel, int>(LogLevel::INF, LOG_INFO)
+            std::make_pair<LogLevel, int>(LogLevel::INF, LOG_INFO),
+            std::make_pair<LogLevel, int>(LogLevel::MRK, LOG_ALERT),
     };
     return lvlDict[lvl];
 }
@@ -100,8 +101,8 @@ void SysLogEngine::init() {
  * @param lvl log level
  * @param message log message
  */
-void SysLogEngine::writeLog(LogLevel lvl, const string &message) {
-    int syslogLvl = SysLogEngine::TranslateLogLevel(lvl);
+void SysLogEngine::writeLog(LogLevel lvl, const string &message, bool force) {
+    int syslogLvl = SysLogEngine::TranslateLogLevel(force ? LogLevel::MRK : lvl);
     syslog(LOG_MAKEPRI(m_syslogFacility, syslogLvl), "%s", message.c_str());
 }
 
@@ -128,7 +129,7 @@ void ConsoleLogEngine::init() {
  * @param lvl log level
  * @param message log message
  */
-void ConsoleLogEngine::writeLog(LogLevel lvl, const string &message) {
+void ConsoleLogEngine::writeLog(LogLevel lvl, const string &message, bool force) {
     std::cout << message;
 }
 

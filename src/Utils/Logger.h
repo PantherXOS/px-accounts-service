@@ -1,7 +1,7 @@
 //
 // Global Logger Module
 // Author   : Reza Alizadeh Majd
-// Version  : 0.0.2
+// Version  : 0.0.3
 // Modified : 2021-05-12
 //
 
@@ -56,7 +56,7 @@ public:
     virtual LogTarget target() const = 0;
 
     /// @brief abstract method to send log line to specified target
-    virtual void writeLog(LogLevel lvl, const string &message) = 0;
+    virtual void writeLog(LogLevel lvl, const string &message, bool force) = 0;
 
 protected:
     bool m_inited = false;                  ///< @brief indicated if LogEngine is initiated
@@ -86,7 +86,7 @@ public:
     virtual LogTarget target() const override { return LogTarget::SYSLOG; };
 
     /// @brief Write Log message with a specified level
-    void writeLog(LogLevel lvl, const string &message) override;
+    void writeLog(LogLevel lvl, const string &message, bool force) override;
 
 protected:
     int m_syslogLevel;      ///< @brief provided level for syslog
@@ -108,7 +108,7 @@ public:
     virtual LogTarget target() const override { return LogTarget::CONSOLE; };
 
     /// @brief Write Log message with a specified level
-    void writeLog(LogLevel lvl, const string &message) override;
+    void writeLog(LogLevel lvl, const string &message, bool force) override;
 };
 
 /// @brief Logger class that prapare log messages and write them to target
@@ -157,7 +157,7 @@ public:
         lvlDict[LogLevel::INF] = "INF";
         lvlDict[LogLevel::MRK] = "MRK";
 
-        if (force || lvl <= m_logLevel) {
+        if (force || lvl == LogLevel::MRK || lvl <= m_logLevel) {
             stringstream sstream;
             if (lvl == LogLevel::MRK) {
                 sstream << "--->";
@@ -170,7 +170,7 @@ public:
                     << std::endl;
 
             if (m_pLogEngine != nullptr) {
-                m_pLogEngine->writeLog(lvl, sstream.str());
+                m_pLogEngine->writeLog(lvl, sstream.str(), force);
             }
         }
     }
