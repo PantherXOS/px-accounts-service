@@ -13,13 +13,13 @@
 #include <RPCHandler.h>
 #include "test_common.h"
 
+static uuid_t accountId;
 
 TEST_CASE("Account Writer Tests", "[RPCServer]") {
 
     std::string title1 = "RPC Test Account";
     std::string title2 = "RPC Test Account Edited";
 
-    uuid_t accountId;
     AccountObject act;
     act.title = title1;
     act.is_active = false;

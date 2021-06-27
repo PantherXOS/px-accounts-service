@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3]
+### Changes
+- fix application crash occurrence related to python plugin exceptions
+
 ## [0.4.2]
 ### Changes
 - cleanup account secrets in case of account creation failure.

@@ -66,8 +66,9 @@ bool PluginContainerPython::init() {
     try {
         py::dict locals;
         locals["module_name"] = py::cast(PXUTILS::PLUGIN::package2module(_info.name));
-        if (!_info.path.empty()) {
-            locals["module_path"] = py::cast(_info.path);
+        auto modulePath = this->loadPath();
+        if (!modulePath.empty()) {
+            locals["module_path"] = py::cast(modulePath);
         }
         py::exec(R"(
 import sys
@@ -79,21 +80,7 @@ sys.path.insert(0, module_path)
 
 import importlib
 new_module = importlib.import_module(module_name)
-
-#new_module = None
-#try:
-#   path
-#except NameError:
-#   import importlib
-#   new_module = importlib.import_module(module_name)
-#else:
-#   if sys.version_info[0] < 3:
-#      import imp
-#      new_module = imp.load_module(module_name, open(path), path, ('py', 'U', imp.PY_SOURCE))
-#   else:
-#      import importlib.machinery
-#      new_module = importlib.machinery.SourceFileLoader(module_name, path).load_module()
-)",
+        )",
                  py::globals(), locals);
 
         _module = locals["new_module"];
@@ -112,19 +99,48 @@ string PluginContainerPython::getTitle() {
 }
 
 VerifyResult PluginContainerPython::verify(const StrStrMap &params) {
-    auto res = _plugin.attr("verify")(params);
-    return res.cast<VerifyResult>();
+    VerifyResult result;
+    try {
+        auto res = _plugin.attr("verify")(params);
+        result = res.cast<VerifyResult>();
+    }
+    catch(py::error_already_set& e) {
+        GLOG_ERR("Plugin [", this->getName(), "]: verification failed");
+        GLOG_WRN(e.what());
+        result.verified = false;
+        result.errors.push_back(e.what());
+        e.discard_as_unraisable(__func__);
+    }
+    return result;
 }
 
 AuthResult PluginContainerPython::authenticate(const ServiceParamList &params) {
-    auto res = _plugin.attr("authenticate")(params);
-    return res.cast<AuthResult>();
+    AuthResult result;
+    try {
+        auto res = _plugin.attr("authenticate")(params);
+        result = res.cast<AuthResult>();
+    }
+    catch (py::error_already_set &e) {
+        GLOG_ERR("Plugin [", this->getName(), "]: authentication failed");
+        GLOG_WRN(e.what());
+        result.authenticated = false;
+        result.errors.push_back(e.what());
+        e.discard_as_unraisable(__func__);
+    }
+    return result;
 }
 
 StrStrMap PluginContainerPython::read(const string &id) {
     if (py::hasattr(_plugin, "read")) {
-        auto res = _plugin.attr("read")(id);
-        return res.cast<StrStrMap>();
+        try {
+            auto res = _plugin.attr("read")(id);
+            return res.cast<StrStrMap>();
+        } catch (py::error_already_set &e) {
+            GLOG_ERR("Plugin [", this->getName(), "]: read failed");
+            GLOG_WRN(e.what());
+            e.discard_as_unraisable(__func__);
+            throw std::logic_error(e.what());
+        }
     } else {
         throw std::logic_error("read not found");
     }
@@ -132,8 +148,16 @@ StrStrMap PluginContainerPython::read(const string &id) {
 
 string PluginContainerPython::write(VerifyResult &vResult, AuthResult &aResult) {
     if (py::hasattr(_plugin, "write")) {
-        auto res = _plugin.attr("write")(vResult, aResult);
-        return res.cast<string>();
+        try {
+            auto res = _plugin.attr("write")(vResult, aResult);
+            return res.cast<string>();
+        }
+        catch (py::error_already_set &e) {
+            GLOG_ERR("Plugin [", this->getName(), "]: write failed");
+            GLOG_WRN(e.what());
+            e.discard_as_unraisable(__func__);
+            throw std::logic_error(e.what());
+        }
     } else {
         throw std::logic_error("write not found");
     }
@@ -141,8 +165,16 @@ string PluginContainerPython::write(VerifyResult &vResult, AuthResult &aResult) 
 
 bool PluginContainerPython::remove(const string &id) {
     if (py::hasattr(_plugin, "remove")) {
-        auto res = _plugin.attr("remove")(id);
-        return res.cast<bool>();
+        try {
+            auto res = _plugin.attr("remove")(id);
+            return res.cast<bool>();
+        }
+        catch (py::error_already_set &e) {
+            GLOG_ERR("Plugin [", this->getName(), "]: remove failed");
+            GLOG_WRN(e.what());
+            e.discard_as_unraisable(__func__);
+            throw std::logic_error(e.what());
+        }
     } else {
         throw std::logic_error("remove not found");
     }

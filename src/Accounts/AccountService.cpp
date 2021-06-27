@@ -99,6 +99,7 @@ bool AccountService::verify() {
 
     try {
         string pluginId = this->plugin()->write(*(verifyResult.get()), *(authResult.get()));
+        GLOG_INF("custom write done, ID:", pluginId);
         this->clearService();
         this->operator[](PLUGIN_ID_PARAM) = pluginId;
     } catch (std::exception &ex) {
@@ -107,6 +108,7 @@ bool AccountService::verify() {
         if (errMsg != "write not found") {
             GLOG_WRN(errMsg);
         }
+        // TODO: check if we need to return false in this case or not.
     }
     return true;
 }

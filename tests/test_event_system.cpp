@@ -20,6 +20,8 @@
 
 #include "test_common.h"
 
+static uuid_t accountId;
+
 TEST_CASE("Event System Tests", "[EventSystem]") {
 
     AccountObject act;
@@ -28,7 +30,6 @@ TEST_CASE("Event System Tests", "[EventSystem]") {
     act.services["python-test"]["k1"] = "v1";
     act.services["python-test"]["k2"] = "v2";
 
-    uuid_t accountId;
 
     SECTION("Cleanup old test files") {
         REQUIRE(TESTCOMMON::ACCOUNTS::cleanup(act.title));

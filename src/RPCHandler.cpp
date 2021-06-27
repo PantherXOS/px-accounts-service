@@ -95,7 +95,7 @@ kj::Promise<void> RPCHandler::setStatus(AccountReader::Server::SetStatusContext 
 
     uuid_t accountId;
     auto strId = ctx.getParams().getId().cStr();
-    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid accound id");
+    KJ_ASSERT(uuid_from_string(strId, accountId), "invalid account id");
 
     auto stat = (AccountStatus)ctx.getParams().getStat();
     bool res = AccountManager::Instance().setStatus(accountId, stat);

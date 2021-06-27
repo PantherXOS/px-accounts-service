@@ -203,6 +203,7 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
 
         REQUIRE(receivedAct.services.size() == 1);
         REQUIRE(receivedAct.services.find("python-json") != receivedAct.services.end());
+        REQUIRE(receivedAct.services["python-json"].size() == 4);
 
         REQUIRE(receivedAct.services["python-json"]["k1"] == "pv1");
         REQUIRE(receivedAct.services["python-json"]["k2"] == "v2");
