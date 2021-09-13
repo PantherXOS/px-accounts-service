@@ -143,11 +143,10 @@ VerifyResultPtr AccountService::_verifyParams() {
                 }
             }
             if (param.val.empty()) {
-                GLOG_ERR("protected param not found: ", param.key);
-                this->addError("protected param not found: '" + param.key + "'");
-                return nullptr;
+                GLOG_INF("ignore secret load for: ", param.key, " (related saved secret not found)");
+            } else {
+                GLOG_INF("protected param value loaded: ", param.key, " -> ", param.val);
             }
-            GLOG_INF("protected param value loaded: ", param.key, " -> ", param.val);
         }
     }
     this->applyVerification(verifyResult.params);

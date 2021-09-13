@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.4]
+### Changes
+- Fix issue with loading optional protected parameters
+- adjust plugin path names
+
 ## [0.4.3]
 ### Changes
 - fix application crash occurrence related to python plugin exceptions
