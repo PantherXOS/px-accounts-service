@@ -62,8 +62,8 @@ struct PasswordSecret : public SecretItemBase {
     string _passwordKey = "password";
 };
 
-struct DualPasswordsecret : public SecretItemBase {
-    explicit DualPasswordsecret() { attributes["schema"] = "dual_password"; }
+struct DualPasswordSecret : public SecretItemBase {
+    explicit DualPasswordSecret() { attributes["schema"] = "dual_password"; }
 
     string userPassword() const { return getSecret(_userPasswordKey); }
     void setUserPassword(const string &value) { setSecret(_userPasswordKey, value); }

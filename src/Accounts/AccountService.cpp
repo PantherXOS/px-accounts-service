@@ -136,7 +136,7 @@ VerifyResultPtr AccountService::_verifyParams() {
             for (auto secret : savedSecrets) {
                 if (EXISTS(secret->attributes, "service") && secret->attributes["service"] == this->_name) {
                     if (secret->is("dual_password")) {
-                        param.val = secret->as<DualPasswordsecret>()->getMatchingPassword(param.key);
+                        param.val = secret->as<DualPasswordSecret>()->getMatchingPassword(param.key);
                     } else if (secret->is("password")) {
                         param.val = secret->as<PasswordSecret>()->password();
                     }

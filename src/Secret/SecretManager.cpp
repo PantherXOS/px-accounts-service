@@ -237,7 +237,7 @@ SecretItemPtrList SecretManager::search(StrStrMap attributes) {
                         if (schema == "password") {
                             secret = make_shared<PasswordSecret>();
                         } else if (schema == "dual_password") {
-                            secret = make_shared<DualPasswordsecret>();
+                            secret = make_shared<DualPasswordSecret>();
                         } else if (schema == "oauth2") {
                             secret = make_shared<OAuth2Secret>();
                         }
