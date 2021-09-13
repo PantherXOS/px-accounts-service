@@ -115,7 +115,7 @@ bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
         if (plugin && plugin->init()) {
             GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle(), "[",
                      plugin->getVersion(), "]"
-                     // , " - ", plugin->loadPath()
+                     // , " - ", plugin->infoPath()
             );
             _plugins[plugin->getTitle()] = plugin;
         } else {

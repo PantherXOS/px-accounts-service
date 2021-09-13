@@ -25,7 +25,7 @@ struct PluginInfo {
     string typeStr;                                 ///< plugin type string
     PluginTypes type = PluginTypes::UnknownPlugin;  ///< plugin type in PluginTypes format
     string path;                                    ///< path to plugin location
-    string loadPath;                                ///< path for pluginInfo YAML file
+    string infoPath;                                ///< path for pluginInfo YAML file
 };
 
 /// @brief abstract base class for plugin containers
@@ -74,7 +74,9 @@ class PluginContainerBase {
     /// @brief getter method to show if plugin container is initiated
     bool isInited() const;
 
-    inline string loadPath() const { return _info.loadPath; }
+    inline string loadPath() const { return _info.path; }
+
+    inline string infoPath() const { return _info.infoPath; }
 
    protected:
     PluginInfo _info;
