@@ -23,6 +23,7 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
         REQUIRE(mgr["python-json"] != nullptr);
         REQUIRE(mgr["cpp-test"] != nullptr);
         REQUIRE(mgr["cpp-custom"] != nullptr);
+        REQUIRE(mgr["python-autoinit"] != nullptr);
     }
 
     SECTION("Check Python Plugin - verify Method") {
@@ -135,5 +136,37 @@ TEST_CASE("Plugin Management Tasks", "[PluginManager]") {
 
         bool dResult = plugin->remove(writeID);
         REQUIRE(dResult);
+    }
+
+    SECTION("Check auto_init plugin (Python)") {
+        auto plugin = mgr["python-autoinit"];
+        REQUIRE(plugin->autoInitialize());
+    }
+
+    SECTION("Check auto_init plugin (Cpp)") {
+        auto plugin = mgr["cpp-autoinit"];
+        REQUIRE(plugin->autoInitialize());
+    }
+
+    SECTION("Check max_count value for plugin (Python)") {
+        auto plugin = mgr["python-autoinit"];
+        REQUIRE(plugin->maxInstanceCount() == 1);
+    }
+
+    SECTION("Check max_count value for plugin (Cpp)") {
+        auto plugin = mgr["cpp-autoinit"];
+        REQUIRE(plugin->maxInstanceCount() == 1);
+    }
+
+    SECTION("Check Missing Plugin Parameters (Cpp)") {
+        auto plugin = mgr["cpp-test"];
+        REQUIRE_FALSE(plugin->autoInitialize());
+        REQUIRE(plugin->maxInstanceCount() == -1);
+    }
+
+    SECTION("Check Missing Plugin Parameters (Python)") {
+        auto plugin = mgr["python-test"];
+        REQUIRE_FALSE(plugin->autoInitialize());
+        REQUIRE(plugin->maxInstanceCount() == -1);
     }
 }

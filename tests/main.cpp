@@ -21,6 +21,8 @@
 
 #define CPP_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-test.so"
 #define CPP_CUSTOM_PLUGIN_PATH "../cpp-custom-plugin/libpx-accounts-service-plugin-cpp-custom.so"
+#define CPP_AUTO_INIT_PLUGIN_PATH "../cpp-test-plugin/libpx-accounts-service-plugin-cpp-autoinit.so"
+
 
 Logger gLogger("account-tests");
 
@@ -40,6 +42,18 @@ void register_test_plugin(const string &name, const string &version, const strin
                  << "   path: " << path << "\n";
 }
 
+void register_cpp_plugin(const string &name,
+                         const string &basePath = "../cpp-test-plugins",
+                         const string &version = "0.0.1") {
+    stringstream libStream;
+    libStream << basePath << "/lib" << name << ".so";
+    register_test_plugin(name, version, "cpp", libStream.str());
+}
+
+void register_python_plugin(const string &name, const string &basePath = ".",
+                            const string &version = "0.0.1") {
+    register_test_plugin(name, version, "python", basePath);
+}
 
 int main(int argc, char *argv[]) {
 
@@ -47,31 +61,16 @@ int main(int argc, char *argv[]) {
     // GLOG_INIT(LogTarget::SYSLOG, LogLevel::INF);
     GLOG_INIT(LogTarget::CONSOLE, LogLevel::INF);
 
+    register_cpp_plugin("px-accounts-service-plugin-cpp-test");
+    register_cpp_plugin("px-accounts-service-plugin-cpp-autoinit");
+    register_cpp_plugin("px-accounts-service-plugin-cpp-custom",
+                        "../cpp-custom-plugin");
 
-    register_test_plugin("px-accounts-service-plugin-cpp-test",
-                         "0.0.1",
-                         "cpp",
-                         CPP_PLUGIN_PATH);
-    register_test_plugin("px-accounts-service-plugin-cpp-custom",
-                         "0.0.1",
-                         "cpp",
-                         CPP_CUSTOM_PLUGIN_PATH);
-    register_test_plugin("px-accounts-service-plugin-protected-params",
-                         "0.0.1",
-                         "python",
-                         ".");
-    register_test_plugin("px-accounts-service-plugin-python-test",
-                         "0.0.1",
-                         "python",
-                         ".");
-    register_test_plugin("px-accounts-service-plugin-test-public-service",
-                         "0.0.1",
-                         "python",
-                         ".");
-    register_test_plugin("px-accounts-service-plugin-python-json",
-                         "0.0.1",
-                         "python",
-                         ".");
+    register_python_plugin("px-accounts-service-plugin-protected-params");
+    register_python_plugin("px-accounts-service-plugin-python-test");
+    register_python_plugin("px-accounts-service-plugin-test-public-service");
+    register_python_plugin("px-accounts-service-plugin-python-json");
+    register_python_plugin("px_accounts-service-plugin-python-autoinit");
 
     RPCServer<SecretSimulator> secretSimulator(SECRET_SIMULATOR_PATH);
     secretSimulator.start();
@@ -90,6 +89,8 @@ int main(int argc, char *argv[]) {
     vector<string> pluginPaths; 
     pluginPaths.push_back(PXUTILS::FILE::abspath("./plugins"));
     PluginManager::Init(pluginPaths);
+
+    AccountManager::Instance().createAutoInitializingAccounts();
 
     RPCServer<RPCHandler> srv(MAIN_SERVER_PATH);
     srv.start();

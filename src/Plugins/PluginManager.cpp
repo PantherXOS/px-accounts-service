@@ -118,8 +118,8 @@ bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
             GLOG_INF("   - new plugin loaded: [", PluginTypesStr[plugin->getType()], "]\t: ", plugin->getTitle(), "[",
                      plugin->getVersion(), "]"
                      // , " - ", plugin->infoPath()
-                     // , " ---- ", plugin->maxInstanceCount()
-                     // , " ---- ", plugin->autoInitialize()
+                     , "[ max-count:", plugin->maxInstanceCount(), "]"
+                     , "[ auto-init:", plugin->autoInitialize(), "]"
             );
             _plugins[plugin->getTitle()] = plugin;
         } else {

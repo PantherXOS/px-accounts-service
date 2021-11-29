@@ -272,4 +272,56 @@ TEST_CASE("Account Management Tasks", "[AccountManager]") {
         REQUIRE(receivedAct.services.size() == 1);
         REQUIRE(receivedAct.services.find("protected-test") != receivedAct.services.end());
     }
+
+    SECTION("Check automatic account creation based on auto_init flag (Python)") {
+        AccountManager::ProviderFilters_t prvFilters;
+        AccountManager::ServiceFilters_t svcFilters; 
+        svcFilters.push_back("python-autoinit");
+        auto accounts = AccountManager::Instance().listAccounts(prvFilters, svcFilters);
+        REQUIRE(accounts.size() == 1);
+    }
+
+    SECTION("Check automatic account creation based on auto_init flag (Cpp)") {
+        AccountManager::ProviderFilters_t prvFilters;
+        AccountManager::ServiceFilters_t svcFilters; 
+        svcFilters.push_back("cpp-autoinit");
+        auto accounts = AccountManager::Instance().listAccounts(prvFilters, svcFilters);
+        REQUIRE(accounts.size() == 1);
+    }
+
+    SECTION("Check automatic account creation ignore, if already an account created") {
+        AccountManager::Instance().createAutoInitializingAccounts();
+        AccountManager::ProviderFilters_t providers; 
+        AccountManager::ServiceFilters_t services; 
+        services.push_back("cpp-autoinit");
+        services.push_back("python-autoinit");
+        auto accounts = AccountManager::Instance().listAccounts(providers, services);
+        REQUIRE(accounts.size() == 2);
+    }
+
+    SECTION("Check Maximum Account count limitation (Python)") {
+        AccountObject act;
+        act.title = "second python account";
+        act.is_active = true;
+        act.services["python-autoinit"].init(&act, "python-autoinit");
+        auto result = AccountManager::Instance().createAccount(act);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE_FALSE(result);
+        REQUIRE(AccountManager::LastErrors().size() > 0);
+        REQUIRE(AccountManager::LastErrors()[0] ==
+                "maximum number of allowed accounts (1) already created.");
+    }
+
+    SECTION("Check Maximum Account count limitation (Cpp)") {
+        AccountObject act;
+        act.title = "second python account";
+        act.is_active = true;
+        act.services["cpp-autoinit"].init(&act, "python-autoinit");
+        auto result = AccountManager::Instance().createAccount(act);
+        CAPTURE(AccountManager::LastErrors());
+        REQUIRE_FALSE(result);
+        REQUIRE(AccountManager::LastErrors().size() > 0);
+        REQUIRE(AccountManager::LastErrors()[0] ==
+                "maximum number of allowed accounts (1) already created.");
+    }
 }

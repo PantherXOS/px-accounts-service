@@ -2,9 +2,19 @@
 // Created by Reza Alizadeh Majd on 2019-06-10.
 //
 
-#include "cpp-test-plugin.h"
 
 #include <algorithm>
+#include <PluginInterface.h>
+
+class CPPTestPlugin : public IPlugin {
+public:
+    explicit CPPTestPlugin() : IPlugin("cpp-test") {}
+
+    virtual VerifyResult verify(const StrStrMap &params) override;
+
+    virtual AuthResult authenticate(const ServiceParamList &params) override;
+};
+
 
 VerifyResult CPPTestPlugin::verify(const StrStrMap &params) {
     StringList requiredParams{"k1", "k2"};
@@ -55,3 +65,18 @@ AuthResult CPPTestPlugin::authenticate(const ServiceParamList &params) {
     result.authenticated = true;
     return result;
 }
+
+#if defined(__linux__) || defined(__APPLE__)
+
+extern "C"
+{
+    CPPTestPlugin *allocator() {
+        return new CPPTestPlugin();
+    }
+
+    void deleter(CPPTestPlugin* ptr) {
+        delete ptr;
+    }
+}
+
+#endif

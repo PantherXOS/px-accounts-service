@@ -17,9 +17,9 @@ TEST_CASE("Account Parser Tests", "[AccountParser]") {
     uuid_generate(testAccount.id);
     testAccount.title = "parser test account";
     testAccount.is_active = true;
-    testAccount.services["test-python"].init(&testAccount, "test-python");
-    testAccount.services["test-python"]["k1"] = "v1";
-    testAccount.services["test-python"]["k2"] = "v2";
+    testAccount.services["python-test"].init(&testAccount, "python-test");
+    testAccount.services["python-test"]["k1"] = "v1";
+    testAccount.services["python-test"]["k2"] = "v2";
 
     TESTCOMMON::ACCOUNTS::cleanup(testAccount.title);
 
@@ -31,7 +31,7 @@ TEST_CASE("Account Parser Tests", "[AccountParser]") {
         CHECK(savedAccount.title == testAccount.title);
         CHECK(savedAccount.is_active == testAccount.is_active);
         CHECK(savedAccount.services.size() == testAccount.services.size());
-        REQUIRE(savedAccount.services.find("test-python") != savedAccount.services.end());
+        REQUIRE(savedAccount.services.find("python-test") != savedAccount.services.end());
     }
 
     SECTION("try to write on readonly parser") {
