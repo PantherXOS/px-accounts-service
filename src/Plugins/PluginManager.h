@@ -10,7 +10,7 @@
 /// @brief Base class for managing plugin related classes
 class PluginManager {
    protected:
-    explicit PluginManager();
+    explicit PluginManager(vector<string> pluginPaths);
 
     /// @brief read list of plugins for in a path
     PluginContainerPtrList readPathPlugins(const std::string &path);
@@ -20,6 +20,10 @@ class PluginManager {
 
    public:
     virtual ~PluginManager();
+
+    static inline bool Initiated() { return _mgrPtr != nullptr; }
+
+    static bool Init(vector<string> pluginPaths); 
 
     /// @brief method to access
     static PluginManager &Instance();
@@ -31,6 +35,7 @@ class PluginManager {
     PluginContainerPtrMap &registeredPlugins();
 
    protected:
+   static PluginManager *_mgrPtr;
     PluginContainerPtrMap _plugins;
 };
 

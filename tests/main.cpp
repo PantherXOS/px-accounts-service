@@ -80,13 +80,16 @@ int main(int argc, char *argv[]) {
     evtSimulator.start();
     evtSimulator.registerChannel("account");
 
-
     SecretManager::Init(SECRET_SIMULATOR_PATH);
 
     vector<string> userAccountsPath;
     userAccountsPath.push_back("/tmp/px-accounts-tests");
     AccountManager::Init(userAccountsPath);
     EventManager::Init(TEST_RPC_EVENT_PATH);
+
+    vector<string> pluginPaths; 
+    pluginPaths.push_back(PXUTILS::FILE::abspath("./plugins"));
+    PluginManager::Init(pluginPaths);
 
     RPCServer<RPCHandler> srv(MAIN_SERVER_PATH);
     srv.start();

@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
     // default path for secret service: https://git.pantherx.org/development/applications/px-secret-service/-/issues/34#note_30058
     string rpcSecretPath = string("unix:") + rpcBasePath + "/secret";
 
+    vector<string> pluginPaths;
+
     LogTarget logTarget = LogTarget::SYSLOG;
     std::vector<std::string> userAccountPaths;
     std::vector<std::string> readonlyAccountsPath;
@@ -48,6 +50,7 @@ int main(int argc, char *argv[]) {
     app.add_flag("-d,--debug", isDebug, "Run px-accounts-service in debug mode");
     app.add_option("--secret-path", rpcSecretPath, "set RPC path for px-secret-service");
     app.add_option("--events-path", rpcEventPath, "set RPC path for px-events-service");
+    app.add_option("--plugin-path", pluginPaths, "Set Path to load plugin files");
     app.add_option("-t,--log-target", logTarget, "Target for application logs to publish")
             ->transform(CLI::CheckedTransformer(logTargetMapping, CLI::ignore_case));
     app.add_option("--user-account-dir", userAccountPaths, "path for account files to read/write");
@@ -72,10 +75,18 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // Init Paths for plugin files
+    if (pluginPaths.empty()) {
+        // add default paths to load plugins        
+        pluginPaths.push_back(PXUTILS::FILE::abspath("/run/current-system/profile/etc/px/accounts/plugins"));   // SYSTEM PLUGINS
+        pluginPaths.push_back(PXUTILS::FILE::abspath("~/.guix-profile/etc/px/accounts/plugins"));               // USER PLUGINS
+        pluginPaths.push_back(PXUTILS::FILE::abspath("./plugins"));                                             // APPLICATION PLUGINS
+    }
 
     EventManager::Init(rpcEventPath);
     SecretManager::Init(rpcSecretPath);
-    PluginManager::Instance();
+    PluginManager::Init(pluginPaths);
+
 
     RPCServer<RPCHandler> srv(rpcActPath);
     srv.start();

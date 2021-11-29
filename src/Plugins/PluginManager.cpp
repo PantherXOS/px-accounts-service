@@ -13,21 +13,14 @@
 
 namespace py = pybind11;
 
-#define APP_PLUGIN_PATH "./plugins"
-#define USER_PLUGIN_PATH "~/.guix-profile/etc/px/accounts/plugins"
-#define SYSTEM_PLUGIN_PATH "/run/current-system/profile/etc/px/accounts/plugins"
+PluginManager *PluginManager::_mgrPtr = nullptr;
 
 /**
  * init python plugins interpreter, and init manager
  * for different paths of plugins
  */
-PluginManager::PluginManager() {
+PluginManager::PluginManager(vector<string> pluginPaths) {
     py::initialize_interpreter();
-
-    auto pluginPaths = std::vector<std::string>();
-    pluginPaths.push_back(PXUTILS::FILE::abspath(SYSTEM_PLUGIN_PATH));
-    pluginPaths.push_back(PXUTILS::FILE::abspath(USER_PLUGIN_PATH));
-    pluginPaths.push_back(PXUTILS::FILE::abspath(APP_PLUGIN_PATH));
 
     const char *customPaths = std::getenv("PLUGIN_PATH");
     if (customPaths) {
@@ -61,9 +54,18 @@ PluginManager::~PluginManager() {
     py::finalize_interpreter();
 }
 
+bool PluginManager::Init(vector<string> pluginPaths) {
+    if (!PluginManager::Initiated()) {
+        PluginManager::_mgrPtr = new PluginManager(pluginPaths);
+    }
+    return PluginManager::Initiated();
+}
+
 PluginManager &PluginManager::Instance() {
-    static PluginManager instance;
-    return instance;
+    if (!PluginManager::Initiated()) {
+        throw std::logic_error("PluginManager is not initiated");
+    }
+    return *PluginManager::_mgrPtr;
 }
 
 /**
