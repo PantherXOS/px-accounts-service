@@ -33,7 +33,7 @@ public:
     bool isRequired(const string &key) const;
 
     /// @brief pointer to plugin which is related to service
-    PluginContainerBase* plugin();
+    PluginContainerBase* plugin() const;
 
     /// @brief verify Account against provided service
     bool verify();

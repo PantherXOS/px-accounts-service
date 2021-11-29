@@ -69,7 +69,7 @@ bool AccountService::isRequired(const string &key) const {
     return false;
 }
 
-PluginContainerBase *AccountService::plugin() { return _plugin; }
+PluginContainerBase *AccountService::plugin() const { return _plugin; }
 
 /**
  * Verify AccountService, this method.

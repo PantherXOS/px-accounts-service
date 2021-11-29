@@ -75,7 +75,7 @@ bool AccountManager::createAccount(AccountObject &act) {
     uuid_generate(accountId);
     uuid_copy(act.id, accountId);
 
-    if (!act.verify()) {
+    if (!verifyAccountCreationLimits(act) || !act.verify()) {
         addErrorList(act.getErrors());
         addError("Account verification failed");
         return false;
@@ -271,12 +271,9 @@ void AccountManager::createAutoInitializingAccounts() {
         if (kv.second->autoInitialize() == true) {
             bool alreadyInitiated = false;
             auto pluginName = kv.first;
-            for (auto account : registeredAccounts) {
-                for (auto svc : account.services) {
-                    auto svcName = svc.first;
-                    if (svcName == pluginName) {
-                        alreadyInitiated = true;
-                    }
+            for (auto &account : registeredAccounts) {
+                if (account.hasService(pluginName)) {
+                    alreadyInitiated = true;
                 }
             }
             if (!alreadyInitiated) {
@@ -296,4 +293,29 @@ void AccountManager::createAutoInitializingAccounts() {
             }
         }
     }
+}
+
+bool AccountManager::verifyAccountCreationLimits(const AccountObject &account) {
+    auto registeredAccounts = this->listAccounts();
+    for (const auto &kv : account.services) {
+        auto svcName = kv.first;
+        auto maxCount = kv.second.plugin()->maxInstanceCount();
+        if (maxCount >= 0) {
+            size_t existingCount = 0;
+            for (auto &account : registeredAccounts) {
+                if (account.hasService(svcName)) {
+                    existingCount++;
+                }
+            }
+            if (existingCount >= maxCount) {
+                stringstream errStream;
+                errStream << "maximum number of allowed accounts (" << maxCount
+                          << ") already created.";
+                addError(errStream.str());
+                GLOG_INF(errStream.str());
+                return false;
+            }
+        }
+    }
+    return true;
 }

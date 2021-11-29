@@ -43,6 +43,8 @@ public:
 
     bool autoInitialize() override;
 
+    int maxInstanceCount() override;
+
     VerifyResult verify(const StrStrMap &params) override;
 
     AuthResult authenticate(const ServiceParamList &params) override;

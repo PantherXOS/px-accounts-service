@@ -44,6 +44,8 @@ class PluginContainerBase {
 
     virtual bool autoInitialize() = 0;
 
+    virtual int maxInstanceCount() = 0;
+
     /// @brief pure virtual method to call plugin's verify method
     virtual VerifyResult verify(const StrStrMap &params) = 0;
 

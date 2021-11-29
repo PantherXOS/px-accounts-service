@@ -71,6 +71,8 @@ class AccountManager : public ErrorReporter {
 
     void createAutoInitializingAccounts();
 
+    bool verifyAccountCreationLimits(const AccountObject &account);
+
    protected:
     static AccountManager *_instance;
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status

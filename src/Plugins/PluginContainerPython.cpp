@@ -14,7 +14,8 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
     py::class_<IPlugin, PythonPlugin>(m, "Plugin")
             .def(py::init())
             .def_readwrite("title", &PythonPlugin::title)
-            .def_readwrite("auto_init", &PythonPlugin::auto_init);
+            .def_readwrite("auto_init", &PythonPlugin::auto_init)
+            .def_readwrite("max_count", &PythonPlugin::max_count);
 
     py::bind_map<StrStrMap>(m, "StrStrMap");
     py::bind_vector<StringList>(m, "StringList");
@@ -101,6 +102,10 @@ string PluginContainerPython::getTitle() {
 
 bool PluginContainerPython::autoInitialize() {
     return _plugin.attr("auto_init").cast<bool>();
+}
+
+int PluginContainerPython::maxInstanceCount() {
+    return _plugin.attr("max_count").cast<int>();
 }
 
 VerifyResult PluginContainerPython::verify(const StrStrMap &params) {

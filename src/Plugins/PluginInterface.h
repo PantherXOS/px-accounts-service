@@ -99,6 +99,7 @@ class IPlugin {
    public:
     string title;           ///< @brief plugin's title
     bool auto_init = false; ///< @brief indicate that if account service creates an account if plugin installed
+    int max_count = -1;     ///< @brief maximum amount of accounts allowed to create form a type
 };
 
 #endif  // PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H

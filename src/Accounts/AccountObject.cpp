@@ -117,3 +117,12 @@ bool AccountObject::_appendProviderParams() {
     }
     return true;
 }
+
+bool AccountObject::hasService(const string &svcName) const {
+    for (const auto &kv : this->services) {
+        if (kv.first == svcName) {
+            return true;
+        }
+    }
+    return false;
+}

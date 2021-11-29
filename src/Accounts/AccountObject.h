@@ -30,6 +30,8 @@ class AccountObject : public ErrorReporter {
 
     inline bool isIdSet() const { return uuid_is_null(this->id) == 0; }
 
+    bool hasService(const string &svcName) const; 
+
    protected:
     /// @brief update params related to defined provider for AccountObject
     bool _appendProviderParams();

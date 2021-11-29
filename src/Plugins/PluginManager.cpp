@@ -119,6 +119,7 @@ bool PluginManager::initPlugins(PluginContainerPtrMap plugins) {
                      plugin->getVersion(), "]"
                      // , " - ", plugin->infoPath()
                      // , " ---- ", plugin->maxInstanceCount()
+                     // , " ---- ", plugin->autoInitialize()
             );
             _plugins[plugin->getTitle()] = plugin;
         } else {

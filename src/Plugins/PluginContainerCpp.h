@@ -23,6 +23,8 @@ public:
 
     bool autoInitialize() override;
 
+    int maxInstanceCount() override;
+
     /// @brief verify service params
     VerifyResult verify(const StrStrMap &params) override;
 

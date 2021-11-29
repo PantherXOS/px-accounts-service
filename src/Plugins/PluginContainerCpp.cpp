@@ -27,6 +27,11 @@ bool PluginContainerCpp::autoInitialize() {
     return plugin->auto_init;
 }
 
+int PluginContainerCpp::maxInstanceCount() { 
+    auto plugin = _loader.DLGetInstance();
+    return plugin->max_count;
+}
+
 VerifyResult PluginContainerCpp::verify(const StrStrMap &params) {
     auto plugin = _loader.DLGetInstance();
     return plugin->verify(params);
