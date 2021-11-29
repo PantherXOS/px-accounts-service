@@ -41,6 +41,8 @@ public:
 
     string getTitle() override;
 
+    bool autoInitialize() override;
+
     VerifyResult verify(const StrStrMap &params) override;
 
     AuthResult authenticate(const ServiceParamList &params) override;

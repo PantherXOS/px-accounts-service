@@ -21,6 +21,8 @@ public:
     /// @brief get plugin title
     string getTitle() override;
 
+    bool autoInitialize() override;
+
     /// @brief verify service params
     VerifyResult verify(const StrStrMap &params) override;
 

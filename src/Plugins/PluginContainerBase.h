@@ -42,6 +42,8 @@ class PluginContainerBase {
     /// @brief pure virtual method to get plugin title
     virtual string getTitle() = 0;
 
+    virtual bool autoInitialize() = 0;
+
     /// @brief pure virtual method to call plugin's verify method
     virtual VerifyResult verify(const StrStrMap &params) = 0;
 

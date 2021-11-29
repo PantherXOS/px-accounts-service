@@ -69,6 +69,8 @@ class AccountManager : public ErrorReporter {
 
     AccountParser *findParser(const uuid_t &id, bool onlyWritables);
 
+    void createAutoInitializingAccounts();
+
    protected:
     static AccountManager *_instance;
     map<string, AccountStatus> m_statDict;  ///< @brief Mapping between accounts and their status

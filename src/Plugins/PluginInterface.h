@@ -97,7 +97,8 @@ class IPlugin {
     virtual bool remove(const string &id) { throw std::logic_error("not implemented"); }
 
    public:
-    string title;  ///< @brief plugin's title
+    string title;           ///< @brief plugin's title
+    bool auto_init = false; ///< @brief indicate that if account service creates an account if plugin installed
 };
 
 #endif  // PX_ACCOUNTS_SERVICE_PLUGIN_INTERFACE_H

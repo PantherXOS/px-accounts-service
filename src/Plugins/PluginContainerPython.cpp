@@ -13,7 +13,8 @@ PYBIND11_EMBEDDED_MODULE(PluginFramework, m) {
 
     py::class_<IPlugin, PythonPlugin>(m, "Plugin")
             .def(py::init())
-            .def_readwrite("title", &PythonPlugin::title);
+            .def_readwrite("title", &PythonPlugin::title)
+            .def_readwrite("auto_init", &PythonPlugin::auto_init);
 
     py::bind_map<StrStrMap>(m, "StrStrMap");
     py::bind_vector<StringList>(m, "StringList");
@@ -96,6 +97,10 @@ new_module = importlib.import_module(module_name)
 
 string PluginContainerPython::getTitle() {
     return _plugin.attr("title").cast<string>();
+}
+
+bool PluginContainerPython::autoInitialize() {
+    return _plugin.attr("auto_init").cast<bool>();
 }
 
 VerifyResult PluginContainerPython::verify(const StrStrMap &params) {

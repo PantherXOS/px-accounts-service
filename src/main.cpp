@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
     SecretManager::Init(rpcSecretPath);
     PluginManager::Init(pluginPaths);
 
+    AccountManager::Instance().createAutoInitializingAccounts();
 
     RPCServer<RPCHandler> srv(rpcActPath);
     srv.start();

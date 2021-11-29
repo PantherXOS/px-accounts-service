@@ -264,3 +264,36 @@ AccountParser *AccountManager::findParser(const uuid_t &id, bool onlyWritables) 
     }
     return nullptr;
 }
+
+void AccountManager::createAutoInitializingAccounts() {
+    auto registeredAccounts = this->listAccounts();
+    for (auto kv : PluginManager::Instance().registeredPlugins()) {
+        if (kv.second->autoInitialize() == true) {
+            bool alreadyInitiated = false;
+            auto pluginName = kv.first;
+            for (auto account : registeredAccounts) {
+                for (auto svc : account.services) {
+                    auto svcName = svc.first;
+                    if (svcName == pluginName) {
+                        alreadyInitiated = true;
+                    }
+                }
+            }
+            if (!alreadyInitiated) {
+                // create an account for plugin.
+                AccountObject act;
+                act.title = "Default - " + pluginName;
+                act.is_active = true;
+                act.services[pluginName].init(&act, pluginName);
+                if (!act.services[pluginName].inited()) {
+                    GLOG_WRN("Failed to initiate account object for: ", pluginName);
+                    continue;
+                }
+                if (!this->createAccount(act)) {
+                    GLOG_WRN("Failed to create account for: ", pluginName);
+                    continue;
+                }
+            }
+        }
+    }
+}

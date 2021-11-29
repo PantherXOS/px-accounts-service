@@ -22,6 +22,11 @@ string PluginContainerCpp::getTitle() {
     return plugin->title;
 }
 
+bool PluginContainerCpp::autoInitialize() {
+    const auto plugin = _loader.DLGetInstance();
+    return plugin->auto_init;
+}
+
 VerifyResult PluginContainerCpp::verify(const StrStrMap &params) {
     auto plugin = _loader.DLGetInstance();
     return plugin->verify(params);
