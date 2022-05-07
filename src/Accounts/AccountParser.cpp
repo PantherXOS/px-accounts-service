@@ -22,6 +22,7 @@ AccountParser::AccountParser(const ParserPath &path) : m_path(path.path), m_read
 }
 
 bool AccountParser::read(const uuid_t &id, AccountObject &account) {
+    this->resetErrors();
     auto accountPath = this->accountPath(id);
     if (!PXUTILS::FILE::exists(accountPath)) {
         addError("Account not found: " + uuid_as_string(id));
@@ -45,7 +46,12 @@ bool AccountParser::read(const uuid_t &id, AccountObject &account) {
                 for (const auto &service : it) {
                     auto serviceName = service.first.as<string>();
                     const YAML::Node &params = service.second;
-                    account.services[serviceName].init(&account, serviceName);
+                    if (!account.services[serviceName].init(&account, serviceName)) {
+                        stringstream err;
+                        err << "Failed to initiate '" << serviceName << "' service.";
+                        GLOG_WRN(err.str());
+                        throw std::runtime_error(err.str());
+                    }
                     for (const auto &p : params) {
                         account.services[serviceName][p.first.as<string>()] = p.second.as<string>();
                     }
@@ -55,6 +61,9 @@ bool AccountParser::read(const uuid_t &id, AccountObject &account) {
     } catch (const YAML::Exception &ex) {
         GLOG_ERR("failed to parse account details:", ex.what());
         addError("failed to parse account details");
+        return false;
+    } catch (const std::exception &ex) {
+        addError(ex.what());
         return false;
     }
     return true;

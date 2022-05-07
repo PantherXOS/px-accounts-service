@@ -52,10 +52,11 @@ kj::Promise<void> RPCHandler::get(AccountReader::Server::GetContext ctx) {
 
     AccountObject actObj;
     bool res = AccountManager::Instance().readAccount(accountId, &actObj);
+    stringstream errStream;
     for (const auto &err : AccountManager::LastErrors()) {
-        KJ_DBG(err);
+        errStream << " - " << err << "\n";
     }
-    KJ_ASSERT(res, "Account not found");
+    KJ_ASSERT(res, "Account not found.\n" + errStream.str());
 
     auto account = ctx.getResults().initAccount();
     account.setId(actObj.idAsString());

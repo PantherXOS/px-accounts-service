@@ -208,6 +208,7 @@ bool AccountManager::readAccount(const uuid_t &id, AccountObject *account) {
     }
     if (!parser->read(id, *account)) {
         addError("Error on reading account file: '" + uuid_as_string(id) + "'.");
+        addErrorList(parser->getErrors());
         return false;
     }
     for (auto &kv : account->services) {
