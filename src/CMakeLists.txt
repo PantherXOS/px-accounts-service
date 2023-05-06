@@ -7,6 +7,7 @@ find_package(yaml-cpp REQUIRED)
 find_package(PythonLibs REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(nng REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 
 find_package(CapnProto CONFIG REQUIRED)
@@ -57,6 +58,6 @@ target_link_libraries(${LIB_NAME} PRIVATE pybind11::embed
 install(TARGETS ${LIB_NAME} DESTINATION lib)
 
 add_executable(${EXE_NAME} main.cpp)
-target_include_directories(${PROJECT_NAME} PUBLIC ../vendor/)
-target_link_libraries(${EXE_NAME} ${LIB_NAME})
+target_link_libraries(${EXE_NAME} ${LIB_NAME} 
+                                  CLI11::CLI11)
 install(TARGETS ${EXE_NAME} DESTINATION bin)

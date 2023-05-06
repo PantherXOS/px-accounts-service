@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <cassert>
-#include <CLI11/CLI11.hpp>
+#include <CLI/CLI.hpp>
 
 #include "RPCServer.h"
 #include "RPCHandler.h"
