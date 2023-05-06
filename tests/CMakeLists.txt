@@ -12,6 +12,7 @@ set(UNIT_TEST_LIST
 set(TARGET_NAME tests)
 
 find_package(PythonLibs REQUIRED)
+find_package(Catch2 REQUIRED)
 
 set(CMAKE_CXX_FLAGS -fvisibility=hidden)
 
@@ -28,7 +29,6 @@ target_link_libraries(${TARGET_NAME}
 target_include_directories(${TARGET_NAME}
         PUBLIC ${PYTHON_INCLUDE_DIRS}
         PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../src/
-        PUBLIC ../Catch2/single_include
         PUBLIC ../src)
 
 add_test(
