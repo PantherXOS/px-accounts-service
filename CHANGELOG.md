@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.8]
+### Changes
+- remove Catch2 submodule, instead using the upstream package
+- remove cli11 vendor dependency, instead using the upstream package
+
+## [0.4.7]
+### Changes
+- Update vendor definition: CLI11 to v2.3.2
+
 ## [0.4.6]
 ### Fixes
 - Fix read account crash in case that a service is missing

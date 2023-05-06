@@ -4,6 +4,8 @@
   (guix gexp)
   (guix utils)
   (guix packages)
+  (gnu packages check)
+  (gnu packages cpp)
   (gnu packages linux)
   (gnu packages networking)
   (gnu packages pkg-config)
@@ -11,12 +13,15 @@
   (gnu packages python-xyz)
   (gnu packages serialization)
   (px packages accounts)
+  (px packages common)
+  (px packages networking)
+  (px packages python-xyz)
   ((guix licenses) #:prefix license:))
 
 
 (package
   (name "px-accounts-service")
-  (version "0.4.2-dev")
+  (version "0.4.8-dev")
   (source
     (local-file (canonicalize-path ".")
                 #:recursive? #t))
@@ -58,8 +63,7 @@
                      (begin
                        (mkdir-p target)
                        (install-file plugin-path target)
-                       (setenv "PYTHONPATH" (string-append target ":" (getenv "PYTHONPATH")))
-                     ))
+                       (setenv "PYTHONPATH" (string-append target ":" (getenv "GUIX_PYTHONPATH")))))
                    #t))
                (register-plugin (string-append ,name "-plugin-python-test") "python"
                  "src/px_accounts_service_plugin_python_test.py")
@@ -70,13 +74,14 @@
              ))
          )))
   (inputs `(("yaml-cpp" ,yaml-cpp)
-             ("capnproto" ,capnproto)))
-  (native-inputs `(("pkg-config" ,pkg-config)
-                    ("pybind11" ,pybind11)
-                    ("nng" ,nng)
-                    ("util-linux" ,util-linux "lib")))
-  (propagated-inputs `(("python" ,python)
-                        ("px-accounts-service-providers-mail" ,px-accounts-service-providers-mail)))
+            ("capnproto" ,capnproto-0.9)))
+  (native-inputs `(("catch2" ,catch2)
+                   ("cli11" ,cli11)
+                   ("pkg-config" ,pkg-config)
+                   ("pybind11" ,pybind11-2.6.2)
+                   ("nng" ,nng-1.5)
+                   ("util-linux" ,util-linux "lib")))
+  (propagated-inputs `(("python" ,python)))
   (home-page "https://www.pantherx.org/")
   (synopsis "PantherX (Online) AccountsService")
   (description "This package provides a background services to manage
